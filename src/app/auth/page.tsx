@@ -1,0 +1,26 @@
+/**
+ * Modern Auth Page
+ * Combined login/signup page with tab switcher
+ */
+
+"use client"
+
+import { useState } from "react"
+import { AuthLayout } from "@/components/auth/AuthLayout"
+import { ModernLoginForm } from "@/components/auth/ModernLoginForm"
+import { ModernSignupForm } from "@/components/auth/ModernSignupForm"
+
+export default function AuthPage() {
+  const [currentTab, setCurrentTab] = useState<'login' | 'register'>('login')
+
+  return (
+    <AuthLayout
+      title="Go ahead and set up your account"
+      subtitle="Sign in-up to enjoy the best managing experience"
+      currentTab={currentTab}
+      onTabChange={setCurrentTab}
+    >
+      {currentTab === 'login' ? <ModernLoginForm /> : <ModernSignupForm />}
+    </AuthLayout>
+  )
+}
