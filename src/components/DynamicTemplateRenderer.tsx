@@ -30,12 +30,12 @@ interface DynamicTemplateRendererProps {
   isPreview?: boolean
 }
 
-export function DynamicTemplateRenderer({ 
-  siteData, 
-  className = "", 
-  isPreview = false 
+export function DynamicTemplateRenderer({
+  siteData,
+  className = "",
+  isPreview = false
 }: DynamicTemplateRendererProps) {
-  
+
   // Apply CSS variables from theme
   useEffect(() => {
     if (siteData.meta.theme) {
@@ -44,7 +44,7 @@ export function DynamicTemplateRenderer({
         root.style.setProperty(key, value)
       })
     }
-    
+
     // Load Google Font if needed
     if (siteData.meta?.font && siteData.meta.font !== 'system') {
       loadGoogleFont(siteData.meta.font)
@@ -60,23 +60,23 @@ export function DynamicTemplateRenderer({
       }
     }
   }, [siteData.meta?.theme, siteData.meta?.font, isPreview])
-  
+
   // Helper function to load Google Fonts
   const loadGoogleFont = (fontName: string) => {
     const fontId = `font-${fontName.replace(/\s+/g, '-').toLowerCase()}`
-    
+
     // Check if font is already loaded
     if (document.getElementById(fontId)) return
-    
+
     const fontUrl = `https://fonts.googleapis.com/css2?family=${fontName.replace(/\s+/g, '+')}:wght@300;400;500;600;700&display=swap`
-    
+
     const link = document.createElement('link')
     link.id = fontId
     link.rel = 'stylesheet'
     link.href = fontUrl
     document.head.appendChild(link)
   }
-  
+
   // Helper function to get font family CSS
   const getFontFamily = (fontName: string) => {
     const fontMap: Record<string, string> = {
@@ -98,15 +98,15 @@ export function DynamicTemplateRenderer({
   // Dynamic block rendering using registry
   const renderBlock = (block: BlockData) => {
     const BlockComponent = getBlockComponent(block.type)
-    
+
     if (!BlockComponent) {
       console.warn(`Block component not found for type: ${block.type}`)
       return null
     }
 
     return (
-      <BlockComponent 
-        key={block.id} 
+      <BlockComponent
+        key={block.id}
         props={block.props}
         isEditing={false}
         className="block-item"
@@ -119,7 +119,7 @@ export function DynamicTemplateRenderer({
   } : {}
 
   return (
-    <div 
+    <div
       className={`min-h-screen template-container ${className}`}
       style={{
         background: 'var(--background, linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%))',
@@ -128,32 +128,32 @@ export function DynamicTemplateRenderer({
       }}
     >
       {/* Optional background pattern overlay */}
-      <div 
+      <div
         className="absolute inset-0 pointer-events-none"
         style={{
           background: 'var(--background-pattern, none)',
           opacity: 'var(--pattern-opacity, 1)'
         }}
       />
-      
+
       {/* Optional background overlay */}
-      <div 
+      <div
         className="absolute inset-0 pointer-events-none"
         style={{
           background: 'var(--background-overlay, none)'
         }}
       />
-      
+
       <div className="relative container mx-auto px-4 py-8">
         <div className="max-w-md mx-auto template-content">
           {siteData.blocks.map(renderBlock)}
-          
+
           {/* LinkQ Branding */}
           {!isPreview && (
-            <div className="text-center mt-12 pt-8 border-t border-opacity-20" 
-                 style={{ borderColor: 'var(--border-color, #e5e7eb)' }}>
+            <div className="text-center mt-12 pt-8 border-t border-opacity-20"
+              style={{ borderColor: 'var(--border-color, #e5e7eb)' }}>
               <p className="text-sm opacity-60"
-                 style={{ color: 'var(--text-secondary, #6b7280)' }}>
+                style={{ color: 'var(--text-secondary, #6b7280)' }}>
                 Made with{" "}
                 <a
                   href="https://linkq.id"

@@ -17,6 +17,14 @@ const nextConfig: NextConfig = {
     // Remove React imports when using new JSX transform
     removeConsole: false,
   },
+  images: {
+    remotePatterns: [
+      {
+        protocol: 'https',
+        hostname: 'images.unsplash.com',
+      },
+    ],
+  },
 };
 
 export default nextConfig;

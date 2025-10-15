@@ -104,7 +104,7 @@ export const LinkItemSchema = z.object({
 })
 
 export const LinkListBlockPropsSchema = z.object({
-  style: z.enum(['pill', 'underline', 'card', 'modern', 'modern-cream']).default('pill'),
+  style: z.enum(['pill', 'underline', 'card', 'modern', 'modern-cream', 'vintage', 'ticket', 'brush', 'neon', 'origami', 'glass', 'pixel', 'hologram', 'neomorphism', 'bubble', 'cyberpunk', 'sketch', 'metallic', 'wood', 'neon-outline', 'minimal-line', 'elastic', 'terminal']).default('pill'),
   items: z.array(LinkItemSchema),
   maxItems: z.number().optional(),
 })

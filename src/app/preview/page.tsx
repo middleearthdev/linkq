@@ -35,7 +35,7 @@ export default function TemplatePreviews() {
       const response = await fetch('/api/templates')
       const data = await response.json()
       setTemplates(data.templates)
-      
+
       // Set first template as default
       if (data.templates.length > 0) {
         setSelectedTemplate(data.templates[0])
@@ -71,13 +71,12 @@ export default function TemplatePreviews() {
           <div className="space-y-4">
             <h2 className="text-xl font-semibold text-gray-900 mb-4">Available Templates</h2>
             {templates.map((template) => (
-              <Card 
+              <Card
                 key={template.id}
-                className={`cursor-pointer transition-all duration-200 ${
-                  selectedTemplate?.id === template.id 
-                    ? 'border-blue-500 bg-blue-50' 
-                    : 'hover:shadow-md'
-                }`}
+                className={`cursor-pointer transition-all duration-200 ${selectedTemplate?.id === template.id
+                  ? 'border-blue-500 bg-blue-50'
+                  : 'hover:shadow-md'
+                  }`}
                 onClick={() => setSelectedTemplate(template)}
               >
                 <CardHeader className="pb-3">
@@ -89,11 +88,10 @@ export default function TemplatePreviews() {
                       <CardTitle className="text-lg">{template.name}</CardTitle>
                       <p className="text-sm text-gray-600 capitalize">{template.category}</p>
                     </div>
-                    <div className={`px-2 py-1 rounded text-xs font-medium ${
-                      template.canAccess 
-                        ? 'bg-green-100 text-green-800' 
-                        : 'bg-red-100 text-red-800'
-                    }`}>
+                    <div className={`px-2 py-1 rounded text-xs font-medium ${template.canAccess
+                      ? 'bg-green-100 text-green-800'
+                      : 'bg-red-100 text-red-800'
+                      }`}>
                       {template.canAccess ? 'Free' : 'Locked'}
                     </div>
                   </div>
@@ -117,7 +115,7 @@ export default function TemplatePreviews() {
                     Category: {selectedTemplate.category}
                   </div>
                 </div>
-                
+
                 {/* Mobile Frame */}
                 <div className="bg-gray-900 rounded-[2.5rem] p-2 mx-auto w-fit">
                   <div className="bg-white rounded-[2rem] w-[375px] h-[667px] overflow-hidden relative">
@@ -125,7 +123,7 @@ export default function TemplatePreviews() {
                     <div className="h-6 bg-black flex items-center justify-center">
                       <div className="w-20 h-1 bg-white rounded-full"></div>
                     </div>
-                    
+
                     {/* Template Content */}
                     <div className="h-[641px] overflow-y-auto">
                       <DynamicTemplateRenderer
@@ -136,9 +134,9 @@ export default function TemplatePreviews() {
                     </div>
                   </div>
                 </div>
-                
+
                 <div className="text-center">
-                  <Button 
+                  <Button
                     onClick={() => window.open(`/api/templates/${selectedTemplate.id}`, '_blank')}
                     variant="outline"
                     size="sm"
