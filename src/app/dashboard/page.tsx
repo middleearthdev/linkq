@@ -10,6 +10,7 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { LinkQLogo } from "@/components/ui/linkq-logo"
+import { usePlan } from "@/hooks/usePlan"
 import {
   LogOut,
   Plus,
@@ -22,13 +23,26 @@ import {
   Eye,
   Edit3,
   Menu,
-  Search
+  Search,
+  Lock,
+  TrendingUp
 } from "lucide-react"
 import { useState, useEffect } from "react"
 import { QuickLoading } from "@/components/ui/cool-loading"
 
 export default function DashboardPage() {
   const { data: session, isPending } = useSession()
+  const { 
+    userPlan, 
+    isPremium, 
+    isPro, 
+    isFree,
+    canUseAnalytics, 
+    canCreateSite,
+    getSiteUsage,
+    getPlanColor,
+    getPlanIcon 
+  } = usePlan()
   const [showMobileMenu, setShowMobileMenu] = useState(false)
   const [showCreateModal, setShowCreateModal] = useState(false)
   const [handle, setHandle] = useState('')
@@ -87,10 +101,28 @@ export default function DashboardPage() {
   }
 
   const handleSignOut = async () => {
-    await signOut()
+    try {
+      await signOut({
+        fetchOptions: {
+          onSuccess: () => {
+            window.location.href = '/'
+          }
+        }
+      })
+    } catch (error) {
+      console.error('Sign out error:', error)
+      // Fallback redirect
+      window.location.href = '/'
+    }
   }
 
   const handleCreateSite = () => {
+    if (!canCreateSite(sites.length)) {
+      // Show upgrade modal or limit reached message
+      const siteUsage = getSiteUsage(sites.length)
+      alert(`You've reached your ${userPlan} plan limit of ${siteUsage.max} sites. Upgrade to create more sites.`)
+      return
+    }
     setShowCreateModal(true)
   }
 
@@ -137,7 +169,12 @@ export default function DashboardPage() {
       const data = await response.json()
 
       if (!response.ok) {
-        setError(data.error || 'Failed to create site')
+        // Handle specific limit errors
+        if (response.status === 403 && data.message) {
+          setError(data.message)
+        } else {
+          setError(data.error || 'Failed to create site')
+        }
         return
       }
 
@@ -167,8 +204,9 @@ export default function DashboardPage() {
           <div className="flex justify-between items-center">
             <div className="flex items-center space-x-3">
               <LinkQLogo size="sm" variant="minimal" showText={false} />
-              <Badge className="text-xs px-2 py-1" style={{ backgroundColor: '#66A38A', color: '#FFFFFF' }}>
-                {(session.user as any).plan || 'FREE'}
+              <Badge className="text-xs px-2 py-1 flex items-center gap-1" style={{ backgroundColor: getPlanColor(), color: '#FFFFFF' }}>
+                <span>{getPlanIcon()}</span>
+                {userPlan}
               </Badge>
             </div>
 
@@ -228,15 +266,31 @@ export default function DashboardPage() {
                 <Button variant="ghost" className="text-gray-400 hover:text-white" size="sm">
                   Templates
                 </Button>
-                <Button variant="ghost" className="text-gray-400 hover:text-white" size="sm">
-                  Analytics
+                <Button 
+                  variant="ghost" 
+                  className={`text-gray-400 hover:text-white ${!canUseAnalytics ? 'cursor-not-allowed opacity-60' : ''}`} 
+                  size="sm"
+                  disabled={!canUseAnalytics}
+                  onClick={() => {
+                    if (!canUseAnalytics) {
+                      alert('Analytics is available for Starter and Pro plans. Upgrade to unlock!')
+                      return
+                    }
+                    navigateToAnalytics()
+                  }}
+                >
+                  <span className="flex items-center gap-1">
+                    Analytics
+                    {!canUseAnalytics && <Lock className="h-3 w-3" />}
+                  </span>
                 </Button>
               </div>
             </div>
 
             <div className="flex items-center space-x-4">
-              <Badge className="text-xs px-3 py-1" style={{ backgroundColor: '#66A38A', color: '#FFFFFF' }}>
-                {(session.user as any).plan || 'FREE'}
+              <Badge className="text-xs px-3 py-1 flex items-center gap-1" style={{ backgroundColor: getPlanColor(), color: '#FFFFFF' }}>
+                <span>{getPlanIcon()}</span>
+                {userPlan}
               </Badge>
               <div className="flex items-center space-x-3">
                 <div className="w-8 h-8 rounded-full flex items-center justify-center text-sm font-semibold text-white" style={{ backgroundColor: '#66A38A' }}>
@@ -317,10 +371,25 @@ export default function DashboardPage() {
 
               <Button
                 variant="ghost"
-                className="w-full justify-start text-gray-400 hover:text-white hover:bg-gray-800/30 h-11 rounded-xl"
+                className={`w-full justify-start h-11 rounded-xl ${
+                  canUseAnalytics 
+                    ? 'text-gray-400 hover:text-white hover:bg-gray-800/30' 
+                    : 'text-gray-600 cursor-not-allowed'
+                }`}
+                disabled={!canUseAnalytics}
+                onClick={() => {
+                  if (!canUseAnalytics) {
+                    alert('Analytics is available for Starter and Pro plans. Upgrade to unlock!')
+                    return
+                  }
+                  // Navigate to analytics
+                }}
               >
                 <BarChart3 className="h-5 w-5 mr-3" />
-                Analytics
+                <span className="flex items-center gap-2">
+                  Analytics
+                  {!canUseAnalytics && <Lock className="h-3 w-3" />}
+                </span>
               </Button>
 
               <Button
@@ -388,17 +457,35 @@ export default function DashboardPage() {
         <div className="mb-6 lg:hidden">
           <Button
             onClick={handleCreateSite}
+            disabled={!canCreateSite(sites.length)}
             className="w-full h-12 font-medium text-base rounded-2xl shadow-sm"
             style={{
-              backgroundColor: '#66A38A',
-              borderColor: '#66A38A',
+              backgroundColor: canCreateSite(sites.length) ? getPlanColor() : '#6B7280',
+              borderColor: canCreateSite(sites.length) ? getPlanColor() : '#6B7280',
               color: '#FFFFFF'
             }}
-            onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#5A8F7A'}
-            onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#66A38A'}
+            onMouseEnter={(e) => {
+              if (canCreateSite(sites.length)) {
+                e.currentTarget.style.backgroundColor = '#5A8F7A'
+              }
+            }}
+            onMouseLeave={(e) => {
+              if (canCreateSite(sites.length)) {
+                e.currentTarget.style.backgroundColor = getPlanColor()
+              }
+            }}
           >
-            <Plus className="h-5 w-5 mr-2" />
-            Create New Bio Link
+            {canCreateSite(sites.length) ? (
+              <>
+                <Plus className="h-5 w-5 mr-2" />
+                Create New Bio Link
+              </>
+            ) : (
+              <>
+                <Lock className="h-5 w-5 mr-2" />
+                Site Limit Reached
+              </>
+            )}
           </Button>
         </div>
 
@@ -406,18 +493,31 @@ export default function DashboardPage() {
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 lg:gap-6 mb-6 lg:mb-8">
           <Card
             onClick={handleCreateSite}
-            className="cursor-pointer hover:shadow-lg transition-all border-gray-700"
+            className={`transition-all border-gray-700 ${
+              canCreateSite(sites.length) 
+                ? 'cursor-pointer hover:shadow-lg' 
+                : 'cursor-not-allowed opacity-60'
+            }`}
             style={{ backgroundColor: '#1A2332', borderColor: '#2A3441' }}
           >
             <CardHeader className="pb-2 lg:pb-3">
               <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between">
-                <Plus className="h-6 w-6 lg:h-5 lg:w-5 mb-2 lg:mb-0" style={{ color: '#66A38A' }} />
-                <CardTitle className="text-sm lg:text-lg text-white">Create Site</CardTitle>
+                {canCreateSite(sites.length) ? (
+                  <Plus className="h-6 w-6 lg:h-5 lg:w-5 mb-2 lg:mb-0" style={{ color: getPlanColor() }} />
+                ) : (
+                  <Lock className="h-6 w-6 lg:h-5 lg:w-5 mb-2 lg:mb-0 text-gray-500" />
+                )}
+                <CardTitle className="text-sm lg:text-lg text-white">
+                  {canCreateSite(sites.length) ? 'Create Site' : 'Limit Reached'}
+                </CardTitle>
               </div>
             </CardHeader>
             <CardContent className="pt-0">
               <CardDescription className="text-xs lg:text-sm text-gray-400">
-                Start building your page
+                {canCreateSite(sites.length) 
+                  ? 'Start building your page' 
+                  : 'Upgrade to create more sites'
+                }
               </CardDescription>
             </CardContent>
           </Card>
@@ -459,19 +559,38 @@ export default function DashboardPage() {
           </Card>
 
           <Card
-            onClick={navigateToAnalytics}
-            className="cursor-pointer hover:shadow-lg transition-all border-gray-700"
+            onClick={() => {
+              if (!canUseAnalytics) {
+                alert('Analytics is available for Starter and Pro plans. Upgrade to unlock!')
+                return
+              }
+              navigateToAnalytics()
+            }}
+            className={`transition-all border-gray-700 ${
+              canUseAnalytics 
+                ? 'cursor-pointer hover:shadow-lg' 
+                : 'cursor-not-allowed opacity-60'
+            }`}
             style={{ backgroundColor: '#1A2332', borderColor: '#2A3441' }}
           >
             <CardHeader className="pb-2 lg:pb-3">
               <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between">
-                <BarChart3 className="h-6 w-6 lg:h-5 lg:w-5 mb-2 lg:mb-0" style={{ color: '#66A38A' }} />
-                <CardTitle className="text-sm lg:text-lg text-white">Analytics</CardTitle>
+                {canUseAnalytics ? (
+                  <BarChart3 className="h-6 w-6 lg:h-5 lg:w-5 mb-2 lg:mb-0" style={{ color: '#66A38A' }} />
+                ) : (
+                  <div className="flex items-center gap-1 mb-2 lg:mb-0">
+                    <BarChart3 className="h-6 w-6 lg:h-5 lg:w-5 text-gray-500" />
+                    <Lock className="h-4 w-4 text-gray-500" />
+                  </div>
+                )}
+                <CardTitle className="text-sm lg:text-lg text-white">
+                  {canUseAnalytics ? 'Analytics' : 'Analytics (Locked)'}
+                </CardTitle>
               </div>
             </CardHeader>
             <CardContent className="pt-0">
               <CardDescription className="text-xs lg:text-sm text-gray-400">
-                Track performance
+                {canUseAnalytics ? 'Track performance' : 'Available in Starter+'}
               </CardDescription>
             </CardContent>
           </Card>
@@ -531,6 +650,30 @@ export default function DashboardPage() {
                 </div>
               ) : (
                 <div className="space-y-3">
+                  {/* Usage Meter */}
+                  <div className="p-3 rounded-xl border border-gray-700 bg-gray-800/30">
+                    <div className="flex items-center justify-between mb-2">
+                      <span className="text-white text-sm font-medium">Site Usage</span>
+                      <span className="text-xs text-gray-400">
+                        {getSiteUsage(sites.length).used}/{getSiteUsage(sites.length).max}
+                      </span>
+                    </div>
+                    <div className="w-full bg-gray-700 rounded-full h-2">
+                      <div 
+                        className="h-2 rounded-full transition-all duration-300"
+                        style={{ 
+                          width: `${Math.min(getSiteUsage(sites.length).percentage, 100)}%`,
+                          backgroundColor: getSiteUsage(sites.length).isAtLimit ? '#EF4444' : getPlanColor()
+                        }}
+                      />
+                    </div>
+                    {getSiteUsage(sites.length).isAtLimit && (
+                      <p className="text-xs text-red-400 mt-1">
+                        Site limit reached. Upgrade to create more sites.
+                      </p>
+                    )}
+                  </div>
+
                   {sites.slice(0, 3).map((site) => (
                     <div
                       key={site.id}
@@ -599,15 +742,44 @@ export default function DashboardPage() {
           <Card className="border-gray-700" style={{ backgroundColor: '#1A2332', borderColor: '#2A3441' }}>
             <CardHeader>
               <CardTitle className="text-white flex items-center">
-                <BarChart3 className="h-5 w-5 mr-2" style={{ color: '#66A38A' }} />
+                {canUseAnalytics ? (
+                  <BarChart3 className="h-5 w-5 mr-2" style={{ color: '#66A38A' }} />
+                ) : (
+                  <>
+                    <BarChart3 className="h-5 w-5 mr-2 text-gray-500" />
+                    <Lock className="h-4 w-4 mr-1 text-gray-500" />
+                  </>
+                )}
                 Analytics Overview
               </CardTitle>
               <CardDescription className="text-gray-400">
-                Your site performance this week
+                {canUseAnalytics ? 'Your site performance this week' : 'Upgrade to Starter for analytics'}
               </CardDescription>
             </CardHeader>
             <CardContent>
-              {loadingSites ? (
+              {!canUseAnalytics ? (
+                <div className="text-center py-6 lg:py-8">
+                  <div className="w-16 h-16 mx-auto mb-4 rounded-full flex items-center justify-center" style={{ backgroundColor: '#2A3441' }}>
+                    <Lock className="h-8 w-8 text-gray-500" />
+                  </div>
+                  <p className="text-gray-400 mb-1">Analytics locked</p>
+                  <p className="text-sm text-gray-500 mb-3">Available in Starter and Pro plans</p>
+                  <Button
+                    size="sm"
+                    className="h-8 px-4 text-sm rounded-xl"
+                    style={{
+                      backgroundColor: '#66A38A',
+                      borderColor: '#66A38A',
+                      color: '#FFFFFF'
+                    }}
+                    onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#5A8F7A'}
+                    onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#66A38A'}
+                  >
+                    <TrendingUp className="h-4 w-4 mr-1" />
+                    Upgrade Plan
+                  </Button>
+                </div>
+              ) : loadingSites ? (
                 <QuickLoading text="Loading analytics..." />
               ) : sites.length === 0 ? (
                 <div className="text-center py-6 lg:py-8">
@@ -650,40 +822,60 @@ export default function DashboardPage() {
           </Card>
         </div>
 
-        {/* Premium Upgrade Banner - Mobile */}
-        <div className="mt-6 lg:mt-8">
-          <Card className="border-yellow-700" style={{ backgroundColor: '#2A2416', borderColor: '#3A3220' }}>
-            <CardContent className="p-4 lg:p-6">
-              <div className="flex items-start space-x-3">
-                <Crown className="h-6 w-6 text-yellow-500 mt-1 flex-shrink-0" />
-                <div className="flex-1">
-                  <h3 className="text-white font-semibold mb-1">Unlock Premium Features</h3>
-                  <p className="text-gray-400 text-sm mb-3">
-                    Get custom domains, advanced analytics, premium templates and more
-                  </p>
-                  <div className="flex flex-col sm:flex-row gap-2">
-                    <Button
-                      size="sm"
-                      className="h-8 px-4 text-sm rounded-xl flex-1 sm:flex-none"
-                      style={{
-                        backgroundColor: '#66A38A',
-                        borderColor: '#66A38A',
-                        color: '#FFFFFF'
-                      }}
-                      onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#5A8F7A'}
-                      onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#66A38A'}
-                    >
-                      Upgrade Now
-                    </Button>
-                    <Button variant="outline" size="sm" className="h-8 px-4 text-sm rounded-xl text-gray-400 border-gray-600 hover:bg-gray-800 flex-1 sm:flex-none">
-                      Learn More
-                    </Button>
+        {/* Premium Upgrade Banner - Only show for FREE users */}
+        {isFree && (
+          <div className="mt-6 lg:mt-8">
+            <Card className="border-yellow-700" style={{ backgroundColor: '#2A2416', borderColor: '#3A3220' }}>
+              <CardContent className="p-4 lg:p-6">
+                <div className="flex items-start space-x-3">
+                  <Crown className="h-6 w-6 text-yellow-500 mt-1 flex-shrink-0" />
+                  <div className="flex-1">
+                    <h3 className="text-white font-semibold mb-1">Unlock Premium Features</h3>
+                    <p className="text-gray-400 text-sm mb-3">
+                      Get analytics, custom domains, premium templates and more with Starter or Pro
+                    </p>
+                    <div className="grid grid-cols-2 gap-2 mb-3 text-xs">
+                      <div className="flex items-center gap-1 text-gray-400">
+                        <Lock className="h-3 w-3" />
+                        Analytics Dashboard
+                      </div>
+                      <div className="flex items-center gap-1 text-gray-400">
+                        <Lock className="h-3 w-3" />
+                        Custom Domains
+                      </div>
+                      <div className="flex items-center gap-1 text-gray-400">
+                        <Lock className="h-3 w-3" />
+                        Remove Branding
+                      </div>
+                      <div className="flex items-center gap-1 text-gray-400">
+                        <Lock className="h-3 w-3" />
+                        Premium Templates
+                      </div>
+                    </div>
+                    <div className="flex flex-col sm:flex-row gap-2">
+                      <Button
+                        size="sm"
+                        className="h-8 px-4 text-sm rounded-xl flex-1 sm:flex-none"
+                        style={{
+                          backgroundColor: '#66A38A',
+                          borderColor: '#66A38A',
+                          color: '#FFFFFF'
+                        }}
+                        onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#5A8F7A'}
+                        onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#66A38A'}
+                      >
+                        Upgrade Now
+                      </Button>
+                      <Button variant="outline" size="sm" className="h-8 px-4 text-sm rounded-xl text-gray-400 border-gray-600 hover:bg-gray-800 flex-1 sm:flex-none">
+                        Learn More
+                      </Button>
+                    </div>
                   </div>
                 </div>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
+              </CardContent>
+            </Card>
+          </div>
+        )}
       </main>
 
       {/* Create Site Modal */}

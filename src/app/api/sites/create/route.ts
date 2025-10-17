@@ -6,6 +6,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { auth } from '@/lib/auth'
+import { getPlanLimits } from '@/lib/utils'
 
 export async function POST(request: NextRequest) {
   try {
@@ -40,6 +41,29 @@ export async function POST(request: NextRequest) {
       return NextResponse.json(
         { error: 'This handle is already taken' },
         { status: 409 }
+      )
+    }
+
+    // Check user's plan limits
+    const userPlan = (session.user as any)?.plan || 'FREE'
+    const limits = getPlanLimits(userPlan as 'FREE' | 'STARTER' | 'PRO')
+    
+    // Count user's current sites
+    const currentSiteCount = await prisma.userSite.count({
+      where: { userId: session.user.id }
+    })
+    
+    // Check if user can create more sites
+    if (currentSiteCount >= limits.maxSites) {
+      return NextResponse.json(
+        { 
+          error: 'Site limit reached', 
+          message: `You've reached your ${userPlan} plan limit of ${limits.maxSites} sites. Upgrade to create more sites.`,
+          currentCount: currentSiteCount,
+          maxAllowed: limits.maxSites,
+          plan: userPlan
+        },
+        { status: 403 }
       )
     }
 
