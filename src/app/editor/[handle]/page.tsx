@@ -36,11 +36,12 @@ import {
 } from "lucide-react"
 import Link from "next/link"
 import { DynamicTemplateRenderer } from "@/components/DynamicTemplateRenderer"
-import { detectPlatform, formatWhatsAppUrl, INDONESIAN_PLATFORMS } from "@/lib/platforms"
+import { detectPlatform } from "@/lib/platforms"
 import PlatformIcon from "@/components/PlatformIcons"
 import ColorPicker from "@/components/ColorPicker"
 import FontPicker from "@/components/FontPicker"
 import TemplatePicker from "@/components/TemplatePicker"
+import { AvatarUpload } from "@/components/ui/avatar-upload"
 
 interface SiteData {
   id: string
@@ -87,6 +88,10 @@ export default function EditorPage({ params }: { params: Promise<{ handle: strin
   const [expandedLinks, setExpandedLinks] = useState<Set<string>>(new Set())
   const [showGlobalStyle, setShowGlobalStyle] = useState(false)
   const [showTemplatePicker, setShowTemplatePicker] = useState(false)
+
+  // Check if user has premium features
+  const userPlan = (session?.user as any)?.plan || 'FREE'
+  const isPremiumUser = userPlan !== 'FREE'
 
   // Reset collapse states when changing tabs
   useEffect(() => {
@@ -186,55 +191,6 @@ export default function EditorPage({ params }: { params: Promise<{ handle: strin
     navigator.clipboard.writeText(text)
   }
 
-  const handleTemplateSwitch = async (templateVersionId: string) => {
-    if (!siteData) return
-
-    setSaving(true)
-    try {
-      const response = await fetch(`/api/sites/${siteData.handle}/template`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          templateVersionId,
-          preserveData: true
-        })
-      })
-
-      const data = await response.json()
-
-      if (!response.ok) {
-        setError(data.error || 'Failed to switch template')
-        return
-      }
-
-      // Update site data with new template
-      setSiteData({
-        ...siteData,
-        templateVersionId: data.site.templateVersionId,
-        dataJson: data.site.dataJson,
-        templateVersion: {
-          template: {
-            name: data.site.templateName
-          }
-        }
-      })
-
-      // Success feedback
-      setError('')
-      
-      // Show success message
-      if ('navigator' in window && 'vibrate' in navigator) {
-        navigator.vibrate([100, 50, 100])
-      }
-
-    } catch (err) {
-      setError('Network error while switching template')
-    } finally {
-      setSaving(false)
-    }
-  }
 
   const handleDragStart = (e: React.DragEvent, index: number) => {
     setDraggedIndex(index)
@@ -354,6 +310,39 @@ export default function EditorPage({ params }: { params: Promise<{ handle: strin
     setDragOverIndex(null)
     setTouchStartY(null)
     setIsDragging(false)
+  }
+
+  // Handle template switching
+  const handleTemplateSwitch = async (templateVersionId: string) => {
+    if (!siteData) return
+    
+    try {
+      setSaving(true)
+      const response = await fetch(`/api/sites/${siteData.handle}/template`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          templateVersionId,
+          preserveData: true
+        })
+      })
+
+      if (!response.ok) {
+        const errorData = await response.json()
+        throw new Error(errorData.error || 'Failed to switch template')
+      }
+
+      // Reload the page to get updated template data
+      window.location.reload()
+      
+    } catch (error) {
+      console.error('Template switch failed:', error)
+      setError(error instanceof Error ? error.message : 'Failed to switch template')
+    } finally {
+      setSaving(false)
+    }
   }
 
   if (isPending || loading) {
@@ -618,6 +607,44 @@ export default function EditorPage({ params }: { params: Promise<{ handle: strin
                       </CardTitle>
                     </CardHeader>
                     <CardContent className="space-y-4">
+                      {/* Profile Picture Upload */}
+                      <div>
+                        <label className="text-sm font-medium text-gray-300 block mb-3">Profile Picture</label>
+                        <AvatarUpload
+                          currentAvatar={bioBlock.props.avatar}
+                          onAvatarChange={(url) => updateBlock(bioBlock.id, { avatar: url })}
+                          size="lg"
+                          className="mb-3"
+                        />
+                        
+                        {/* Show Avatar Toggle */}
+                        {bioBlock.props.avatar && (
+                          <div className="mt-3 flex items-center justify-between">
+                            <label htmlFor="showAvatar" className="text-sm font-medium text-gray-300">
+                              Show profile picture
+                            </label>
+                            <button
+                              type="button"
+                              onClick={() => updateBlock(bioBlock.id, { showAvatar: !(bioBlock.props.showAvatar ?? true) })}
+                              className={`relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-[#66A38A] focus:ring-offset-2 focus:ring-offset-gray-800 ${
+                                bioBlock.props.showAvatar ?? true ? 'bg-[#66A38A]' : 'bg-gray-600'
+                              }`}
+                              role="switch"
+                              aria-checked={bioBlock.props.showAvatar ?? true}
+                              aria-labelledby="showAvatar"
+                            >
+                              <span className="sr-only">Show profile picture</span>
+                              <span
+                                aria-hidden="true"
+                                className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${
+                                  bioBlock.props.showAvatar ?? true ? 'translate-x-5' : 'translate-x-0'
+                                }`}
+                              />
+                            </button>
+                          </div>
+                        )}
+                      </div>
+
                       <div>
                         <label className="text-sm font-medium text-gray-300 block mb-2">Name</label>
                         <Input
@@ -657,12 +684,13 @@ export default function EditorPage({ params }: { params: Promise<{ handle: strin
                               <span>Drag to reorder</span>
                             </div>
                           )}
-                          {linkListBlock.props.items?.length > 0 && (
+                          {linkListBlock.props.items?.length > 0 && isPremiumUser && (
                             <Button
                               onClick={() => setShowGlobalStyle(!showGlobalStyle)}
                               variant="ghost"
                               size="sm"
                               className="h-8 px-2 text-gray-400 hover:text-gray-300"
+                              title="Global Link Styling - Premium Feature"
                             >
                               <Palette className="h-4 w-4" />
                             </Button>
@@ -926,7 +954,8 @@ export default function EditorPage({ params }: { params: Promise<{ handle: strin
                               const hasCustomFields = platform?.customFields
                               const hasNonPlatformCustomization = !platform
                               
-                              if (!hasCustomFields && !hasNonPlatformCustomization) return null
+                              // Only show link settings for premium users
+                              if (!isPremiumUser || (!hasCustomFields && !hasNonPlatformCustomization)) return null
 
                               const isExpanded = expandedLinks.has(link.id)
 
@@ -945,6 +974,7 @@ export default function EditorPage({ params }: { params: Promise<{ handle: strin
                                     variant="ghost"
                                     size="sm"
                                     className="h-6 px-2 text-xs text-gray-400 hover:text-gray-300"
+                                    title={`${platform ? `${platform.name} Settings` : 'Link Settings'} - Premium Feature`}
                                   >
                                     <Settings className="h-3 w-3 mr-1" style={{ color: platform?.color || '#66A38A' }} />
                                     {platform ? `${platform.name} Settings` : 'Link Settings'}
