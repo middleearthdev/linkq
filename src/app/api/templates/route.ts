@@ -7,7 +7,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { db } from '@/lib/db'
 import { getCurrentUser } from '@/lib/auth-server'
 import { canUserAccessTemplate, generateTemplatePreviewData } from '@/lib/template-registry'
-import { TemplateListResponse, TemplatePreview } from '@/types/template'
+import { TemplatePreview } from '@/types/template'
 
 export async function GET(request: NextRequest) {
   try {
@@ -16,17 +16,40 @@ export async function GET(request: NextRequest) {
     const category = searchParams.get('category')
     const featured = searchParams.get('featured') === 'true'
 
+    // Get query params for filtering
+    const tagsParam = searchParams.get('tags')
+    const selectedTags = tagsParam ? tagsParam.split(',') : []
+
     // Get templates from database
     const templates = await db.template.findMany({
       where: {
         status: 'PUBLISHED',
-        ...(category && { category })
+        ...(category && { category }),
+        ...(selectedTags.length > 0 && {
+          tags: {
+            some: {
+              tag: {
+                slug: { in: selectedTags }
+              }
+            }
+          }
+        })
       },
       include: {
         versions: {
           where: { isActive: true },
           orderBy: { createdAt: 'desc' },
           take: 1
+        },
+        tags: {
+          include: {
+            tag: true
+          },
+          orderBy: {
+            tag: {
+              sortOrder: 'asc'
+            }
+          }
         }
       },
       orderBy: [
@@ -62,6 +85,7 @@ export async function GET(request: NextRequest) {
 
       return {
         id: template.id,
+        versionId: version.id, // Add version ID for template switching
         slug: template.slug,
         name: template.name,
         description: template.description || '',
@@ -71,6 +95,20 @@ export async function GET(request: NextRequest) {
         isPaid: version.isPaid,
         priceCents: version.priceCents || undefined,
         requiredPlan: version.requiredPlan || undefined,
+
+        tags: template.tags.map(tagRelation => ({
+          id: tagRelation.tag.id,
+          name: tagRelation.tag.name,
+          slug: tagRelation.tag.slug,
+          description: tagRelation.tag.description || undefined,
+          color: tagRelation.tag.color || undefined,
+          icon: tagRelation.tag.icon || undefined,
+          category: tagRelation.tag.category as 'industry' | 'style' | 'purpose' | 'audience' || undefined,
+          isPopular: tagRelation.tag.isPopular,
+          sortOrder: tagRelation.tag.sortOrder,
+          createdAt: tagRelation.tag.createdAt.toISOString(),
+          updatedAt: tagRelation.tag.updatedAt.toISOString()
+        })),
 
         previewData: generateTemplatePreviewData(manifest),
         features: getTemplateFeatures(manifest),
@@ -88,6 +126,7 @@ export async function GET(request: NextRequest) {
       _count: { category: true }
     })
 
+
     // Get featured templates from database (mark them as featured in the database)
     const featuredTemplates = await db.template.findMany({
       where: {
@@ -98,7 +137,7 @@ export async function GET(request: NextRequest) {
       orderBy: { createdAt: 'asc' } // Show oldest (most stable) templates first
     })
 
-    const response: TemplateListResponse = {
+    const response = {
       templates: featured
         ? templatePreviews.filter(t => featuredTemplates.some(ft => ft.slug === t.slug))
         : templatePreviews,

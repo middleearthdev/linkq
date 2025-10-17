@@ -26,13 +26,13 @@ import {
   Copy,
   Link2,
   Smartphone,
-  Monitor,
   EyeOff,
   GripVertical,
   Globe,
   ChevronDown,
   ChevronUp,
-  Palette
+  Palette,
+  X
 } from "lucide-react"
 import Link from "next/link"
 import { DynamicTemplateRenderer } from "@/components/DynamicTemplateRenderer"
@@ -42,6 +42,7 @@ import ColorPicker from "@/components/ColorPicker"
 import FontPicker from "@/components/FontPicker"
 import TemplatePicker from "@/components/TemplatePicker"
 import { AvatarUpload } from "@/components/ui/avatar-upload"
+import { SiteLoadingScreen } from "@/components/ui/cool-loading"
 
 interface SiteData {
   id: string
@@ -76,10 +77,10 @@ export default function EditorPage({ params }: { params: Promise<{ handle: strin
   const [siteData, setSiteData] = useState<SiteData | null>(null)
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
+  const [publishing, setPublishing] = useState(false)
   const [error, setError] = useState('')
   const [activeTab, setActiveTab] = useState<'edit' | 'design' | 'settings'>('edit')
   const [showPreview, setShowPreview] = useState(false)
-  const [previewMode, setPreviewMode] = useState<'mobile' | 'desktop'>('mobile')
   const [draggedIndex, setDraggedIndex] = useState<number | null>(null)
   const [dragOverIndex, setDragOverIndex] = useState<number | null>(null)
   const [touchStartY, setTouchStartY] = useState<number | null>(null)
@@ -153,6 +154,42 @@ export default function EditorPage({ params }: { params: Promise<{ handle: strin
       setError('Network error')
     } finally {
       setSaving(false)
+    }
+  }
+
+  const publishSite = async () => {
+    if (!siteData) return
+
+    setPublishing(true)
+    try {
+      const response = await fetch(`/api/sites/${siteData.handle}`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          status: siteData.status === 'PUBLISHED' ? 'DRAFT' : 'PUBLISHED'
+        })
+      })
+
+      if (!response.ok) {
+        const data = await response.json()
+        setError(data.error || 'Failed to update site status')
+        return
+      }
+
+      // Update local state
+      setSiteData({
+        ...siteData,
+        status: siteData.status === 'PUBLISHED' ? 'DRAFT' : 'PUBLISHED'
+      })
+
+      // Success feedback
+      setError('')
+    } catch (err) {
+      setError('Network error')
+    } finally {
+      setPublishing(false)
     }
   }
 
@@ -315,7 +352,7 @@ export default function EditorPage({ params }: { params: Promise<{ handle: strin
   // Handle template switching
   const handleTemplateSwitch = async (templateVersionId: string) => {
     if (!siteData) return
-    
+
     try {
       setSaving(true)
       const response = await fetch(`/api/sites/${siteData.handle}/template`, {
@@ -336,7 +373,7 @@ export default function EditorPage({ params }: { params: Promise<{ handle: strin
 
       // Reload the page to get updated template data
       window.location.reload()
-      
+
     } catch (error) {
       console.error('Template switch failed:', error)
       setError(error instanceof Error ? error.message : 'Failed to switch template')
@@ -346,11 +383,7 @@ export default function EditorPage({ params }: { params: Promise<{ handle: strin
   }
 
   if (isPending || loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: '#0F1419' }}>
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2" style={{ borderColor: '#66A38A' }} />
-      </div>
-    )
+    return <SiteLoadingScreen handle={resolvedParams.handle} />
   }
 
   if (error || !siteData) {
@@ -412,7 +445,7 @@ export default function EditorPage({ params }: { params: Promise<{ handle: strin
               onClick={saveSite}
               disabled={saving}
               size="sm"
-              className="px-4 h-8 rounded-xl"
+              className="px-3 h-8 rounded-xl"
               style={{
                 backgroundColor: saving ? '#9CA3AF' : '#66A38A',
                 borderColor: saving ? '#9CA3AF' : '#66A38A',
@@ -421,6 +454,31 @@ export default function EditorPage({ params }: { params: Promise<{ handle: strin
             >
               {saving ? 'Saving...' : 'Save'}
             </Button>
+            {siteData?.status === 'DRAFT' ? (
+              <Button
+                onClick={publishSite}
+                disabled={publishing || saving}
+                size="sm"
+                className="px-3 h-8 rounded-xl"
+                style={{
+                  backgroundColor: publishing ? '#9CA3AF' : '#10B981',
+                  borderColor: publishing ? '#9CA3AF' : '#10B981',
+                  color: '#FFFFFF'
+                }}
+              >
+                {publishing ? 'Publishing...' : 'Publish'}
+              </Button>
+            ) : (
+              <Button
+                onClick={publishSite}
+                disabled={publishing || saving}
+                variant="outline"
+                size="sm"
+                className="px-3 h-8 rounded-xl border-orange-500 text-orange-400 hover:bg-orange-500/10"
+              >
+                {publishing ? 'Unpublishing...' : 'Unpublish'}
+              </Button>
+            )}
           </div>
         </div>
 
@@ -476,7 +534,7 @@ export default function EditorPage({ params }: { params: Promise<{ handle: strin
               <h1 className="text-xl font-semibold text-white">Bio Link Editor</h1>
               <p className="text-sm text-gray-400">Editing: @{siteData.handle}</p>
             </div>
-            
+
             {/* Desktop Tabs */}
             <div className="flex rounded-xl p-1" style={{ backgroundColor: '#1A2332' }}>
               <button
@@ -540,46 +598,59 @@ export default function EditorPage({ params }: { params: Promise<{ handle: strin
               <Save className="h-4 w-4 mr-2" />
               {saving ? 'Saving...' : 'Save Changes'}
             </Button>
+            {siteData?.status === 'DRAFT' ? (
+              <Button
+                onClick={publishSite}
+                disabled={publishing || saving}
+                className="rounded-xl"
+                style={{
+                  backgroundColor: publishing ? '#9CA3AF' : '#10B981',
+                  borderColor: publishing ? '#9CA3AF' : '#10B981',
+                  color: '#FFFFFF'
+                }}
+              >
+                {publishing ? 'Publishing...' : 'Publish Site'}
+              </Button>
+            ) : (
+              <Button
+                onClick={publishSite}
+                disabled={publishing || saving}
+                variant="outline"
+                className="rounded-xl border-orange-500 text-orange-400 hover:bg-orange-500/10"
+              >
+                {publishing ? 'Unpublishing...' : 'Unpublish'}
+              </Button>
+            )}
           </div>
         </div>
       </header>
 
       {/* Main Content */}
       <main className="flex-1">
-        <div className="lg:grid lg:grid-cols-2 lg:h-[calc(100vh-80px)]">
+        <div className="lg:grid lg:grid-cols-2 lg:h-[calc(120vh-80px)]">
           {/* Mobile Preview Mode */}
           {showPreview && (
-            <div className="lg:hidden fixed inset-0 z-40" style={{ backgroundColor: '#0F1419', paddingTop: '140px' }}>
+            <div className="lg:hidden fixed inset-0 z-40" style={{ backgroundColor: '#0F1419' }}>
               <div className="h-full overflow-hidden">
-                {/* Preview Header */}
-                <div className="px-4 py-2 border-b" style={{ borderColor: '#2A3441' }}>
-                  <div className="flex items-center justify-center space-x-4">
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => setPreviewMode('mobile')}
-                      className={`p-2 ${previewMode === 'mobile' ? 'text-white' : 'text-gray-400'}`}
-                      style={{ backgroundColor: previewMode === 'mobile' ? '#66A38A' : 'transparent' }}
-                    >
-                      <Smartphone className="h-4 w-4 mr-1" />
-                      Mobile
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => setPreviewMode('desktop')}
-                      className={`p-2 ${previewMode === 'desktop' ? 'text-white' : 'text-gray-400'}`}
-                      style={{ backgroundColor: previewMode === 'desktop' ? '#66A38A' : 'transparent' }}
-                    >
-                      <Monitor className="h-4 w-4 mr-1" />
-                      Desktop
-                    </Button>
+                {/* Compact Preview Header */}
+                <div className="px-3 py-2 border-b flex items-center justify-between" style={{ borderColor: '#2A3441' }}>
+                  <div className="flex items-center gap-2">
+                    <Smartphone className="h-4 w-4" style={{ color: '#66A38A' }} />
+                    <span className="text-sm text-white font-medium">Preview</span>
                   </div>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => setShowPreview(false)}
+                    className="text-gray-400 hover:text-white p-1.5"
+                  >
+                    <X className="h-5 w-5" />
+                  </Button>
                 </div>
 
-                {/* Preview Content */}
-                <div className="h-full overflow-y-auto" style={{ backgroundColor: '#F7F9FA' }}>
-                  <div className={`${previewMode === 'mobile' ? 'max-w-sm mx-auto' : 'max-w-4xl mx-auto'} h-full`}>
+                {/* Preview Content - Full Width */}
+                <div className="h-[calc(100vh-50px)] overflow-y-auto" style={{ backgroundColor: '#F7F9FA' }}>
+                  <div className="w-full h-full">
                     <DynamicTemplateRenderer
                       siteData={siteData.dataJson}
                       isPreview={true}
@@ -616,7 +687,7 @@ export default function EditorPage({ params }: { params: Promise<{ handle: strin
                           size="lg"
                           className="mb-3"
                         />
-                        
+
                         {/* Show Avatar Toggle */}
                         {bioBlock.props.avatar && (
                           <div className="mt-3 flex items-center justify-between">
@@ -626,9 +697,8 @@ export default function EditorPage({ params }: { params: Promise<{ handle: strin
                             <button
                               type="button"
                               onClick={() => updateBlock(bioBlock.id, { showAvatar: !(bioBlock.props.showAvatar ?? true) })}
-                              className={`relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-[#66A38A] focus:ring-offset-2 focus:ring-offset-gray-800 ${
-                                bioBlock.props.showAvatar ?? true ? 'bg-[#66A38A]' : 'bg-gray-600'
-                              }`}
+                              className={`relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-[#66A38A] focus:ring-offset-2 focus:ring-offset-gray-800 ${bioBlock.props.showAvatar ?? true ? 'bg-[#66A38A]' : 'bg-gray-600'
+                                }`}
                               role="switch"
                               aria-checked={bioBlock.props.showAvatar ?? true}
                               aria-labelledby="showAvatar"
@@ -636,9 +706,8 @@ export default function EditorPage({ params }: { params: Promise<{ handle: strin
                               <span className="sr-only">Show profile picture</span>
                               <span
                                 aria-hidden="true"
-                                className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${
-                                  bioBlock.props.showAvatar ?? true ? 'translate-x-5' : 'translate-x-0'
-                                }`}
+                                className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${bioBlock.props.showAvatar ?? true ? 'translate-x-5' : 'translate-x-0'
+                                  }`}
                               />
                             </button>
                           </div>
@@ -800,7 +869,7 @@ export default function EditorPage({ params }: { params: Promise<{ handle: strin
                                     label="Apply Button Color to All Links"
                                     allowDefault={true}
                                   />
-                                  
+
                                   <ColorPicker
                                     value={undefined}
                                     defaultColor={'#FFFFFF'}
@@ -953,7 +1022,7 @@ export default function EditorPage({ params }: { params: Promise<{ handle: strin
                               const platform = detectPlatform(link.url)
                               const hasCustomFields = platform?.customFields
                               const hasNonPlatformCustomization = !platform
-                              
+
                               // Only show link settings for premium users
                               if (!isPremiumUser || (!hasCustomFields && !hasNonPlatformCustomization)) return null
 
@@ -1064,7 +1133,7 @@ export default function EditorPage({ params }: { params: Promise<{ handle: strin
                                             label="Button Color"
                                             allowDefault={true}
                                           />
-                                          
+
                                           {/* Text Color */}
                                           <ColorPicker
                                             value={link.customTextColor}
@@ -1096,9 +1165,9 @@ export default function EditorPage({ params }: { params: Promise<{ handle: strin
                                                     updateBlock(linkListBlock.id, { items: newItems })
                                                   }}
                                                   className={`h-8 px-2 rounded-md border text-xs transition-all ${(link.customStyle === styleOption.value) ||
-                                                      (!link.customStyle && styleOption.value === 'pill')
-                                                      ? 'border-sage-green bg-sage-green/20 text-white'
-                                                      : 'border-gray-600 text-gray-400 hover:border-gray-400'
+                                                    (!link.customStyle && styleOption.value === 'pill')
+                                                    ? 'border-sage-green bg-sage-green/20 text-white'
+                                                    : 'border-gray-600 text-gray-400 hover:border-gray-400'
                                                     }`}
                                                   style={{
                                                     borderColor: (link.customStyle === styleOption.value) ||
@@ -1193,7 +1262,7 @@ export default function EditorPage({ params }: { params: Promise<{ handle: strin
             {activeTab === 'design' && (
               <div className="space-y-6">
                 <h2 className="text-xl font-semibold text-white mb-4">Design & Typography</h2>
-                
+
                 {/* Global Font Settings */}
                 <Card className="border-gray-700" style={{ backgroundColor: '#1A2332', borderColor: '#2A3441' }}>
                   <CardHeader className="pb-3">
@@ -1247,8 +1316,8 @@ export default function EditorPage({ params }: { params: Promise<{ handle: strin
                       </div>
 
                       {/* Template Picker Button */}
-                      <Button 
-                        variant="outline" 
+                      <Button
+                        variant="outline"
                         className="w-full border-gray-600 text-gray-300 hover:border-[#66A38A] hover:text-white"
                         onClick={() => setShowTemplatePicker(true)}
                       >
@@ -1285,24 +1354,10 @@ export default function EditorPage({ params }: { params: Promise<{ handle: strin
                 <div className="flex items-center justify-between">
                   <h3 className="text-white font-semibold">Live Preview</h3>
                   <div className="flex items-center space-x-2">
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => setPreviewMode('mobile')}
-                      className={`p-2 ${previewMode === 'mobile' ? 'text-white' : 'text-gray-400'}`}
-                      style={{ backgroundColor: previewMode === 'mobile' ? '#66A38A' : 'transparent' }}
-                    >
-                      <Smartphone className="h-4 w-4" />
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => setPreviewMode('desktop')}
-                      className={`p-2 ${previewMode === 'desktop' ? 'text-white' : 'text-gray-400'}`}
-                      style={{ backgroundColor: previewMode === 'desktop' ? '#66A38A' : 'transparent' }}
-                    >
-                      <Monitor className="h-4 w-4" />
-                    </Button>
+                    <div className="flex items-center gap-1 text-xs text-gray-400">
+                      <Smartphone className="h-4 w-4" style={{ color: '#66A38A' }} />
+                      <span>Mobile Preview</span>
+                    </div>
                     <Button
                       variant="ghost"
                       size="sm"
@@ -1315,14 +1370,33 @@ export default function EditorPage({ params }: { params: Promise<{ handle: strin
                 </div>
               </div>
 
-              {/* Desktop Preview Content */}
-              <div className="h-[calc(100%-60px)] overflow-y-auto" style={{ backgroundColor: '#F7F9FA' }}>
-                <div className={`${previewMode === 'mobile' ? 'max-w-sm mx-auto' : 'w-full'} h-full`}>
-                  <DynamicTemplateRenderer
-                    siteData={siteData.dataJson}
-                    isPreview={true}
-                    className="h-full"
-                  />
+              {/* Desktop Preview Content - Mobile Frame */}
+              <div className="h-[calc(100%-60px)] overflow-y-auto flex items-center justify-center" style={{ backgroundColor: '#F7F9FA' }}>
+                {/* Mobile Frame - iPhone 14 Pro dimensions (scaled down) */}
+                <div className="bg-gray-900 rounded-[2rem] p-1.5 shadow-2xl scale-85">
+                  <div className="bg-white rounded-[1.5rem] w-[375px] h-[650px] overflow-hidden relative">
+                    {/* Mobile Status Bar - Dynamic Island */}
+                    <div className="h-12 bg-black flex items-center justify-center relative">
+                      {/* Dynamic Island */}
+                      <div className="w-32 h-6 bg-black rounded-full absolute top-3"></div>
+                      {/* Status indicators */}
+                      <div className="absolute top-3 left-6 text-white text-xs font-medium">9:41</div>
+                      <div className="absolute top-3 right-6 flex items-center gap-1">
+                        <div className="w-4 h-2 border border-white rounded-sm">
+                          <div className="w-3 h-1 bg-white rounded-sm m-0.5"></div>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Template Content */}
+                    <div className="h-[590px] overflow-y-auto">
+                      <DynamicTemplateRenderer
+                        siteData={siteData.dataJson}
+                        isPreview={true}
+                        className="h-full"
+                      />
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>

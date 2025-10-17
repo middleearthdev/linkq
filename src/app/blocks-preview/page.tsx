@@ -24,7 +24,7 @@ const mockData = {
   'bio': {
     name: 'John Doe',
     bio: 'Digital creator, developer, and coffee enthusiast. Building awesome things one line of code at a time.',
-    avatar: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150&h=150&fit=crop&crop=face',
+    avatar: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=200&h=200&fit=crop&crop=face',
     showAvatar: true,
     avatarSize: 'lg',
     avatarStyle: 'circle',
@@ -153,9 +153,18 @@ export default function BlocksPreviewPage() {
         ]
       case 'bio':
         return [
-          { name: 'Circle Avatar', props: { ...baseProps, avatarStyle: 'circle' } },
-          { name: 'Rounded Avatar', props: { ...baseProps, avatarStyle: 'rounded' } },
-          { name: 'Large Elegant', props: { ...baseProps, nameStyle: 'large-elegant' } }
+          { name: 'Circle', props: { ...baseProps, avatarStyle: 'circle' } },
+          { name: 'Rounded Frame', props: { ...baseProps, avatarStyle: 'rounded-frame' } },
+          { name: 'Square', props: { ...baseProps, avatarStyle: 'square' } },
+          { name: 'Blob (Organic)', props: { ...baseProps, avatarStyle: 'blob' } },
+          { name: 'Hexagon', props: { ...baseProps, avatarStyle: 'hexagon' } },
+          { name: 'Star', props: { ...baseProps, avatarStyle: 'star' } },
+          { name: 'Diamond', props: { ...baseProps, avatarStyle: 'diamond' } },
+          { name: 'Wave', props: { ...baseProps, avatarStyle: 'wave' } },
+          { name: 'Flower', props: { ...baseProps, avatarStyle: 'flower' } },
+          { name: 'Badge', props: { ...baseProps, avatarStyle: 'badge' } },
+          { name: 'Polaroid', props: { ...baseProps, avatarStyle: 'polaroid' } },
+          { name: 'Vintage', props: { ...baseProps, avatarStyle: 'vintage' } }
         ]
       case 'gallery':
         return [

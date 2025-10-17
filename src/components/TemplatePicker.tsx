@@ -29,7 +29,7 @@ import { TemplateListResponse, TemplatePreview } from "@/types/template"
 
 interface TemplatePickerProps {
   currentTemplateId?: string
-  onTemplateSelect: (templateId: string) => void
+  onTemplateSelect: (templateVersionId: string) => void // Changed to templateVersionId
   onClose: () => void
   isOpen: boolean
 }
@@ -98,7 +98,7 @@ export default function TemplatePicker({
     }
 
     try {
-      await onTemplateSelect(template.id)
+      await onTemplateSelect(template.versionId) // Use versionId instead of id
       onClose()
     } catch (error) {
       console.error('Failed to switch template:', error)

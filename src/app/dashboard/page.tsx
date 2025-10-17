@@ -23,7 +23,8 @@ import {
   Menu,
   Search
 } from "lucide-react"
-import { useState } from "react"
+import { useState, useEffect } from "react"
+import { QuickLoading } from "@/components/ui/cool-loading"
 
 export default function DashboardPage() {
   const { data: session, isPending } = useSession()
@@ -33,6 +34,36 @@ export default function DashboardPage() {
   const [selectedTemplate, setSelectedTemplate] = useState('minimal')
   const [creating, setCreating] = useState(false)
   const [error, setError] = useState('')
+  const [sites, setSites] = useState<any[]>([])
+  const [loadingSites, setLoadingSites] = useState(true)
+  const [sitesError, setSitesError] = useState('')
+
+  // Fetch user sites
+  useEffect(() => {
+    const fetchSites = async () => {
+      if (!session?.user) return
+      
+      try {
+        setLoadingSites(true)
+        setSitesError('')
+        
+        const response = await fetch('/api/dashboard/sites')
+        const data = await response.json()
+        
+        if (data.success) {
+          setSites(data.data.sites || [])
+        } else {
+          setSitesError(data.error?.message || 'Failed to load sites')
+        }
+      } catch (err) {
+        setSitesError('Failed to load sites')
+      } finally {
+        setLoadingSites(false)
+      }
+    }
+    
+    fetchSites()
+  }, [session])
 
   if (isPending) {
     return (
@@ -62,8 +93,7 @@ export default function DashboardPage() {
   }
 
   const navigateToSites = () => {
-    // TODO: Navigate to sites page
-    console.log('Navigate to sites')
+    window.location.href = '/sites'
   }
 
   const navigateToTemplates = () => {
@@ -190,7 +220,7 @@ export default function DashboardPage() {
                 <Button variant="ghost" className="text-gray-300 hover:text-white" size="sm">
                   Dashboard
                 </Button>
-                <Button variant="ghost" className="text-gray-400 hover:text-white" size="sm">
+                <Button variant="ghost" className="text-gray-400 hover:text-white" size="sm" onClick={navigateToSites}>
                   Sites
                 </Button>
                 <Button variant="ghost" className="text-gray-400 hover:text-white" size="sm">
@@ -269,6 +299,7 @@ export default function DashboardPage() {
               <Button 
                 variant="ghost" 
                 className="w-full justify-start text-gray-400 hover:text-white hover:bg-gray-800/30 h-11 rounded-xl"
+                onClick={navigateToSites}
               >
                 <Globe className="h-5 w-5 mr-3" />
                 My Sites
@@ -458,26 +489,107 @@ export default function DashboardPage() {
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="text-center py-6 lg:py-8">
-                <div className="w-16 h-16 mx-auto mb-4 rounded-full flex items-center justify-center" style={{ backgroundColor: '#2A3441' }}>
-                  <Globe className="h-8 w-8 text-gray-500" />
+              {loadingSites ? (
+                <QuickLoading text="Loading sites..." />
+              ) : sitesError ? (
+                <div className="text-center py-6 lg:py-8">
+                  <div className="w-16 h-16 mx-auto mb-4 rounded-full flex items-center justify-center" style={{ backgroundColor: '#2A3441' }}>
+                    <Globe className="h-8 w-8 text-red-400" />
+                  </div>
+                  <p className="text-red-400 mb-3">{sitesError}</p>
+                  <Button 
+                    onClick={() => window.location.reload()}
+                    size="sm"
+                    className="h-8 px-4 text-sm rounded-xl"
+                    variant="outline"
+                  >
+                    Retry
+                  </Button>
                 </div>
-                <p className="text-gray-400 mb-3">No sites created yet</p>
-                <Button 
-                  onClick={handleCreateSite}
-                  size="sm"
-                  className="h-8 px-4 text-sm rounded-xl"
-                  style={{ 
-                    backgroundColor: '#66A38A',
-                    borderColor: '#66A38A',
-                    color: '#FFFFFF'
-                  }}
-                  onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#5A8F7A'}
-                  onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#66A38A'}
-                >
-                  Create Your First Site
-                </Button>
-              </div>
+              ) : sites.length === 0 ? (
+                <div className="text-center py-6 lg:py-8">
+                  <div className="w-16 h-16 mx-auto mb-4 rounded-full flex items-center justify-center" style={{ backgroundColor: '#2A3441' }}>
+                    <Globe className="h-8 w-8 text-gray-500" />
+                  </div>
+                  <p className="text-gray-400 mb-3">No sites created yet</p>
+                  <Button 
+                    onClick={handleCreateSite}
+                    size="sm"
+                    className="h-8 px-4 text-sm rounded-xl"
+                    style={{ 
+                      backgroundColor: '#66A38A',
+                      borderColor: '#66A38A',
+                      color: '#FFFFFF'
+                    }}
+                    onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#5A8F7A'}
+                    onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#66A38A'}
+                  >
+                    Create Your First Site
+                  </Button>
+                </div>
+              ) : (
+                <div className="space-y-3">
+                  {sites.slice(0, 3).map((site) => (
+                    <div 
+                      key={site.id}
+                      className="flex items-center justify-between p-3 rounded-xl hover:bg-gray-800/30 transition-colors cursor-pointer"
+                      onClick={() => window.location.href = `/editor/${site.handle}`}
+                    >
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2 mb-1">
+                          <h4 className="text-white text-sm font-medium truncate">{site.title}</h4>
+                          <Badge 
+                            variant="outline" 
+                            className="text-xs px-1.5 py-0.5"
+                            style={{
+                              backgroundColor: site.status === 'PUBLISHED' ? '#1F2937' : '#374151',
+                              borderColor: site.status === 'PUBLISHED' ? '#10B981' : '#6B7280',
+                              color: site.status === 'PUBLISHED' ? '#10B981' : '#9CA3AF'
+                            }}
+                          >
+                            {site.status}
+                          </Badge>
+                        </div>
+                        <p className="text-gray-400 text-xs truncate">@{site.handle}</p>
+                        <p className="text-gray-500 text-xs">{site.views} views</p>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="h-8 w-8 p-0 text-gray-400 hover:text-white"
+                          onClick={(e) => {
+                            e.stopPropagation()
+                            window.open(`/${site.handle}`, '_blank')
+                          }}
+                        >
+                          <Eye className="h-4 w-4" />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="h-8 w-8 p-0 text-gray-400 hover:text-white"
+                          onClick={(e) => {
+                            e.stopPropagation()
+                            window.location.href = `/editor/${site.handle}`
+                          }}
+                        >
+                          <Edit3 className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    </div>
+                  ))}
+                  {sites.length > 3 && (
+                    <Button
+                      variant="ghost"
+                      className="w-full h-8 text-sm text-gray-400 hover:text-white"
+                      onClick={() => console.log('Navigate to all sites')}
+                    >
+                      View all {sites.length} sites
+                    </Button>
+                  )}
+                </div>
+              )}
             </CardContent>
           </Card>
 
@@ -493,13 +605,45 @@ export default function DashboardPage() {
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="text-center py-6 lg:py-8">
-                <div className="w-16 h-16 mx-auto mb-4 rounded-full flex items-center justify-center" style={{ backgroundColor: '#2A3441' }}>
-                  <BarChart3 className="h-8 w-8 text-gray-500" />
+              {loadingSites ? (
+                <QuickLoading text="Loading analytics..." />
+              ) : sites.length === 0 ? (
+                <div className="text-center py-6 lg:py-8">
+                  <div className="w-16 h-16 mx-auto mb-4 rounded-full flex items-center justify-center" style={{ backgroundColor: '#2A3441' }}>
+                    <BarChart3 className="h-8 w-8 text-gray-500" />
+                  </div>
+                  <p className="text-gray-400 mb-1">No analytics data yet</p>
+                  <p className="text-sm text-gray-500">Create a site to start tracking</p>
                 </div>
-                <p className="text-gray-400 mb-1">No analytics data yet</p>
-                <p className="text-sm text-gray-500">Create a site to start tracking</p>
-              </div>
+              ) : (
+                <div className="space-y-4">
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="text-center">
+                      <div className="text-2xl font-bold text-white mb-1">
+                        {sites.reduce((total, site) => total + site.views, 0)}
+                      </div>
+                      <div className="text-xs text-gray-400">Total Views</div>
+                    </div>
+                    <div className="text-center">
+                      <div className="text-2xl font-bold text-white mb-1">
+                        {sites.filter(site => site.status === 'PUBLISHED').length}
+                      </div>
+                      <div className="text-xs text-gray-400">Published Sites</div>
+                    </div>
+                  </div>
+                  
+                  {sites.length > 0 && (
+                    <div className="pt-3 border-t" style={{ borderColor: '#2A3441' }}>
+                      <div className="flex items-center justify-between text-sm">
+                        <span className="text-gray-400">Most viewed:</span>
+                        <span className="text-white font-medium">
+                          {sites.sort((a, b) => b.views - a.views)[0]?.title || 'N/A'}
+                        </span>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )}
             </CardContent>
           </Card>
         </div>

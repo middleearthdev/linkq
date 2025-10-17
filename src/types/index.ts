@@ -89,7 +89,7 @@ export const BioBlockPropsSchema = z.object({
   avatar: z.string().optional(),
   showAvatar: z.boolean().default(true),
   avatarSize: z.enum(['sm', 'md', 'lg', 'xl', 'xxl']).default('lg'),
-  avatarStyle: z.enum(['circle', 'rounded', 'rounded-frame']).default('circle'),
+  avatarStyle: z.enum(['circle', 'rounded', 'rounded-frame', 'blob', 'hexagon', 'star', 'diamond', 'wave', 'flower', 'badge', 'polaroid', 'vintage']).default('circle'),
   textAlign: z.enum(['left', 'center', 'right']).default('center'),
   nameStyle: z.enum(['default', 'large-elegant']).default('default'),
   spacing: z.enum(['normal', 'wide']).default('normal'),
@@ -107,6 +107,13 @@ export const LinkListBlockPropsSchema = z.object({
   style: z.enum(['pill', 'underline', 'card', 'modern', 'modern-cream', 'vintage', 'ticket', 'brush', 'neon', 'origami', 'glass', 'pixel', 'hologram', 'neomorphism', 'bubble', 'cyberpunk', 'sketch', 'metallic', 'wood', 'neon-outline', 'minimal-line', 'elastic', 'terminal']).default('pill'),
   items: z.array(LinkItemSchema),
   maxItems: z.number().optional(),
+  customColors: z.object({
+    primary: z.string().optional(),
+    secondary: z.string().optional(),
+    text: z.string().optional(),
+    accent: z.string().optional(),
+    background: z.string().optional(),
+  }).optional(),
 })
 
 export const SocialIconsBlockPropsSchema = z.object({
@@ -231,6 +238,35 @@ export type UserEntitlements = z.infer<typeof UserEntitlementsSchema>
 // API RESPONSE TYPES
 // ====================================
 
+// ====================================
+// TAG SYSTEM TYPES
+// ====================================
+
+export const TagCategoryEnum = {
+  INDUSTRY: 'industry',
+  STYLE: 'style', 
+  PURPOSE: 'purpose',
+  AUDIENCE: 'audience'
+} as const
+
+export type TagCategory = keyof typeof TagCategoryEnum
+
+export const TagSchema = z.object({
+  id: z.string(),
+  name: z.string(),
+  slug: z.string(),
+  description: z.string().optional(),
+  color: z.string().optional(),
+  icon: z.string().optional(),
+  category: z.enum(['industry', 'style', 'purpose', 'audience']).optional(),
+  isPopular: z.boolean().default(false),
+  sortOrder: z.number().default(0),
+  createdAt: z.string(),
+  updatedAt: z.string(),
+})
+
+export type Tag = z.infer<typeof TagSchema>
+
 export interface TemplateListResponse {
   templates: Array<{
     id: string
@@ -243,6 +279,7 @@ export interface TemplateListResponse {
     priceCents?: number
     requiredPlan?: SubscriptionTierType
     isOwned: boolean
+    tags: Tag[]
     latestVersion: {
       id: string
       version: string
@@ -254,6 +291,11 @@ export interface TemplateListResponse {
     limit: number
     total: number
     hasMore: boolean
+  }
+  filters: {
+    availableTags: Tag[]
+    selectedTags: string[]
+    categories: string[]
   }
 }
 
@@ -373,8 +415,47 @@ export interface PaginationParams {
   limit?: number
   search?: string
   category?: string
-  sort?: 'name' | 'created' | 'updated' | 'price'
+  tags?: string[] // Array of tag slugs for filtering
+  sort?: 'name' | 'created' | 'updated' | 'price' | 'popularity'
   order?: 'asc' | 'desc'
+}
+
+// ====================================
+// TAG MANAGEMENT TYPES
+// ====================================
+
+export const CreateTagSchema = z.object({
+  name: z.string().min(1, 'Tag name is required'),
+  slug: z.string().min(1, 'Tag slug is required').regex(/^[a-z0-9-]+$/, 'Slug must contain only lowercase letters, numbers, and hyphens'),
+  description: z.string().optional(),
+  color: z.string().regex(/^#[0-9A-Fa-f]{6}$/, 'Color must be a valid hex color').optional(),
+  icon: z.string().optional(),
+  category: z.enum(['industry', 'style', 'purpose', 'audience']).optional(),
+  isPopular: z.boolean().default(false),
+  sortOrder: z.number().default(0),
+})
+
+export const UpdateTagSchema = CreateTagSchema.partial()
+
+export const TagFilterParams = z.object({
+  category: z.enum(['industry', 'style', 'purpose', 'audience']).optional(),
+  isPopular: z.boolean().optional(),
+  search: z.string().optional(),
+})
+
+export type CreateTagData = z.infer<typeof CreateTagSchema>
+export type UpdateTagData = z.infer<typeof UpdateTagSchema>
+export type TagFilterData = z.infer<typeof TagFilterParams>
+
+export interface TagsResponse {
+  tags: Tag[]
+  grouped: {
+    industry: Tag[]
+    style: Tag[]
+    purpose: Tag[]
+    audience: Tag[]
+  }
+  popular: Tag[]
 }
 
 export interface ErrorDetails {

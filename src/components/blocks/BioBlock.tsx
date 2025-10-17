@@ -4,8 +4,10 @@
  */
 
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
+import { AvatarUpload } from '@/components/ui/avatar-upload'
 import { BioBlockProps } from '@/types'
 import { cn } from '@/lib/utils'
+import '@/styles/avatar-frames.css'
 
 interface BioBlockComponentProps {
   props: BioBlockProps
@@ -35,11 +37,20 @@ export function BioBlock({ props, className, isEditing = false }: BioBlockCompon
     xxl: 'w-40 h-40'
   }
 
-  // Avatar style mapping
+  // Avatar style mapping with mobile-first responsive design
   const avatarStyles = {
     circle: 'rounded-full',
-    'rounded-frame': 'rounded-[2rem]', // Matches sample design
-    square: 'rounded-lg'
+    'rounded-frame': 'rounded-[1.5rem] sm:rounded-[2rem]',
+    square: 'rounded-lg',
+    blob: 'blob-shape',
+    hexagon: 'hexagon-shape', 
+    star: 'star-shape',
+    diamond: 'diamond-shape',
+    wave: 'wave-shape',
+    flower: 'flower-shape',
+    badge: 'badge-shape',
+    polaroid: 'polaroid-effect rounded-none',
+    vintage: 'vintage-frame rounded-[1.5rem] sm:rounded-[2rem]',
   }
 
   // Name style mapping
@@ -56,6 +67,7 @@ export function BioBlock({ props, className, isEditing = false }: BioBlockCompon
     wide: 'space-y-6'
   }
 
+  // Regular layout for all avatar styles
   return (
     <div className={cn(
       'flex flex-col items-center p-6',
@@ -70,8 +82,15 @@ export function BioBlock({ props, className, isEditing = false }: BioBlockCompon
         <div className={cn(
           avatarSizes[avatarSize as keyof typeof avatarSizes],
           avatarStyles[avatarStyle as keyof typeof avatarStyles],
-          'overflow-hidden border-[var(--avatar-border)] shadow-[var(--shadow)]',
+          // Base styles - conditionally applied
+          avatarStyle !== 'polaroid' && 'overflow-hidden',
+          ['circle', 'rounded-frame', 'square'].includes(avatarStyle) ? 'border-[var(--avatar-border)] shadow-[var(--shadow)]' : '',
           'bg-gradient-to-br from-gray-100 to-gray-200',
+          'transition-all duration-300 ease-in-out',
+          'relative', // For pseudo-elements
+          // Special handling for custom shapes
+          (avatarStyle === 'polaroid') && 'bg-white',
+          (avatarStyle === 'wave' || avatarStyle === 'blob') && 'animate-morph',
           isEditing && 'outline-dashed outline-2 outline-blue-400 outline-offset-2'
         )}>
           {avatar ? (
@@ -158,13 +177,12 @@ export function BioBlockEditor({
       </div>
 
       <div>
-        <label className="block text-sm font-medium mb-2">Avatar URL</label>
-        <input
-          type="url"
-          value={props.avatar || ''}
-          onChange={(e) => handleChange('avatar', e.target.value)}
-          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-          placeholder="https://yoursite.com/your-photo.jpg"
+        <label className="block text-sm font-medium mb-3">Profile Picture</label>
+        <AvatarUpload
+          currentAvatar={props.avatar}
+          onAvatarChange={(url) => handleChange('avatar', url)}
+          size="lg"
+          className="mb-3"
         />
       </div>
 

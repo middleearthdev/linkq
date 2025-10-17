@@ -95,6 +95,12 @@ const POPULAR_FONTS = [
     value: 'JetBrains Mono',
     family: '"JetBrains Mono", monospace',
     category: 'Monospace'
+  },
+  { 
+    name: 'Cursive',
+    value: 'Cursive',
+    family: 'cursive',
+    category: 'Cursive'
   }
 ]
 

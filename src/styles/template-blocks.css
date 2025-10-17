@@ -1,0 +1,161 @@
+/**
+ * Template Block Global Styles
+ * CSS classes that respond to template CSS variables
+ */
+
+/* Block containers */
+.bio-block {
+  /* Use template variables for background and spacing */
+  padding: var(--block-padding, 1.5rem);
+  margin: var(--block-margin, 0.5rem 0);
+}
+
+.link-item {
+  /* Default styles that can be overridden by template variables */
+  background: var(--card-background, #ffffff);
+  color: var(--text-color, #333333);
+  border: var(--border, 1px solid transparent);
+  border-radius: var(--border-radius, 0.5rem);
+  box-shadow: var(--shadow, 0 1px 3px rgba(0, 0, 0, 0.1));
+  transition: all 0.2s ease-in-out;
+}
+
+.link-item:hover {
+  background: var(--card-background-hover, var(--card-background, #ffffff));
+  box-shadow: var(--shadow-hover, var(--shadow, 0 4px 12px rgba(0, 0, 0, 0.15)));
+  transform: var(--transform-hover, translateY(-2px));
+}
+
+/* Bio text styling */
+.bio-name {
+  color: var(--text-color, #1f2937);
+  font-weight: var(--heading-weight, 700);
+  letter-spacing: var(--heading-spacing, -0.025em);
+}
+
+.bio-text {
+  color: var(--text-secondary, #6b7280);
+  font-weight: var(--body-weight, 400);
+  line-height: var(--body-line-height, 1.6);
+}
+
+/* Social icons styling */
+.social-icons {
+  /* Template variables for social icons */
+  --icon-size: var(--social-icon-size, 2rem);
+  --icon-color: var(--primary-color, #3b82f6);
+  --icon-background: var(--card-background, #ffffff);
+  --icon-border: var(--border, 1px solid #e5e7eb);
+  --icon-shadow: var(--shadow, 0 1px 3px rgba(0, 0, 0, 0.1));
+}
+
+.social-icon {
+  width: var(--icon-size);
+  height: var(--icon-size);
+  color: var(--icon-color);
+  background: var(--icon-background);
+  border: var(--icon-border);
+  border-radius: var(--border-radius, 0.5rem);
+  box-shadow: var(--icon-shadow);
+  transition: all 0.2s ease-in-out;
+}
+
+.social-icon:hover {
+  background: var(--primary-color, #3b82f6);
+  color: var(--card-background, #ffffff);
+  box-shadow: var(--shadow-hover, 0 4px 12px rgba(0, 0, 0, 0.15));
+  transform: var(--transform-hover, translateY(-2px));
+}
+
+/* Gallery block styling */
+.gallery-block {
+  border-radius: var(--border-radius, 0.5rem);
+  overflow: hidden;
+}
+
+.gallery-item {
+  border-radius: var(--border-radius, 0.5rem);
+  box-shadow: var(--shadow, 0 1px 3px rgba(0, 0, 0, 0.1));
+  transition: all 0.2s ease-in-out;
+}
+
+.gallery-item:hover {
+  box-shadow: var(--shadow-hover, 0 4px 12px rgba(0, 0, 0, 0.15));
+  transform: var(--transform-hover, scale(1.02));
+}
+
+/* Template container responsive variables */
+.template-container {
+  /* Mobile-first responsive spacing */
+  --block-padding: 1rem;
+  --block-margin: 0.5rem 0;
+  --content-max-width: 100%;
+}
+
+@media (min-width: 640px) {
+  .template-container {
+    --block-padding: 1.25rem;
+    --block-margin: 0.75rem 0;
+    --content-max-width: 28rem;
+  }
+}
+
+@media (min-width: 768px) {
+  .template-container {
+    --block-padding: 1.5rem;
+    --block-margin: 1rem 0;
+    --content-max-width: 32rem;
+  }
+}
+
+@media (min-width: 1024px) {
+  .template-container {
+    --block-padding: 2rem;
+    --block-margin: 1.25rem 0;
+    --content-max-width: 36rem;
+  }
+}
+
+/* Theme-specific overrides */
+.template-container[data-theme="dark"] {
+  --text-color: #f9fafb;
+  --text-secondary: #d1d5db;
+  --card-background: #374151;
+  --border: 1px solid #4b5563;
+}
+
+.template-container[data-theme="minimal"] {
+  --shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  --shadow-hover: 0 2px 8px rgba(0, 0, 0, 0.1);
+  --transform-hover: none;
+}
+
+.template-container[data-theme="glass"] {
+  --card-background: rgba(255, 255, 255, 0.1);
+  --border: 1px solid rgba(255, 255, 255, 0.2);
+  --shadow: 0 8px 32px rgba(31, 38, 135, 0.37);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+
+/* High contrast mode */
+@media (prefers-contrast: high) {
+  .template-container {
+    --border: 2px solid currentColor;
+    --shadow: none;
+    --transform-hover: none;
+  }
+}
+
+/* Reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  .link-item,
+  .social-icon,
+  .gallery-item {
+    transition: none;
+  }
+  
+  .template-container {
+    --transform-hover: none;
+  }
+}

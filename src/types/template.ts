@@ -115,6 +115,7 @@ export interface UserEntitlements {
 
 export interface TemplatePreview {
   id: string
+  versionId: string // Template version ID for switching
   slug: string
   name: string
   description?: string

@@ -51,16 +51,21 @@ export function LinkListBlock({ props, className, isEditing = false }: LinkListB
 
     if (style === 'pill') {
       return (
-        <Button
+        <button
           key={item.id || index}
-          variant="default"
-          size="lg"
-          className={cn(baseClasses, 'rounded-full h-14 px-6')}
+          className={cn(
+            baseClasses, 
+            'rounded-full h-14 px-6 font-medium',
+            'bg-[var(--primary-color)] text-[var(--card-background)]',
+            'hover:bg-[var(--secondary-color)] hover:scale-105',
+            'shadow-[var(--shadow)] border-[var(--border)]',
+            'transition-all duration-200 active:scale-95'
+          )}
           onClick={() => handleLinkClick(item)}
           disabled={isEditing}
         >
           {content}
-        </Button>
+        </button>
       )
     }
 
@@ -70,8 +75,10 @@ export function LinkListBlock({ props, className, isEditing = false }: LinkListB
           key={item.id || index}
           className={cn(
             baseClasses,
-            'h-12 px-4 text-lg border-b-2 border-transparent hover:border-current',
-            'bg-transparent hover:bg-gray-100 dark:hover:bg-gray-800'
+            'h-12 px-4 text-lg border-b-2 border-transparent',
+            'text-[var(--text-color)] hover:text-[var(--primary-color)]',
+            'bg-transparent hover:bg-[var(--card-background)]',
+            'hover:border-[var(--primary-color)] transition-all duration-200'
           )}
           onClick={() => handleLinkClick(item)}
           disabled={isEditing}
@@ -83,18 +90,23 @@ export function LinkListBlock({ props, className, isEditing = false }: LinkListB
 
     if (style === 'card') {
       return (
-        <Card
+        <button
           key={item.id || index}
           className={cn(
-            'cursor-pointer hover:shadow-md transition-shadow',
+            baseClasses,
+            'h-16 px-6 font-medium',
+            'bg-[var(--card-background)] text-[var(--text-color)]',
+            'border border-[var(--border)] rounded-[var(--border-radius)]',
+            'shadow-[var(--shadow)] hover:shadow-lg',
+            'hover:bg-[var(--primary-color)] hover:text-[var(--card-background)]',
+            'transition-all duration-200 active:scale-98',
             isEditing && 'outline-dashed outline-2 outline-blue-400 outline-offset-2'
           )}
           onClick={() => handleLinkClick(item)}
+          disabled={isEditing}
         >
-          <div className={cn(baseClasses, 'h-16 px-6')}>
-            {content}
-          </div>
-        </Card>
+          {content}
+        </button>
       )
     }
 

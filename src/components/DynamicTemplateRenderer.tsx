@@ -40,8 +40,26 @@ export function DynamicTemplateRenderer({
   useEffect(() => {
     if (siteData.meta.theme) {
       const root = document.documentElement
+      
+      // Set template CSS variables
       Object.entries(siteData.meta.theme).forEach(([key, value]) => {
         root.style.setProperty(key, value)
+      })
+      
+      // Set fallback CSS variables if not provided
+      const fallbacks = {
+        '--text-secondary': 'var(--text-color, #6b7280)',
+        '--border': '1px solid var(--primary-color, #d1d5db)',
+        '--avatar-border': '2px solid var(--primary-color, #ffffff)',
+        '--card-background-hover': 'var(--secondary-color, #f3f4f6)',
+        '--text-hover': 'var(--card-background, #ffffff)',
+        '--shadow-hover': '0 8px 25px -5px rgba(0, 0, 0, 0.2)'
+      }
+      
+      Object.entries(fallbacks).forEach(([key, value]) => {
+        if (!siteData.meta.theme[key]) {
+          root.style.setProperty(key, value)
+        }
       })
     }
 
@@ -90,7 +108,8 @@ export function DynamicTemplateRenderer({
       'Source Sans Pro': '"Source Sans Pro", sans-serif',
       'Playfair Display': '"Playfair Display", serif',
       'Merriweather': '"Merriweather", serif',
-      'JetBrains Mono': '"JetBrains Mono", monospace'
+      'JetBrains Mono': '"JetBrains Mono", monospace',
+      'Cursive': 'cursive'
     }
     return fontMap[fontName] || 'system-ui, -apple-system, sans-serif'
   }
@@ -120,31 +139,23 @@ export function DynamicTemplateRenderer({
 
   return (
     <div
-      className={`min-h-screen template-container ${className}`}
+      className={`min-h-screen template-container ${className} relative`}
       style={{
         background: 'var(--background, linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%))',
         color: 'var(--text-color, #333)',
         ...containerStyle
       }}
     >
-      {/* Optional background pattern overlay */}
-      <div
+      {/* Background overlay untuk background image */}
+      <div 
         className="absolute inset-0 pointer-events-none"
         style={{
-          background: 'var(--background-pattern, none)',
-          opacity: 'var(--pattern-opacity, 1)'
+          background: 'var(--background-overlay, transparent)',
+          zIndex: 1
         }}
       />
 
-      {/* Optional background overlay */}
-      <div
-        className="absolute inset-0 pointer-events-none"
-        style={{
-          background: 'var(--background-overlay, none)'
-        }}
-      />
-
-      <div className="relative container mx-auto px-4 py-8">
+      <div className="relative container mx-auto px-4 py-8" style={{ zIndex: 2 }}>
         <div className="max-w-md mx-auto template-content">
           {siteData.blocks.map(renderBlock)}
 

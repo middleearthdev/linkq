@@ -1,0 +1,231 @@
+/**
+ * Custom Avatar Frame Styles
+ * Mobile-first responsive design for creative photo frames
+ */
+
+/* Blob Shape - Organic, wavy edges inspired by profile.png */
+.blob-shape {
+  border-radius: 30% 70% 70% 30% / 30% 30% 70% 70%;
+  position: relative;
+}
+
+@media (min-width: 640px) {
+  .blob-shape {
+    border-radius: 40% 60% 60% 40% / 40% 40% 60% 60%;
+  }
+}
+
+/* Hexagon Shape */
+.hexagon-shape {
+  clip-path: polygon(30% 0%, 70% 0%, 100% 50%, 70% 100%, 30% 100%, 0% 50%);
+}
+
+@media (min-width: 640px) {
+  .hexagon-shape {
+    clip-path: polygon(25% 0%, 75% 0%, 100% 50%, 75% 100%, 25% 100%, 0% 50%);
+  }
+}
+
+/* Star Shape */
+.star-shape {
+  clip-path: polygon(50% 0%, 61% 35%, 98% 35%, 68% 57%, 79% 91%, 50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%);
+}
+
+/* Diamond Shape - Enhanced */
+.diamond-shape {
+  clip-path: polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%);
+  transform: none; /* Remove rotation, use clip-path instead */
+}
+
+/* Wave Shape - Fluid, ocean-like borders */
+.wave-shape {
+  border-radius: 60% 40% 30% 70% / 60% 30% 70% 40%;
+  position: relative;
+}
+
+.wave-shape::before {
+  content: '';
+  position: absolute;
+  top: -2px;
+  left: -2px;
+  right: -2px;
+  bottom: -2px;
+  background: linear-gradient(45deg, #667eea 0%, #764ba2 100%);
+  border-radius: 60% 40% 30% 70% / 60% 30% 70% 40%;
+  z-index: -1;
+}
+
+/* Flower Shape - Petal-like design */
+.flower-shape {
+  clip-path: circle(50% at 50% 50%);
+  position: relative;
+}
+
+.flower-shape::before {
+  content: '';
+  position: absolute;
+  top: -10%;
+  left: -10%;
+  right: -10%;
+  bottom: -10%;
+  background: radial-gradient(circle at 30% 40%, transparent 20%, currentColor 21%, currentColor 25%, transparent 26%),
+              radial-gradient(circle at 70% 40%, transparent 20%, currentColor 21%, currentColor 25%, transparent 26%),
+              radial-gradient(circle at 50% 70%, transparent 20%, currentColor 21%, currentColor 25%, transparent 26%),
+              radial-gradient(circle at 30% 70%, transparent 20%, currentColor 21%, currentColor 25%, transparent 26%),
+              radial-gradient(circle at 70% 70%, transparent 20%, currentColor 21%, currentColor 25%, transparent 26%);
+  border-radius: 50%;
+  z-index: -1;
+  opacity: 0.3;
+}
+
+/* Badge Shape - Like a sheriff's badge */
+.badge-shape {
+  clip-path: polygon(50% 0%, 80% 10%, 100% 35%, 85% 60%, 100% 90%, 50% 100%, 0% 90%, 15% 60%, 0% 35%, 20% 10%);
+}
+
+/* Polaroid effect - Classic instant photo look */
+.polaroid-effect {
+  position: relative;
+  background: white;
+  padding: 8px 8px 40px 8px;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+}
+
+.polaroid-effect::after {
+  content: '';
+  position: absolute;
+  bottom: 8px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 60%;
+  height: 20px;
+  background: linear-gradient(90deg, transparent, rgba(0,0,0,0.1), transparent);
+}
+
+/* Vintage frame effects */
+.vintage-frame {
+  position: relative;
+  filter: sepia(0.3) contrast(1.1) brightness(1.1);
+}
+
+.vintage-frame::before {
+  content: '';
+  position: absolute;
+  top: -4px;
+  left: -4px;
+  right: -4px;
+  bottom: -4px;
+  background: 
+    linear-gradient(45deg, #d4af37 0%, #ffd700 25%, #d4af37 50%, #b8860b 75%, #d4af37 100%);
+  border-radius: inherit;
+  z-index: -1;
+}
+
+
+/* Mobile-first base styles (default for all screens) */
+.blob-shape {
+  border-radius: 45% 55% 55% 45% / 45% 45% 55% 55%;
+}
+
+.wave-shape {
+  border-radius: 50% 50% 40% 60% / 50% 40% 60% 50%;
+}
+
+.polaroid-effect {
+  padding: 4px 4px 20px 4px;
+}
+
+.polaroid-effect::after {
+  height: 12px;
+}
+
+/* Small screens and up (sm: 640px+) */
+@media (min-width: 640px) {
+  .polaroid-effect {
+    padding: 6px 6px 30px 6px;
+  }
+  
+  .polaroid-effect::after {
+    height: 15px;
+  }
+}
+
+/* Medium screens and up (md: 768px+) */
+@media (min-width: 768px) {
+  .blob-shape {
+    border-radius: 60% 40% 30% 70% / 60% 30% 70% 40%;
+  }
+  
+  .wave-shape {
+    border-radius: 60% 40% 30% 70% / 60% 30% 70% 40%;
+  }
+  
+  .polaroid-effect {
+    padding: 8px 8px 40px 8px;
+  }
+  
+  .polaroid-effect::after {
+    height: 20px;
+  }
+}
+
+/* Large screens and up (lg: 1024px+) */
+@media (min-width: 1024px) {
+  .vintage-frame::before {
+    top: -6px;
+    left: -6px;
+    right: -6px;
+    bottom: -6px;
+  }
+}
+
+/* Hover effects for interactive feel */
+@media (hover: hover) {
+  .blob-shape:hover {
+    border-radius: 60% 40% 40% 60% / 60% 60% 40% 40%;
+    transition: border-radius 0.3s ease-in-out;
+  }
+  
+  .wave-shape:hover {
+    border-radius: 40% 60% 50% 50% / 40% 50% 50% 60%;
+    transition: border-radius 0.3s ease-in-out;
+  }
+  
+  .hexagon-shape:hover {
+    transform: rotate(15deg);
+    transition: transform 0.3s ease-in-out;
+  }
+}
+
+/* Frame animations */
+@keyframes gentle-morph {
+  0%, 100% { border-radius: 60% 40% 30% 70% / 60% 30% 70% 40%; }
+  50% { border-radius: 30% 60% 70% 40% / 50% 60% 30% 60%; }
+}
+
+@keyframes gradientShift {
+  0%, 100% { background-position: 0% 0%; }
+  50% { background-position: 100% 100%; }
+}
+
+@keyframes rotate {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.animate-morph {
+  animation: gentle-morph 4s ease-in-out infinite;
+}
+
+/* Accessibility improvements */
+@media (prefers-reduced-motion: reduce) {
+  .blob-shape:hover,
+  .wave-shape:hover,
+  .hexagon-shape:hover {
+    transition: none;
+  }
+  
+  .animate-morph {
+    animation: none;
+  }
+}

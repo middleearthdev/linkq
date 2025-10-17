@@ -6,8 +6,8 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { db } from '@/lib/db'
 import { getCurrentUser } from '@/lib/auth-server'
-import { 
-  getTemplateManifest, 
+import {
+  getTemplateManifest,
   canUserAccessTemplate
 } from '@/lib/template-registry'
 import { UserEntitlements } from '@/types/template'
@@ -50,6 +50,7 @@ export async function POST(
       return NextResponse.json({ error: 'Site not found' }, { status: 404 })
     }
 
+    console.log(templateVersionId)
     // Get target template version
     const targetTemplateVersion = await db.templateVersion.findFirst({
       where: {
@@ -84,8 +85,8 @@ export async function POST(
 
     const accessCheck = canUserAccessTemplate(targetManifest, userEntitlements)
     if (!accessCheck.canAccess) {
-      return NextResponse.json({ 
-        error: 'Access denied', 
+      return NextResponse.json({
+        error: 'Access denied',
         reason: accessCheck.reason,
         needsUpgrade: accessCheck.needsUpgrade
       }, { status: 403 })
@@ -93,7 +94,7 @@ export async function POST(
 
     // Perform data migration if needed
     let migratedData = site.dataJson as any
-    
+
     if (preserveData && currentManifest) {
       migratedData = await migrateTemplateData(
         site.dataJson as any,
@@ -162,7 +163,7 @@ async function getUserPurchasedTemplates(userId: string): Promise<string[]> {
       templateId: true
     }
   })
-  
+
   return purchases.map(p => p.templateId)
 }
 
@@ -231,21 +232,39 @@ function migrateBlockSimple(block: any, targetManifest: any): any | null {
     return null // Block not supported, skip it
   }
 
-  // Apply default props from target template
+  // Apply default props from target template - template props take priority
   const defaultProps = targetManifest.defaults.blockProps[block.type] || {}
+
+  // Preserve important user data that shouldn't be overwritten by template defaults
+  const preservedUserData: Record<string, string[]> = {
+    bio: ['avatar', 'name', 'bio'], // Keep user's personal info
+    links: ['items'], // Keep user's links
+    // Add other block types as needed
+  }
+
+  const userDataToPreserve = preservedUserData[block.type] || []
+  const preservedProps: any = {}
   
+  // Extract user data that should be preserved
+  userDataToPreserve.forEach(key => {
+    if (block.props[key] !== undefined && block.props[key] !== null && block.props[key] !== '') {
+      preservedProps[key] = block.props[key]
+    }
+  })
+
   return {
     ...block,
     props: {
-      ...defaultProps,
-      ...block.props
+      ...block.props,      // User's current props as base
+      ...defaultProps,     // Template props override user props
+      ...preservedProps    // But preserve important user data
     }
   }
 }
 
 function generateDefaultSiteData(manifest: any): any {
   const blocks: any[] = []
-  
+
   // Create default blocks based on manifest
   for (const blockType of manifest.allowedBlocks) {
     if (manifest.defaults.blockProps[blockType]) {
@@ -268,13 +287,13 @@ function generateDefaultSiteData(manifest: any): any {
 }
 
 function generateBlockId(): string {
-  return Math.random().toString(36).substr(2, 9)
+  return Math.random().toString(36).substring(2, 11)
 }
 
 async function logTemplateSwitchEvent(
-  userId: string, 
-  siteId: string, 
-  fromTemplateId: string, 
+  userId: string,
+  siteId: string,
+  fromTemplateId: string,
   toTemplateId: string
 ) {
   try {

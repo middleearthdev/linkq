@@ -147,11 +147,57 @@ model Template {
   // Relations
   versions    TemplateVersion[]
   purchases   UserTemplatePurchase[]
+  tags        TemplateTag[]
   
   @@map("templates")
   @@index([slug])
   @@index([status])
   @@index([category])
+}
+
+model Tag {
+  id          String    @id @default(cuid())
+  name        String    @unique // e.g., "sport", "music", "business", "personal"
+  slug        String    @unique // e.g., "sport", "music", "business", "personal" 
+  description String?   // Optional description
+  color       String?   // Hex color for UI display
+  icon        String?   // Icon name or emoji
+  
+  // Categorization
+  category    String?   // "industry", "style", "purpose", "audience"
+  isPopular   Boolean   @default(false)
+  sortOrder   Int       @default(0)
+  
+  // Timestamps
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  
+  // Relations
+  templates   TemplateTag[]
+  
+  @@map("tags")
+  @@index([slug])
+  @@index([category])
+  @@index([isPopular])
+  @@index([sortOrder])
+}
+
+model TemplateTag {
+  id         String   @id @default(cuid())
+  templateId String
+  tagId      String
+  
+  // Timestamps
+  createdAt  DateTime @default(now())
+  
+  // Relations
+  template   Template @relation(fields: [templateId], references: [id], onDelete: Cascade)
+  tag        Tag      @relation(fields: [tagId], references: [id], onDelete: Cascade)
+  
+  @@map("template_tags")
+  @@unique([templateId, tagId])
+  @@index([templateId])
+  @@index([tagId])
 }
 
 model TemplateVersion {
