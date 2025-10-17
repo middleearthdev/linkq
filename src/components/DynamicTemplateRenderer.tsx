@@ -40,12 +40,12 @@ export function DynamicTemplateRenderer({
   useEffect(() => {
     if (siteData.meta.theme) {
       const root = document.documentElement
-      
+
       // Set template CSS variables
       Object.entries(siteData.meta.theme).forEach(([key, value]) => {
         root.style.setProperty(key, value)
       })
-      
+
       // Set fallback CSS variables if not provided
       const fallbacks = {
         '--text-secondary': 'var(--text-color, #6b7280)',
@@ -55,7 +55,7 @@ export function DynamicTemplateRenderer({
         '--text-hover': 'var(--card-background, #ffffff)',
         '--shadow-hover': '0 8px 25px -5px rgba(0, 0, 0, 0.2)'
       }
-      
+
       Object.entries(fallbacks).forEach(([key, value]) => {
         if (!siteData.meta.theme[key]) {
           root.style.setProperty(key, value)
@@ -147,7 +147,7 @@ export function DynamicTemplateRenderer({
       }}
     >
       {/* Background overlay untuk background image */}
-      <div 
+      <div
         className="absolute inset-0 pointer-events-none"
         style={{
           background: 'var(--background-overlay, transparent)',

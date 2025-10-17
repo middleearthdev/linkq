@@ -16,7 +16,7 @@ interface PageProps {
 
 async function getSiteData(handle: string) {
   const site = await db.userSite.findUnique({
-    where: { 
+    where: {
       handle,
       status: 'PUBLISHED',
     },
@@ -61,7 +61,7 @@ async function getSiteData(handle: string) {
     userEntitlements.blocks.push('cta')
     userEntitlements.features.push('premium-templates', 'basic-analytics', 'remove-branding')
   }
-  
+
   if (site.user.plan === 'PRO') {
     userEntitlements.blocks.push('gallery', 'analytics')
     userEntitlements.features.push('advanced-analytics', 'custom-domain', 'custom-css')
@@ -85,7 +85,7 @@ async function getSiteData(handle: string) {
       showBranding: !site.removeBranding,
       customBranding: site.removeBranding ? null : {
         text: 'Created with LinkQ',
-        url: 'https://linkq.app',
+        url: 'https://linkq.id',
       },
     },
     customCss: site.customCss,
@@ -97,7 +97,7 @@ async function getSiteData(handle: string) {
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const { handle } = await params
   const siteData = await getSiteData(handle)
-  
+
   if (!siteData) {
     return {
       title: 'Page Not Found - LinkQ',
@@ -116,6 +116,12 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   const description = userBio || `${userName}'s bio link page created with LinkQ`
   const siteUrl = `${process.env.NEXT_PUBLIC_APP_URL}/${siteData.handle}`
 
+  // Get font information for preload
+  const fontName = (siteData.data as any)?.meta?.font
+  const fontUrl = fontName && fontName !== 'system' 
+    ? `https://fonts.googleapis.com/css2?family=${fontName.replace(/\s+/g, '+')}:wght@300;400;500;600;700&display=swap`
+    : null
+
   return {
     title,
     description,
@@ -123,7 +129,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     authors: [{ name: userName }],
     creator: userName,
     publisher: 'LinkQ',
-    
+
     // Open Graph
     openGraph: {
       title,
@@ -180,13 +186,25 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     alternates: {
       canonical: siteUrl,
     },
+
+    // Preload critical resources
+    other: {
+      // Preload Google Font
+      ...(fontUrl && {
+        'link-preload-font': `<link rel="preload" href="${fontUrl}" as="style" crossorigin="anonymous">`,
+      }),
+      // Preload avatar image
+      ...(userAvatar && {
+        'link-preload-avatar': `<link rel="preload" href="${userAvatar}" as="image" crossorigin="anonymous">`,
+      }),
+    },
   }
 }
 
 export default async function PublicBioLinkPage({ params }: PageProps) {
   const { handle } = await params
   const siteData = await getSiteData(handle)
-  
+
   if (!siteData) {
     notFound()
   }
@@ -203,6 +221,12 @@ export default async function PublicBioLinkPage({ params }: PageProps) {
   const userName = bioBlock?.props?.name || siteData.handle
   const userBio = bioBlock?.props?.bio || siteData.description
   const userAvatar = bioBlock?.props?.avatar
+
+  // Get font information for preload
+  const fontName = (siteData.data as any)?.meta?.font
+  const fontUrl = fontName && fontName !== 'system' 
+    ? `https://fonts.googleapis.com/css2?family=${fontName.replace(/\s+/g, '+')}:wght@300;400;500;600;700&display=swap`
+    : null
 
   return (
     <>
@@ -224,6 +248,48 @@ export default async function PublicBioLinkPage({ params }: PageProps) {
           }),
         }}
       />
+
+      {/* Preload critical resources */}
+      {fontUrl && (
+        <link 
+          rel="preload" 
+          href={fontUrl} 
+          as="style" 
+          crossOrigin="anonymous"
+        />
+      )}
+      {userAvatar && (
+        <link 
+          rel="preload" 
+          href={userAvatar} 
+          as="image" 
+          crossOrigin="anonymous"
+        />
+      )}
+
+      {/* Load Google Font early */}
+      {fontUrl && (
+        <link 
+          rel="stylesheet" 
+          href={fontUrl}
+          crossOrigin="anonymous"
+        />
+      )}
+
+      {/* Inline critical CSS for theme variables to prevent background delay */}
+      <style dangerouslySetInnerHTML={{
+        __html: `
+          :root {
+            ${Object.entries((siteData.data as any)?.meta?.theme || {})
+              .map(([key, value]) => `${key}: ${value};`)
+              .join('\n            ')}
+          }
+          .template-container {
+            background: var(--background, linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%)) !important;
+            color: var(--text-color, #333) !important;
+          }
+        `
+      }} />
 
       {/* Custom CSS if provided */}
       {siteData.customCss && (

@@ -3,6 +3,7 @@
  * Displays user's profile picture, name, and bio text
  */
 
+import Image from 'next/image'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { AvatarUpload } from '@/components/ui/avatar-upload'
 import { BioBlockProps } from '@/types'
@@ -87,17 +88,20 @@ export function BioBlock({ props, className, isEditing = false }: BioBlockCompon
           ['circle', 'rounded-frame', 'square'].includes(avatarStyle) ? 'border-[var(--avatar-border)] shadow-[var(--shadow)]' : '',
           'bg-gradient-to-br from-gray-100 to-gray-200',
           'transition-all duration-300 ease-in-out',
-          'relative', // For pseudo-elements
+          'relative', // Required for Next.js Image with fill
           // Special handling for custom shapes
           (avatarStyle === 'polaroid') && 'bg-white',
           (avatarStyle === 'wave' || avatarStyle === 'blob') && 'animate-morph',
           isEditing && 'outline-dashed outline-2 outline-blue-400 outline-offset-2'
         )}>
           {avatar ? (
-            <img 
+            <Image 
               src={avatar} 
-              alt={name} 
-              className="w-full h-full object-cover"
+              alt={name || 'Avatar'} 
+              fill
+              className="object-cover"
+              priority={true}
+              sizes="(max-width: 768px) 160px, (max-width: 1024px) 192px, 256px"
             />
           ) : (
             <div className="w-full h-full flex items-center justify-center text-gray-400 bg-gradient-to-br from-blue-500 to-purple-600">

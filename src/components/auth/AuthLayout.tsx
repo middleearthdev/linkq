@@ -7,6 +7,7 @@
 
 import { ArrowLeft } from "lucide-react"
 import { Button } from "@/components/ui/button"
+import { LinkQLogo } from "@/components/ui/linkq-logo"
 import Link from "next/link"
 
 interface AuthLayoutProps {
@@ -96,7 +97,7 @@ export function AuthLayout({
           <div className="text-center text-white space-y-6 max-w-md">
             <div className="space-y-4">
               <Link href="/" className="inline-block">
-                <h1 className="text-4xl font-bold">LinkQ</h1>
+                <LinkQLogo size="xl" variant="animated" />
               </Link>
               <h2 className="text-2xl font-semibold">{title}</h2>
               <p className="text-lg text-gray-400">{subtitle}</p>

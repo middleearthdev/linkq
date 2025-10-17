@@ -99,6 +99,10 @@ model Account {
   providerId        String
   accessToken       String?
   refreshToken      String?
+  idToken           String?  // OAuth ID token
+  accessTokenExpiresAt DateTime?  // Token expiry
+  refreshTokenExpiresAt DateTime? // Refresh token expiry
+  scope             String?  // OAuth scopes
   expiresAt         DateTime?
   password          String?
   createdAt         DateTime @default(now())

@@ -25,6 +25,9 @@ export const auth = betterAuth({
     updateAge: 60 * 60 * 24, // 1 day
     cookieName: "linkq-session",
   },
+  advanced: {
+    cookiePrefix: "linkq-session"
+  },
   user: {
     additionalFields: {
       plan: {

@@ -21,7 +21,7 @@ export function AnalyticsScript({ siteId, apiUrl = '/api/analytics/track' }: Ana
     const handleClick = (event: MouseEvent) => {
       const target = event.target as HTMLElement
       const link = target.closest('a')
-      
+
       if (link && link.href) {
         // Only track external links or specific tracking attributes
         if (link.hasAttribute('data-track') || isExternalLink(link.href)) {
@@ -71,8 +71,8 @@ export function AnalyticsScript({ siteId, apiUrl = '/api/analytics/track' }: Ana
 
 // Export utility functions for manual tracking
 export const trackAnalyticsEvent = async (
-  siteId: string, 
-  event: 'view' | 'click' | 'conversion', 
+  siteId: string,
+  event: 'view' | 'click' | 'conversion',
   target?: string,
   apiUrl = '/api/analytics/track'
 ) => {

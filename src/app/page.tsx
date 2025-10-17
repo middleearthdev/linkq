@@ -8,6 +8,7 @@
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
+import { LinkQLogo } from '@/components/ui/linkq-logo'
 // Templates are now loaded dynamically from API
 import { Sparkles, Zap, Shield, Palette, BarChart3, Globe } from 'lucide-react'
 import Link from 'next/link'
@@ -28,13 +29,13 @@ export default function HomePage() {
               Bio Link
             </h1>
             <p className="text-xl text-gray-600 mb-8 max-w-3xl mx-auto">
-              Create beautiful, customizable bio link pages that convert. 
+              Create beautiful, customizable bio link pages that convert.
               Choose from professional templates, track analytics, and grow your audience.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Link href="/auth/signup">
-                <Button 
-                  size="lg" 
+              <Link href="/auth/login">
+                <Button
+                  size="lg"
                   className="text-white font-medium shadow-lg"
                   style={{ backgroundColor: '#66A38A', borderColor: '#66A38A' }}
                   onMouseEnter={(e) => {
@@ -196,7 +197,7 @@ export default function HomePage() {
                 <h3 className="text-2xl font-bold mb-2">Free</h3>
                 <div className="text-4xl font-bold mb-4">$0</div>
                 <p className="text-gray-600 mb-6">Perfect for getting started</p>
-                
+
                 <ul className="space-y-3 mb-8 text-left">
                   <li className="flex items-center">
                     <Shield className="w-5 h-5 text-green-500 mr-3" />
@@ -215,7 +216,7 @@ export default function HomePage() {
                     LinkQ branding
                   </li>
                 </ul>
-                
+
                 <Link href="/auth/signup">
                   <Button className="w-full" variant="outline">Get Started</Button>
                 </Link>
@@ -227,14 +228,14 @@ export default function HomePage() {
               <div className="absolute -top-4 left-1/2 transform -translate-x-1/2">
                 <Badge className="bg-blue-500">Most Popular</Badge>
               </div>
-              
+
               <div className="text-center">
                 <h3 className="text-2xl font-bold mb-2">Starter</h3>
                 <div className="text-4xl font-bold mb-4">
                   $9<span className="text-lg text-gray-600">/month</span>
                 </div>
                 <p className="text-gray-600 mb-6">For creators and professionals</p>
-                
+
                 <ul className="space-y-3 mb-8 text-left">
                   <li className="flex items-center">
                     <Sparkles className="w-5 h-5 text-blue-500 mr-3" />
@@ -257,7 +258,7 @@ export default function HomePage() {
                     Remove branding
                   </li>
                 </ul>
-                
+
                 <Link href="/auth/signup?plan=starter">
                   <Button className="w-full">Start Free Trial</Button>
                 </Link>
@@ -272,7 +273,7 @@ export default function HomePage() {
                   $29<span className="text-lg text-gray-600">/month</span>
                 </div>
                 <p className="text-gray-600 mb-6">For businesses and teams</p>
-                
+
                 <ul className="space-y-3 mb-8 text-left">
                   <li className="flex items-center">
                     <Zap className="w-5 h-5 text-purple-500 mr-3" />
@@ -299,7 +300,7 @@ export default function HomePage() {
                     Custom CSS
                   </li>
                 </ul>
-                
+
                 <Link href="/auth/signup?plan=pro">
                   <Button className="w-full" variant="outline">Start Free Trial</Button>
                 </Link>
@@ -331,12 +332,14 @@ export default function HomePage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid md:grid-cols-4 gap-8">
             <div>
-              <h3 className="text-2xl font-bold mb-4">LinkQ</h3>
+              <div className="mb-4">
+                <LinkQLogo size="lg" variant="default" />
+              </div>
               <p className="text-gray-400">
                 The easiest way to create beautiful bio link pages that convert.
               </p>
             </div>
-            
+
             <div>
               <h4 className="font-semibold mb-4">Product</h4>
               <ul className="space-y-2 text-gray-400">
@@ -346,7 +349,7 @@ export default function HomePage() {
                 <li><Link href="/examples" className="hover:text-white">Examples</Link></li>
               </ul>
             </div>
-            
+
             <div>
               <h4 className="font-semibold mb-4">Support</h4>
               <ul className="space-y-2 text-gray-400">
@@ -356,7 +359,7 @@ export default function HomePage() {
                 <li><Link href="/status" className="hover:text-white">Status</Link></li>
               </ul>
             </div>
-            
+
             <div>
               <h4 className="font-semibold mb-4">Company</h4>
               <ul className="space-y-2 text-gray-400">
@@ -367,7 +370,7 @@ export default function HomePage() {
               </ul>
             </div>
           </div>
-          
+
           <div className="border-t border-gray-800 mt-8 pt-8 text-center text-gray-400">
             <p>&copy; 2025 LinkQ. All rights reserved.</p>
           </div>

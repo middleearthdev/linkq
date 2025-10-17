@@ -9,12 +9,13 @@ import { useSession, signOut } from "@/lib/auth-client"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
-import { 
-  LogOut, 
-  Plus, 
-  Settings, 
-  BarChart3, 
-  Link, 
+import { LinkQLogo } from "@/components/ui/linkq-logo"
+import {
+  LogOut,
+  Plus,
+  Settings,
+  BarChart3,
+  Link,
   Palette,
   Globe,
   Crown,
@@ -31,7 +32,8 @@ export default function DashboardPage() {
   const [showMobileMenu, setShowMobileMenu] = useState(false)
   const [showCreateModal, setShowCreateModal] = useState(false)
   const [handle, setHandle] = useState('')
-  const [selectedTemplate, setSelectedTemplate] = useState('minimal')
+  // Use default template - no selection needed
+  const defaultTemplate = 'minimal'
   const [creating, setCreating] = useState(false)
   const [error, setError] = useState('')
   const [sites, setSites] = useState<any[]>([])
@@ -42,14 +44,14 @@ export default function DashboardPage() {
   useEffect(() => {
     const fetchSites = async () => {
       if (!session?.user) return
-      
+
       try {
         setLoadingSites(true)
         setSitesError('')
-        
+
         const response = await fetch('/api/dashboard/sites')
         const data = await response.json()
-        
+
         if (data.success) {
           setSites(data.data.sites || [])
         } else {
@@ -61,7 +63,7 @@ export default function DashboardPage() {
         setLoadingSites(false)
       }
     }
-    
+
     fetchSites()
   }, [session])
 
@@ -128,7 +130,7 @@ export default function DashboardPage() {
         },
         body: JSON.stringify({
           handle: handle.trim(),
-          templateSlug: selectedTemplate
+          templateSlug: defaultTemplate
         })
       })
 
@@ -141,7 +143,7 @@ export default function DashboardPage() {
 
       // Success - redirect to editor
       window.location.href = data.site.editUrl
-      
+
     } catch (err) {
       setError('Network error. Please try again.')
     } finally {
@@ -152,7 +154,7 @@ export default function DashboardPage() {
   const resetCreateModal = () => {
     setShowCreateModal(false)
     setHandle('')
-    setSelectedTemplate('minimal')
+    // No template selection needed - using default
     setError('')
     setCreating(false)
   }
@@ -164,16 +166,16 @@ export default function DashboardPage() {
         <div className="px-4 py-4">
           <div className="flex justify-between items-center">
             <div className="flex items-center space-x-3">
-              <h1 className="text-xl font-bold text-white">LinkQ</h1>
+              <LinkQLogo size="sm" variant="minimal" showText={false} />
               <Badge className="text-xs px-2 py-1" style={{ backgroundColor: '#66A38A', color: '#FFFFFF' }}>
                 {(session.user as any).plan || 'FREE'}
               </Badge>
             </div>
-            
+
             <div className="flex items-center space-x-2">
-              <Button 
-                variant="ghost" 
-                size="sm" 
+              <Button
+                variant="ghost"
+                size="sm"
                 className="text-white p-2"
                 style={{ backgroundColor: 'transparent' }}
                 onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#212A33'}
@@ -181,9 +183,9 @@ export default function DashboardPage() {
               >
                 <Search className="h-5 w-5" />
               </Button>
-              <Button 
-                variant="ghost" 
-                size="sm" 
+              <Button
+                variant="ghost"
+                size="sm"
                 className="text-white p-2"
                 style={{ backgroundColor: 'transparent' }}
                 onClick={() => setShowMobileMenu(!showMobileMenu)}
@@ -194,7 +196,7 @@ export default function DashboardPage() {
               </Button>
             </div>
           </div>
-          
+
           {/* Mobile User Info */}
           <div className="mt-3 pt-3 border-t" style={{ borderColor: '#212A33' }}>
             <div className="flex items-center space-x-3">
@@ -215,7 +217,7 @@ export default function DashboardPage() {
         <div className="max-w-7xl mx-auto px-6 py-4">
           <div className="flex justify-between items-center">
             <div className="flex items-center space-x-6">
-              <h1 className="text-2xl font-bold text-white">LinkQ</h1>
+              <LinkQLogo size="md" variant="default" />
               <div className="flex items-center space-x-1">
                 <Button variant="ghost" className="text-gray-300 hover:text-white" size="sm">
                   Dashboard
@@ -231,7 +233,7 @@ export default function DashboardPage() {
                 </Button>
               </div>
             </div>
-            
+
             <div className="flex items-center space-x-4">
               <Badge className="text-xs px-3 py-1" style={{ backgroundColor: '#66A38A', color: '#FFFFFF' }}>
                 {(session.user as any).plan || 'FREE'}
@@ -242,9 +244,9 @@ export default function DashboardPage() {
                 </div>
                 <span className="text-sm text-gray-300">{session.user.name}</span>
               </div>
-              <Button 
-                variant="outline" 
-                size="sm" 
+              <Button
+                variant="outline"
+                size="sm"
                 onClick={handleSignOut}
                 className="text-gray-300 border-gray-600 hover:bg-gray-800"
               >
@@ -259,11 +261,11 @@ export default function DashboardPage() {
       {/* Mobile Slide Menu Overlay */}
       {showMobileMenu && (
         <div className="lg:hidden fixed inset-0 z-50">
-          <div 
-            className="absolute inset-0 bg-black opacity-50" 
+          <div
+            className="absolute inset-0 bg-black opacity-50"
             onClick={() => setShowMobileMenu(false)}
           />
-          <div 
+          <div
             className="absolute right-0 top-0 h-full w-80 max-w-[85vw] shadow-xl"
             style={{ backgroundColor: '#1A2332' }}
           >
@@ -271,9 +273,9 @@ export default function DashboardPage() {
             <div className="px-4 py-4 border-b" style={{ borderColor: '#2A3441' }}>
               <div className="flex justify-between items-center">
                 <h3 className="text-lg font-semibold text-white">Menu</h3>
-                <Button 
-                  variant="ghost" 
-                  size="sm" 
+                <Button
+                  variant="ghost"
+                  size="sm"
                   onClick={() => setShowMobileMenu(false)}
                   className="text-white p-2"
                   style={{ backgroundColor: 'transparent' }}
@@ -287,42 +289,42 @@ export default function DashboardPage() {
 
             {/* Mobile Menu Content */}
             <div className="px-4 py-6 space-y-1">
-              <Button 
-                variant="ghost" 
+              <Button
+                variant="ghost"
                 className="w-full justify-start text-white bg-gray-800/50 h-11 rounded-xl"
                 style={{ backgroundColor: '#2A3441' }}
               >
                 <Link className="h-5 w-5 mr-3" style={{ color: '#66A38A' }} />
                 Dashboard
               </Button>
-              
-              <Button 
-                variant="ghost" 
+
+              <Button
+                variant="ghost"
                 className="w-full justify-start text-gray-400 hover:text-white hover:bg-gray-800/30 h-11 rounded-xl"
                 onClick={navigateToSites}
               >
                 <Globe className="h-5 w-5 mr-3" />
                 My Sites
               </Button>
-              
-              <Button 
-                variant="ghost" 
+
+              <Button
+                variant="ghost"
                 className="w-full justify-start text-gray-400 hover:text-white hover:bg-gray-800/30 h-11 rounded-xl"
               >
                 <Palette className="h-5 w-5 mr-3" />
                 Templates
               </Button>
-              
-              <Button 
-                variant="ghost" 
+
+              <Button
+                variant="ghost"
                 className="w-full justify-start text-gray-400 hover:text-white hover:bg-gray-800/30 h-11 rounded-xl"
               >
                 <BarChart3 className="h-5 w-5 mr-3" />
                 Analytics
               </Button>
-              
-              <Button 
-                variant="ghost" 
+
+              <Button
+                variant="ghost"
                 className="w-full justify-start text-gray-400 hover:text-white hover:bg-gray-800/30 h-11 rounded-xl"
               >
                 <Settings className="h-5 w-5 mr-3" />
@@ -341,10 +343,10 @@ export default function DashboardPage() {
                 <p className="text-gray-400 text-sm mb-3">
                   Unlock premium features and templates
                 </p>
-                <Button 
-                  size="sm" 
+                <Button
+                  size="sm"
                   className="w-full h-8 text-sm rounded-xl"
-                  style={{ 
+                  style={{
                     backgroundColor: '#66A38A',
                     borderColor: '#66A38A',
                     color: '#FFFFFF'
@@ -358,8 +360,8 @@ export default function DashboardPage() {
 
               {/* Sign Out */}
               <div className="pt-4">
-                <Button 
-                  variant="ghost" 
+                <Button
+                  variant="ghost"
                   onClick={handleSignOut}
                   className="w-full justify-start text-red-400 hover:text-red-300 hover:bg-red-900/20 h-11 rounded-xl"
                 >
@@ -384,10 +386,10 @@ export default function DashboardPage() {
 
         {/* Quick Create Button - Mobile Priority */}
         <div className="mb-6 lg:hidden">
-          <Button 
+          <Button
             onClick={handleCreateSite}
             className="w-full h-12 font-medium text-base rounded-2xl shadow-sm"
-            style={{ 
+            style={{
               backgroundColor: '#66A38A',
               borderColor: '#66A38A',
               color: '#FFFFFF'
@@ -402,9 +404,9 @@ export default function DashboardPage() {
 
         {/* Quick Actions Grid */}
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 lg:gap-6 mb-6 lg:mb-8">
-          <Card 
+          <Card
             onClick={handleCreateSite}
-            className="cursor-pointer hover:shadow-lg transition-all border-gray-700" 
+            className="cursor-pointer hover:shadow-lg transition-all border-gray-700"
             style={{ backgroundColor: '#1A2332', borderColor: '#2A3441' }}
           >
             <CardHeader className="pb-2 lg:pb-3">
@@ -420,9 +422,9 @@ export default function DashboardPage() {
             </CardContent>
           </Card>
 
-          <Card 
+          <Card
             onClick={navigateToSites}
-            className="cursor-pointer hover:shadow-lg transition-all border-gray-700" 
+            className="cursor-pointer hover:shadow-lg transition-all border-gray-700"
             style={{ backgroundColor: '#1A2332', borderColor: '#2A3441' }}
           >
             <CardHeader className="pb-2 lg:pb-3">
@@ -438,9 +440,9 @@ export default function DashboardPage() {
             </CardContent>
           </Card>
 
-          <Card 
+          <Card
             onClick={navigateToTemplates}
-            className="cursor-pointer hover:shadow-lg transition-all border-gray-700" 
+            className="cursor-pointer hover:shadow-lg transition-all border-gray-700"
             style={{ backgroundColor: '#1A2332', borderColor: '#2A3441' }}
           >
             <CardHeader className="pb-2 lg:pb-3">
@@ -456,9 +458,9 @@ export default function DashboardPage() {
             </CardContent>
           </Card>
 
-          <Card 
+          <Card
             onClick={navigateToAnalytics}
-            className="cursor-pointer hover:shadow-lg transition-all border-gray-700" 
+            className="cursor-pointer hover:shadow-lg transition-all border-gray-700"
             style={{ backgroundColor: '#1A2332', borderColor: '#2A3441' }}
           >
             <CardHeader className="pb-2 lg:pb-3">
@@ -497,7 +499,7 @@ export default function DashboardPage() {
                     <Globe className="h-8 w-8 text-red-400" />
                   </div>
                   <p className="text-red-400 mb-3">{sitesError}</p>
-                  <Button 
+                  <Button
                     onClick={() => window.location.reload()}
                     size="sm"
                     className="h-8 px-4 text-sm rounded-xl"
@@ -512,11 +514,11 @@ export default function DashboardPage() {
                     <Globe className="h-8 w-8 text-gray-500" />
                   </div>
                   <p className="text-gray-400 mb-3">No sites created yet</p>
-                  <Button 
+                  <Button
                     onClick={handleCreateSite}
                     size="sm"
                     className="h-8 px-4 text-sm rounded-xl"
-                    style={{ 
+                    style={{
                       backgroundColor: '#66A38A',
                       borderColor: '#66A38A',
                       color: '#FFFFFF'
@@ -530,7 +532,7 @@ export default function DashboardPage() {
               ) : (
                 <div className="space-y-3">
                   {sites.slice(0, 3).map((site) => (
-                    <div 
+                    <div
                       key={site.id}
                       className="flex items-center justify-between p-3 rounded-xl hover:bg-gray-800/30 transition-colors cursor-pointer"
                       onClick={() => window.location.href = `/editor/${site.handle}`}
@@ -538,8 +540,8 @@ export default function DashboardPage() {
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2 mb-1">
                           <h4 className="text-white text-sm font-medium truncate">{site.title}</h4>
-                          <Badge 
-                            variant="outline" 
+                          <Badge
+                            variant="outline"
                             className="text-xs px-1.5 py-0.5"
                             style={{
                               backgroundColor: site.status === 'PUBLISHED' ? '#1F2937' : '#374151',
@@ -631,7 +633,7 @@ export default function DashboardPage() {
                       <div className="text-xs text-gray-400">Published Sites</div>
                     </div>
                   </div>
-                  
+
                   {sites.length > 0 && (
                     <div className="pt-3 border-t" style={{ borderColor: '#2A3441' }}>
                       <div className="flex items-center justify-between text-sm">
@@ -660,10 +662,10 @@ export default function DashboardPage() {
                     Get custom domains, advanced analytics, premium templates and more
                   </p>
                   <div className="flex flex-col sm:flex-row gap-2">
-                    <Button 
-                      size="sm" 
+                    <Button
+                      size="sm"
                       className="h-8 px-4 text-sm rounded-xl flex-1 sm:flex-none"
-                      style={{ 
+                      style={{
                         backgroundColor: '#66A38A',
                         borderColor: '#66A38A',
                         color: '#FFFFFF'
@@ -687,11 +689,11 @@ export default function DashboardPage() {
       {/* Create Site Modal */}
       {showCreateModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-          <div 
-            className="absolute inset-0 bg-black opacity-50" 
+          <div
+            className="absolute inset-0 bg-black opacity-50"
             onClick={resetCreateModal}
           />
-          <div 
+          <div
             className="relative w-full max-w-md rounded-3xl p-6 shadow-xl"
             style={{ backgroundColor: '#F7F9FA' }}
           >
@@ -721,8 +723,8 @@ export default function DashboardPage() {
                     value={handle}
                     onChange={(e) => setHandle(e.target.value.toLowerCase().replace(/[^a-z0-9_-]/g, ''))}
                     disabled={creating}
-                    className="w-full pl-20 pr-4 h-12 rounded-xl border text-gray-900 placeholder-gray-400"
-                    style={{ 
+                    className="w-full pl-16 pr-4 h-12 rounded-xl border text-gray-900 placeholder-gray-400"
+                    style={{
                       backgroundColor: creating ? '#F3F4F6' : '#EFF2F5',
                       borderColor: error && error.toLowerCase().includes('handle') ? '#F87171' : '#DFE5EB'
                     }}
@@ -736,66 +738,31 @@ export default function DashboardPage() {
                 </p>
               </div>
 
-              {/* Template Selection Preview */}
-              <div>
-                <label className="text-sm font-medium text-gray-700 block mb-2">
-                  Starting Template
-                </label>
-                <div className="grid grid-cols-3 gap-2">
-                  <div 
-                    className="p-3 rounded-xl border-2 cursor-pointer transition-all" 
-                    style={{ 
-                      backgroundColor: '#EFF2F5',
-                      borderColor: selectedTemplate === 'minimal' ? '#66A38A' : '#DFE5EB'
-                    }}
-                    onClick={() => !creating && setSelectedTemplate('minimal')}
-                  >
-                    <div className="aspect-[3/4] rounded-lg mb-2" style={{ backgroundColor: '#D1E7DD' }} />
-                    <p className="text-xs font-medium text-gray-700 text-center">Minimal</p>
-                    <p className="text-xs text-gray-500 text-center">Free</p>
-                  </div>
-                  <div 
-                    className="p-3 rounded-xl border-2 cursor-pointer transition-all" 
-                    style={{ 
-                      backgroundColor: '#EFF2F5',
-                      borderColor: selectedTemplate === 'aurora' ? '#66A38A' : '#DFE5EB'
-                    }}
-                    onClick={() => !creating && setSelectedTemplate('aurora')}
-                  >
-                    <div className="aspect-[3/4] rounded-lg mb-2" style={{ backgroundColor: '#E2D9F3' }} />
-                    <p className="text-xs font-medium text-gray-700 text-center">Aurora</p>
-                    <p className="text-xs text-gray-500 text-center">Premium</p>
-                  </div>
-                  <div 
-                    className="p-3 rounded-xl border-2 cursor-pointer transition-all" 
-                    style={{ 
-                      backgroundColor: '#EFF2F5',
-                      borderColor: selectedTemplate === 'professional' ? '#66A38A' : '#DFE5EB'
-                    }}
-                    onClick={() => !creating && setSelectedTemplate('professional')}
-                  >
-                    <div className="aspect-[3/4] rounded-lg mb-2" style={{ backgroundColor: '#D4E7F7' }} />
-                    <p className="text-xs font-medium text-gray-700 text-center">Professional</p>
-                    <p className="text-xs text-gray-500 text-center">Pro Plan</p>
-                  </div>
-                </div>
+              {/* Info about default template */}
+              <div className="text-center py-4">
+                <p className="text-sm text-gray-600 mb-2">
+                  Your new site will be created with our <strong>Minimal Template</strong>
+                </p>
+                <p className="text-xs text-gray-500">
+                  You can customize and change templates later in the editor
+                </p>
               </div>
             </div>
 
             <div className="flex gap-3 mt-6">
-              <Button 
-                variant="outline" 
+              <Button
+                variant="outline"
                 onClick={resetCreateModal}
                 disabled={creating}
                 className="flex-1 h-12 rounded-xl border-gray-300 text-gray-700 hover:bg-gray-50"
               >
                 Cancel
               </Button>
-              <Button 
+              <Button
                 onClick={handleCreateSiteSubmit}
                 disabled={creating || !handle.trim()}
                 className="flex-1 h-12 rounded-xl font-medium"
-                style={{ 
+                style={{
                   backgroundColor: creating || !handle.trim() ? '#9CA3AF' : '#66A38A',
                   borderColor: creating || !handle.trim() ? '#9CA3AF' : '#66A38A',
                   color: '#FFFFFF'
