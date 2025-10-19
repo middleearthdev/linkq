@@ -6,7 +6,7 @@
 
 import { NextRequest, NextResponse } from 'next/server'
 import { db } from '@/lib/db'
-import { auth } from '@/lib/auth'
+import { getSessionUser } from '@/lib/auth-utils'
 import { z } from 'zod'
 
 const CreateTemplateSchema = z.object({
@@ -22,14 +22,19 @@ const CreateTemplateSchema = z.object({
   requiredPlan: z.enum(['FREE', 'STARTER', 'PRO']).optional(),
 })
 
+// Add better error logging
+function logValidationError(error: z.ZodError, body: any) {
+  console.error('Validation failed for template creation:')
+  console.error('Received data:', JSON.stringify(body, null, 2))
+  console.error('Validation errors:', error.issues)
+}
+
 export async function GET(request: NextRequest) {
   try {
-    // Get session
-    const session = await auth.api.getSession({
-      headers: request.headers
-    })
+    // Get user with fresh DB check
+    const user = await getSessionUser()
 
-    if (!session) {
+    if (!user) {
       return NextResponse.json({
         success: false,
         error: { code: 'UNAUTHORIZED', message: 'Not authenticated' },
@@ -37,7 +42,7 @@ export async function GET(request: NextRequest) {
     }
 
     // Check if user is admin
-    if (session.user.email !== 'admin@linkq.app') {
+    if (!user.isAdmin) {
       return NextResponse.json({
         success: false,
         error: { code: 'FORBIDDEN', message: 'Admin access required' },
@@ -78,6 +83,7 @@ export async function GET(request: NextRequest) {
             select: {
               versions: true,
               purchases: true,
+              tags: true,
             },
           },
         },
@@ -86,7 +92,7 @@ export async function GET(request: NextRequest) {
     ])
 
     const formattedTemplates = templates.map((template: any) => {
-      const latestVersion = template.versions[0]
+      const activeVersion = template.versions[0]
       
       return {
         id: template.id,
@@ -96,16 +102,21 @@ export async function GET(request: NextRequest) {
         category: template.category,
         creator: template.creator,
         status: template.status,
-        isPaid: latestVersion?.isPaid || false,
-        priceCents: latestVersion?.priceCents || 0,
-        requiredPlan: latestVersion?.requiredPlan,
+        isPaid: activeVersion?.isPaid || false,
+        priceCents: activeVersion?.priceCents || 0,
+        requiredPlan: activeVersion?.requiredPlan,
         createdAt: template.createdAt,
         updatedAt: template.updatedAt,
         _count: template._count,
-        latestVersion: latestVersion ? {
-          id: latestVersion.id,
-          version: latestVersion.version,
-          publishedAt: latestVersion.publishedAt,
+        activeVersion: activeVersion ? {
+          id: activeVersion.id,
+          version: activeVersion.version,
+          manifestJson: activeVersion.manifestJson,
+          cssVarsJson: activeVersion.cssVarsJson,
+          isPaid: activeVersion.isPaid,
+          priceCents: activeVersion.priceCents,
+          requiredPlan: activeVersion.requiredPlan,
+          publishedAt: activeVersion.publishedAt,
         } : null,
       }
     })
@@ -139,12 +150,10 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   try {
-    // Get session
-    const session = await auth.api.getSession({
-      headers: request.headers
-    })
+    // Get user with fresh DB check
+    const user = await getSessionUser()
 
-    if (!session) {
+    if (!user) {
       return NextResponse.json({
         success: false,
         error: { code: 'UNAUTHORIZED', message: 'Not authenticated' },
@@ -152,7 +161,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Check if user is admin
-    if (session.user.email !== 'admin@linkq.app') {
+    if (!user.isAdmin) {
       return NextResponse.json({
         success: false,
         error: { code: 'FORBIDDEN', message: 'Admin access required' },
@@ -160,7 +169,16 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json()
-    const validatedData = CreateTemplateSchema.parse(body)
+    
+    let validatedData
+    try {
+      validatedData = CreateTemplateSchema.parse(body)
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        logValidationError(error, body)
+      }
+      throw error
+    }
 
     // Check if slug is already taken
     const existingTemplate = await db.template.findUnique({
@@ -181,7 +199,7 @@ export async function POST(request: NextRequest) {
         slug: validatedData.slug,
         description: validatedData.description,
         category: validatedData.category,
-        creator: validatedData.creator || session.user.name || 'Admin',
+        creator: validatedData.creator || user.name || 'Admin',
         status: 'DRAFT',
         versions: {
           create: {

@@ -7,7 +7,7 @@
 
 import { NextRequest, NextResponse } from 'next/server'
 import { db } from '@/lib/db'
-import { auth } from '@/lib/auth'
+import { getSessionUser } from '@/lib/auth-utils'
 import { z } from 'zod'
 
 const UpdateTemplateSchema = z.object({
@@ -25,24 +25,14 @@ export async function GET(
 ) {
   try {
     const { templateId } = await params
+
+    // Security: Check admin access
+    const user = await getSessionUser()
     
-    // Get session
-    const session = await auth.api.getSession({
-      headers: request.headers
-    })
-
-    if (!session) {
+    if (!user?.isAdmin) {
       return NextResponse.json({
         success: false,
-        error: { code: 'UNAUTHORIZED', message: 'Not authenticated' },
-      }, { status: 401 })
-    }
-
-    // Check if user is admin
-    if (session.user.email !== 'admin@linkq.app') {
-      return NextResponse.json({
-        success: false,
-        error: { code: 'FORBIDDEN', message: 'Admin access required' },
+        error: { code: 'FORBIDDEN', message: 'Admin access required' }
       }, { status: 403 })
     }
 
@@ -111,7 +101,7 @@ export async function GET(
 
   } catch (error) {
     console.error('Get template API error:', error)
-    
+
     return NextResponse.json({
       success: false,
       error: {
@@ -128,24 +118,14 @@ export async function PUT(
 ) {
   try {
     const { templateId } = await params
+
+    // Security: Check admin access
+    const user = await getSessionUser()
     
-    // Get session
-    const session = await auth.api.getSession({
-      headers: request.headers
-    })
-
-    if (!session) {
+    if (!user?.isAdmin) {
       return NextResponse.json({
         success: false,
-        error: { code: 'UNAUTHORIZED', message: 'Not authenticated' },
-      }, { status: 401 })
-    }
-
-    // Check if user is admin
-    if (session.user.email !== 'admin@linkq.app') {
-      return NextResponse.json({
-        success: false,
-        error: { code: 'FORBIDDEN', message: 'Admin access required' },
+        error: { code: 'FORBIDDEN', message: 'Admin access required' }
       }, { status: 403 })
     }
 
@@ -215,7 +195,7 @@ export async function PUT(
 
   } catch (error) {
     console.error('Update template API error:', error)
-    
+
     if (error instanceof z.ZodError) {
       return NextResponse.json({
         success: false,
@@ -243,24 +223,14 @@ export async function DELETE(
 ) {
   try {
     const { templateId } = await params
+
+    // Security: Check admin access
+    const user = await getSessionUser()
     
-    // Get session
-    const session = await auth.api.getSession({
-      headers: request.headers
-    })
-
-    if (!session) {
+    if (!user?.isAdmin) {
       return NextResponse.json({
         success: false,
-        error: { code: 'UNAUTHORIZED', message: 'Not authenticated' },
-      }, { status: 401 })
-    }
-
-    // Check if user is admin
-    if (session.user.email !== 'admin@linkq.app') {
-      return NextResponse.json({
-        success: false,
-        error: { code: 'FORBIDDEN', message: 'Admin access required' },
+        error: { code: 'FORBIDDEN', message: 'Admin access required' }
       }, { status: 403 })
     }
 
@@ -287,9 +257,9 @@ export async function DELETE(
     if (template._count.purchases > 0) {
       return NextResponse.json({
         success: false,
-        error: { 
-          code: 'TEMPLATE_IN_USE', 
-          message: `Cannot delete template. It has ${template._count.purchases} purchases.` 
+        error: {
+          code: 'TEMPLATE_IN_USE',
+          message: `Cannot delete template. It has ${template._count.purchases} purchases.`
         },
       }, { status: 400 })
     }
@@ -311,7 +281,7 @@ export async function DELETE(
 
   } catch (error) {
     console.error('Delete template API error:', error)
-    
+
     return NextResponse.json({
       success: false,
       error: {

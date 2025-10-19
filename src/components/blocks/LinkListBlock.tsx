@@ -16,10 +16,19 @@ interface LinkListBlockComponentProps {
 }
 
 export function LinkListBlock({ props, className, isEditing = false }: LinkListBlockComponentProps) {
-  const { style = 'pill', items = [], maxItems } = props
+  const { style = 'pill', items = [], maxItems, customColors } = props
   
   const displayItems = maxItems ? items.slice(0, maxItems) : items
   const activeItems = displayItems.filter(item => item.isActive !== false)
+
+  // Generate CSS variables for custom colors
+  const customStyle = customColors ? {
+    '--custom-primary': customColors.primary || 'var(--primary-color)',
+    '--custom-secondary': customColors.secondary || 'var(--secondary-color)', 
+    '--custom-text': customColors.text || 'var(--text-color)',
+    '--custom-accent': customColors.accent || customColors.primary || 'var(--primary-color)',
+    '--custom-background': customColors.background || customColors.secondary || 'var(--card-background)'
+  } as React.CSSProperties : {}
 
   const handleLinkClick = (item: any) => {
     if (!isEditing) {
@@ -56,11 +65,19 @@ export function LinkListBlock({ props, className, isEditing = false }: LinkListB
           className={cn(
             baseClasses, 
             'rounded-full h-14 px-6 font-medium',
-            'bg-[var(--primary-color)] text-[var(--card-background)]',
-            'hover:bg-[var(--secondary-color)] hover:scale-105',
+            customColors 
+              ? 'text-[var(--custom-text)] hover:scale-105'
+              : 'bg-[var(--primary-color)] text-[var(--card-background)] hover:bg-[var(--secondary-color)] hover:scale-105',
             'shadow-[var(--shadow)] border-[var(--border)]',
             'transition-all duration-200 active:scale-95'
           )}
+          style={{
+            ...(customColors && {
+              backgroundColor: customColors.primary,
+              color: customColors.text,
+              ...customStyle
+            })
+          }}
           onClick={() => handleLinkClick(item)}
           disabled={isEditing}
         >
@@ -809,11 +826,14 @@ export function LinkListBlock({ props, className, isEditing = false }: LinkListB
   }
 
   return (
-    <div className={cn(
-      'w-full max-w-md mx-auto space-y-4 p-6',
-      'link-list-block', // CSS class for template styling
-      className
-    )}>
+    <div 
+      className={cn(
+        'w-full max-w-md mx-auto space-y-4 p-6',
+        'link-list-block', // CSS class for template styling
+        className
+      )}
+      style={customStyle}
+    >
       {activeItems.map(renderLink)}
       
       {isEditing && activeItems.length === 0 && (

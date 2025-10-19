@@ -1,102 +1,141 @@
 /**
  * Admin Stats API Routes
- * GET /api/admin/stats - Get platform statistics
+ * GET /api/admin/stats - Get comprehensive platform statistics
  */
 
 import { NextRequest, NextResponse } from 'next/server'
 import { db } from '@/lib/db'
-import { auth } from '@/lib/auth'
+import { getSessionUser } from '@/lib/auth-utils'
+import { withRateLimit, RATE_LIMITS } from '@/lib/rate-limit'
 
-export async function GET(request: NextRequest) {
+async function getAdminStats(request: NextRequest) {
   try {
-    // Get session
-    const session = await auth.api.getSession({
-      headers: request.headers
-    })
-
-    if (!session) {
+    // Security: Check admin access with fresh DB check
+    const user = await getSessionUser()
+    
+    if (!user?.isAdmin) {
       return NextResponse.json({
         success: false,
-        error: { code: 'UNAUTHORIZED', message: 'Not authenticated' },
-      }, { status: 401 })
-    }
-
-    // Check if user is admin (implement your admin check logic)
-    if (session.user.email !== 'admin@linkq.app') {
-      return NextResponse.json({
-        success: false,
-        error: { code: 'FORBIDDEN', message: 'Admin access required' },
+        error: { code: 'FORBIDDEN', message: 'Admin access required' }
       }, { status: 403 })
     }
 
-    // Get current date for calculations
-    const now = new Date()
-    const currentMonth = new Date(now.getFullYear(), now.getMonth(), 1)
-    const lastMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1)
-
-    // Fetch platform statistics
+    // Performance: Parallel queries untuk efficiency
     const [
       totalUsers,
       totalSites,
       totalTemplates,
-      currentMonthUsers,
-      lastMonthUsers,
       totalRevenue,
-      activeUsers
+      recentUsers,
+      activeUsers,
+      planDistribution,
+      publishedSites,
+      templateStats
     ] = await Promise.all([
-      // Total users
+      // Total users count
       db.user.count(),
       
-      // Total sites
+      // Total sites count
       db.userSite.count(),
       
-      // Total templates
+      // Total templates count (only published)
       db.template.count({
         where: { status: 'PUBLISHED' }
       }),
       
-      // Current month users
-      db.user.count({
-        where: {
-          createdAt: {
-            gte: currentMonth
-          }
-        }
-      }),
-      
-      // Last month users
-      db.user.count({
-        where: {
-          createdAt: {
-            gte: lastMonth,
-            lt: currentMonth
-          }
-        }
-      }),
-      
-      // Total revenue (from template purchases)
+      // Total revenue from completed purchases
       db.userTemplatePurchase.aggregate({
-        _sum: {
-          priceCents: true
+        where: { status: 'COMPLETED' },
+        _sum: { priceCents: true }
+      }),
+      
+      // Recent users (last 30 days)
+      db.user.count({
+        where: {
+          createdAt: {
+            gte: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000)
+          }
         }
       }),
       
-      // Active users (users with published sites)
+      // Active users (had activity in last 7 days)
       db.user.count({
         where: {
-          sites: {
-            some: {
-              status: 'PUBLISHED'
+          OR: [
+            {
+              sites: {
+                some: {
+                  updatedAt: {
+                    gte: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000)
+                  }
+                }
+              }
+            },
+            {
+              updatedAt: {
+                gte: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000)
+              }
+            }
+          ]
+        }
+      }),
+      
+      // Plan distribution
+      db.user.groupBy({
+        by: ['plan'],
+        _count: true
+      }),
+      
+      // Published sites count
+      db.userSite.count({
+        where: { status: 'PUBLISHED' }
+      }),
+      
+      // Popular templates
+      db.template.findMany({
+        where: { status: 'PUBLISHED' },
+        select: {
+          id: true,
+          name: true,
+          _count: {
+            select: {
+              purchases: true
             }
           }
-        }
+        },
+        orderBy: {
+          purchases: {
+            _count: 'desc'
+          }
+        },
+        take: 5
       })
     ])
 
-    // Calculate monthly growth percentage
+    // Calculate previous month for growth comparison
+    const lastMonthUsers = await db.user.count({
+      where: {
+        createdAt: {
+          lte: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000)
+        }
+      }
+    })
+    
+    // Calculate monthly growth
     const monthlyGrowth = lastMonthUsers > 0 
-      ? Math.round(((currentMonthUsers - lastMonthUsers) / lastMonthUsers) * 100)
-      : 0
+      ? Math.round(((recentUsers) / lastMonthUsers) * 100)
+      : 100
+
+    // Process plan distribution
+    const planStats = {
+      FREE: 0,
+      STARTER: 0,
+      PRO: 0
+    }
+    
+    planDistribution.forEach(item => {
+      planStats[item.plan as keyof typeof planStats] = item._count
+    })
 
     const stats = {
       totalUsers,
@@ -105,13 +144,24 @@ export async function GET(request: NextRequest) {
       totalRevenue: totalRevenue._sum.priceCents || 0,
       monthlyGrowth,
       activeUsers,
-      currentMonthUsers,
-      lastMonthUsers,
+      recentUsers,
+      publishedSites,
+      planDistribution: planStats,
+      popularTemplates: templateStats,
+      
+      // Additional insights
+      insights: {
+        averageSitesPerUser: totalUsers > 0 ? Math.round((totalSites / totalUsers) * 100) / 100 : 0,
+        userRetention: totalUsers > 0 ? Math.round((activeUsers / totalUsers) * 100) : 0,
+        conversionRate: totalUsers > 0 ? Math.round(((planStats.STARTER + planStats.PRO) / totalUsers) * 100) : 0,
+        publishRate: totalSites > 0 ? Math.round((publishedSites / totalSites) * 100) : 0
+      }
     }
 
     return NextResponse.json({
       success: true,
       data: stats,
+      generatedAt: new Date().toISOString()
     })
 
   } catch (error) {
@@ -126,3 +176,6 @@ export async function GET(request: NextRequest) {
     }, { status: 500 })
   }
 }
+
+// Export with rate limiting
+export const GET = withRateLimit(getAdminStats, RATE_LIMITS.admin)

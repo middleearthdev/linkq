@@ -35,13 +35,23 @@ export function DynamicTemplateRenderer({
   className = "",
   isPreview = false
 }: DynamicTemplateRendererProps) {
+  console.log(siteData)
 
-  // Apply CSS variables from theme
+  // Apply CSS variables from theme - scoped for preview mode, global for client sites
   useEffect(() => {
-    if (siteData.meta.theme) {
+    console.log(siteData)
+    console.log(getContainerStyle())
+
+    // Load Google Font if needed (this is always safe)
+    if (siteData.meta?.font && siteData.meta.font !== 'system') {
+      loadGoogleFont(siteData.meta.font)
+    }
+
+    // Only apply global CSS variables if NOT in preview mode (i.e., on actual client sites)
+    if (!isPreview && siteData.meta.theme) {
       const root = document.documentElement
 
-      // Set template CSS variables
+      // Set template CSS variables globally for client sites
       Object.entries(siteData.meta.theme).forEach(([key, value]) => {
         root.style.setProperty(key, value)
       })
@@ -61,21 +71,6 @@ export function DynamicTemplateRenderer({
           root.style.setProperty(key, value)
         }
       })
-    }
-
-    // Load Google Font if needed
-    if (siteData.meta?.font && siteData.meta.font !== 'system') {
-      loadGoogleFont(siteData.meta.font)
-    }
-
-    // Cleanup CSS variables on unmount for preview
-    return () => {
-      if (isPreview && siteData.meta.theme) {
-        const root = document.documentElement
-        Object.keys(siteData.meta.theme).forEach((key) => {
-          root.style.removeProperty(key)
-        })
-      }
     }
   }, [siteData.meta?.theme, siteData.meta?.font, isPreview])
 
@@ -133,18 +128,50 @@ export function DynamicTemplateRenderer({
     )
   }
 
-  const containerStyle = siteData.meta?.font ? {
-    fontFamily: getFontFamily(siteData.meta.font)
-  } : {}
+  // Generate container style with scoped CSS variables for preview mode
+  const getContainerStyle = () => {
+    const style: Record<string, any> = {}
+
+    // Apply font family
+    if (siteData.meta?.font) {
+      style.fontFamily = getFontFamily(siteData.meta.font)
+    }
+
+    // For preview mode, apply CSS variables directly to container
+    if (isPreview && siteData.meta.theme) {
+      // Apply template theme variables
+      Object.entries(siteData.meta.theme).forEach(([key, value]) => {
+        style[key] = value
+      })
+
+      // Set fallback CSS variables if not provided
+      const fallbacks = {
+        '--text-secondary': style['--text-color'] || '#6b7280',
+        '--border': `1px solid ${style['--primary-color'] || '#d1d5db'}`,
+        '--avatar-border': `2px solid ${style['--primary-color'] || '#ffffff'}`,
+        '--card-background-hover': style['--secondary-color'] || '#f3f4f6',
+        '--text-hover': style['--card-background'] || '#ffffff',
+        '--shadow-hover': '0 8px 25px -5px rgba(0, 0, 0, 0.2)'
+      }
+
+      Object.entries(fallbacks).forEach(([key, value]) => {
+        if (!style[key]) {
+          style[key] = value
+        }
+      })
+    }
+
+    // Default styles
+    style.background = style['--background'] || 'linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%)'
+    style.color = style['--text-color'] || '#333'
+
+    return style
+  }
 
   return (
     <div
       className={`min-h-screen template-container ${className} relative`}
-      style={{
-        background: 'var(--background, linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%))',
-        color: 'var(--text-color, #333)',
-        ...containerStyle
-      }}
+      style={getContainerStyle()}
     >
       {/* Background overlay untuk background image */}
       <div

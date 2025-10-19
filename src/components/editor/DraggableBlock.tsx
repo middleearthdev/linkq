@@ -54,96 +54,94 @@ export function DraggableBlock({
       style={style}
       className={cn(
         "relative group",
-        isDragging && "opacity-50",
+        isDragging && "opacity-50 scale-105",
         !isVisible && "opacity-60"
       )}
     >
       {/* Block Content */}
-      <Card
+      <div
         className={cn(
-          "relative cursor-pointer transition-all duration-200",
-          isSelected && "ring-2 ring-blue-500 ring-offset-2",
-          "hover:shadow-md"
+          "relative cursor-pointer transition-all duration-200 bg-white border-2 rounded-lg shadow-sm",
+          isSelected ? "border-blue-500 shadow-blue-100" : "border-gray-200 hover:border-gray-300",
+          "hover:shadow-md group-hover:shadow-lg"
         )}
         onClick={onSelect}
       >
-        {/* Drag Handle & Controls */}
+        {/* Compact Drag Handle */}
         <div className={cn(
-          "absolute -left-12 top-2 opacity-0 group-hover:opacity-100 transition-opacity",
-          "flex flex-col gap-1 z-10"
+          "absolute -left-6 top-1/2 transform -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity",
+          "z-10"
         )}>
-          <Button
-            size="sm"
-            variant="ghost"
-            className="h-6 w-6 p-0 cursor-grab active:cursor-grabbing"
+          <div
+            className="h-6 w-3 cursor-grab active:cursor-grabbing bg-gray-200 hover:bg-gray-300 rounded-l border border-r-0 border-gray-300 flex items-center justify-center"
             {...attributes}
             {...listeners}
           >
-            <GripVertical className="h-3 w-3" />
-          </Button>
+            <GripVertical className="h-2 w-2 text-gray-500" />
+          </div>
         </div>
 
-        {/* Top Controls */}
+        {/* Compact Top Controls */}
         <div className={cn(
-          "absolute -top-10 right-0 opacity-0 group-hover:opacity-100 transition-opacity",
-          "flex gap-1 bg-white rounded border shadow-sm p-1 z-10"
+          "absolute -top-2 right-1 opacity-0 group-hover:opacity-100 transition-opacity",
+          "flex gap-0.5 bg-white rounded border border-gray-300 shadow-sm p-0.5 z-10"
         )}>
           <Button
             size="sm"
             variant="ghost"
-            className="h-6 w-6 p-0"
+            className="h-4 w-4 p-0 hover:bg-gray-100"
             onClick={(e) => {
               e.stopPropagation()
               onToggleVisibility()
             }}
           >
             {isVisible ? (
-              <Eye className="h-3 w-3" />
+              <Eye className="h-2 w-2 text-gray-600" />
             ) : (
-              <EyeOff className="h-3 w-3" />
+              <EyeOff className="h-2 w-2 text-gray-400" />
             )}
           </Button>
           <Button
             size="sm"
             variant="ghost"
-            className="h-6 w-6 p-0"
+            className="h-4 w-4 p-0 hover:bg-blue-50"
             onClick={(e) => {
               e.stopPropagation()
               onEdit()
             }}
           >
-            <Edit className="h-3 w-3" />
+            <Edit className="h-2 w-2 text-blue-600" />
           </Button>
           <Button
             size="sm"
             variant="ghost"
-            className="h-6 w-6 p-0 text-red-600 hover:text-red-700"
+            className="h-4 w-4 p-0 hover:bg-red-50"
             onClick={(e) => {
               e.stopPropagation()
               onDelete()
             }}
           >
-            <Trash2 className="h-3 w-3" />
+            <Trash2 className="h-2 w-2 text-red-600" />
           </Button>
         </div>
 
-        {/* Block Content */}
-        <div className={cn(
-          "transition-opacity",
-          !isVisible && "opacity-50"
-        )}>
-          {children}
-        </div>
-
-        {/* Selection Indicator */}
+        {/* Compact Block Type Badge */}
         {isSelected && (
-          <div className="absolute inset-0 pointer-events-none">
-            <div className="absolute top-2 left-2 bg-blue-500 text-white text-xs px-2 py-1 rounded">
+          <div className="absolute top-1 left-1 z-10">
+            <div className="bg-blue-500 text-white text-xs px-1.5 py-0.5 rounded text-xs font-medium">
               {block.type}
             </div>
           </div>
         )}
-      </Card>
+
+        {/* Compact Block Content */}
+        <div className={cn(
+          "transition-opacity p-2",
+          !isVisible && "opacity-50"
+        )}>
+          {children}
+        </div>
+      </div>
     </div>
   )
 }

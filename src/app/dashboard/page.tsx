@@ -29,6 +29,7 @@ import {
 } from "lucide-react"
 import { useState, useEffect } from "react"
 import { QuickLoading } from "@/components/ui/cool-loading"
+import { AdminNavLink } from "@/components/navigation/AdminNavLink"
 
 export default function DashboardPage() {
   const { data: session, isPending } = useSession()
@@ -266,6 +267,7 @@ export default function DashboardPage() {
                 <Button variant="ghost" className="text-gray-400 hover:text-white" size="sm">
                   Templates
                 </Button>
+                <AdminNavLink variant="desktop" />
                 <Button 
                   variant="ghost" 
                   className={`text-gray-400 hover:text-white ${!canUseAnalytics ? 'cursor-not-allowed opacity-60' : ''}`} 
@@ -399,6 +401,8 @@ export default function DashboardPage() {
                 <Settings className="h-5 w-5 mr-3" />
                 Settings
               </Button>
+
+              <AdminNavLink variant="mobile" />
 
               {/* Divider */}
               <div className="my-6 border-t" style={{ borderColor: '#2A3441' }} />
