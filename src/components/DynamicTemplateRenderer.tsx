@@ -35,7 +35,6 @@ export function DynamicTemplateRenderer({
   className = "",
   isPreview = false
 }: DynamicTemplateRendererProps) {
-  console.log(siteData)
 
   // Apply CSS variables from theme - scoped for preview mode, global for client sites
   useEffect(() => {

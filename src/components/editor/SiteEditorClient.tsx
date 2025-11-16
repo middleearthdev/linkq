@@ -32,6 +32,7 @@ import { BlockEditor } from "@/components/editor/BlockEditor"
 import { BlockLibrarySidebar } from "@/components/editor/BlockLibrarySidebar"
 import { EditorCanvas } from "@/components/editor/EditorCanvas"
 import { ThemeEditor } from "@/components/editor/ThemeEditor"
+import { LinkListEditor } from "@/components/editor/LinkListEditor"
 import {
   Plus,
   Eye,
@@ -72,7 +73,7 @@ export function SiteEditorClient({
   const [viewport, setViewport] = useState<"mobile" | "tablet" | "desktop">("mobile")
   const [showPreview, setShowPreview] = useState(false)
   const [saving, setSaving] = useState(false)
-  const [activePanel, setActivePanel] = useState<"blocks" | "theme">("blocks")
+  const [activePanel, setActivePanel] = useState<"blocks" | "theme" | "link-config">("blocks")
   const [isInitializing, setIsInitializing] = useState(true)
   const [isSheetOpen, setIsSheetOpen] = useState(false)
 
@@ -250,11 +251,18 @@ export function SiteEditorClient({
   }, [selectedBlockId, editingBlockId])
 
   const handleEditBlock = useCallback((blockId: string) => {
+    const block = blocks.find(b => b.id === blockId)
     setEditingBlockId(blockId)
     setSelectedBlockId(blockId)
-    // Trigger animation after state is set
-    setTimeout(() => setIsSheetOpen(true), 10)
-  }, [])
+
+    if (block?.type === 'link-list') {
+      // For link-list blocks, show config in sidebar
+      setActivePanel('link-config')
+    } else {
+      // For other blocks, use the sheet
+      setTimeout(() => setIsSheetOpen(true), 10)
+    }
+  }, [blocks])
 
   const handleSaveBlock = useCallback((blockId: string, props: any) => {
     setBlocks(prev => prev.map(block =>
@@ -483,28 +491,48 @@ export function SiteEditorClient({
       <div className="flex-1 flex overflow-hidden">
 
         {/* Dynamic Sidebar */}
-        <div className="w-72 bg-white border-r border-gray-200 flex flex-col">
+        <div className="w-108 bg-white border-r border-gray-200 flex flex-col overflow-hidden">
           {activePanel === "blocks" ? (
             <>
-              <div className="p-4 border-b border-gray-200">
+              <div className="p-4 border-b border-gray-200 flex-shrink-0">
                 <h2 className="text-sm font-medium text-gray-900 mb-1">Block Library</h2>
                 <p className="text-xs text-gray-500">Drag blocks to build your template</p>
               </div>
-              <BlockLibrarySidebar
-                onAddBlock={handleAddBlock}
-                userRole="admin"
-                className="flex-1"
-              />
+              <div className="flex-1 overflow-y-auto">
+                <BlockLibrarySidebar
+                  onAddBlock={handleAddBlock}
+                  userRole="admin"
+                  className="flex-1"
+                />
+              </div>
             </>
-          ) : (
-            <div className="flex-1 overflow-hidden">
+          ) : activePanel === "theme" ? (
+            <div className="flex-1 overflow-y-auto">
               <ThemeEditor
                 cssVars={cssVars}
                 onChange={setCssVars}
                 className="border-0 shadow-none h-full"
               />
             </div>
-          )}
+          ) : activePanel === "link-config" && editingBlock?.type === "link-list" ? (
+            <div className="flex-1 overflow-y-auto">
+              <LinkListEditor
+                props={editingBlock.props as any}
+                onChange={(newProps) => handleSaveBlock(editingBlock.id, newProps)}
+                onSave={() => {
+                  setActivePanel("blocks")
+                  setEditingBlockId(null)
+                  setSelectedBlockId(null)
+                }}
+                onClose={() => {
+                  setActivePanel("blocks")
+                  setEditingBlockId(null)
+                  setSelectedBlockId(null)
+                }}
+                className="h-full"
+              />
+            </div>
+          ) : null}
         </div>
 
         {/* Canvas Area */}
@@ -562,7 +590,7 @@ export function SiteEditorClient({
         </div>
 
         {/* Preview Panel */}
-        <div className="w-80 bg-white border-l border-gray-200 flex flex-col">
+        <div className="w-106 bg-white border-l border-gray-200 flex flex-col">
           <div className="p-4 border-b border-gray-200">
             <div className="flex items-center justify-between">
               <h2 className="text-sm font-medium text-gray-900">Preview</h2>
@@ -576,7 +604,7 @@ export function SiteEditorClient({
           <div className="flex-1 p-4 flex items-center justify-center bg-gray-50">
             {/* iPhone Frame */}
             <div className="relative">
-              <div className="w-64 h-[500px] bg-black rounded-[2rem] p-2 shadow-xl">
+              <div className="w-84 h-[600px] bg-black rounded-[2rem] p-2 shadow-xl">
                 <div className="w-full h-full bg-white rounded-[1.5rem] overflow-hidden relative">
                   {/* Status Bar */}
                   <div className="h-6 bg-black flex items-center justify-center relative">
@@ -585,7 +613,7 @@ export function SiteEditorClient({
                   </div>
 
                   {/* Content */}
-                  <div className="h-[470px] overflow-y-auto">
+                  <div className="h-[600px] overflow-y-auto">
                     {isInitializing ? (
                       <div className="flex items-center justify-center h-full">
                         <div className="text-center">
@@ -618,13 +646,9 @@ export function SiteEditorClient({
         </div>
       </div>
 
-      {/* Block Editor Sheet */}
-      {editingBlock && (
-        <div className={`fixed top-0 left-0 h-full bg-white shadow-2xl transition-transform duration-300 ease-out z-50 ${
-          editingBlock.type === 'link-list' 
-            ? 'w-[600px]' 
-            : 'w-96'
-        } ${isSheetOpen ? 'translate-x-0' : '-translate-x-full'}`}>
+      {/* Block Editor Sheet - Only for non-link-list blocks */}
+      {editingBlock && editingBlock.type !== 'link-list' && (
+        <div className={`fixed top-0 left-0 h-full bg-white shadow-2xl transition-transform duration-300 ease-out z-50 w-96 ${isSheetOpen ? 'translate-x-0' : '-translate-x-full'}`}>
           <BlockEditor
             block={editingBlock}
             onSave={handleSaveBlock}

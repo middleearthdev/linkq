@@ -113,6 +113,17 @@ export const LinkListBlockPropsSchema = z.object({
     text: z.string().optional(),
     accent: z.string().optional(),
     background: z.string().optional(),
+    // Extended colors for creative styles
+    tertiary: z.string().optional(),
+    quaternary: z.string().optional(),
+    shadow: z.string().optional(),
+    border: z.string().optional(),
+    highlight: z.string().optional(),
+    glow: z.string().optional(),
+    // Gradient definitions
+    gradientType: z.enum(['linear', 'radial', 'conic']).optional(),
+    gradientDirection: z.string().optional(),
+    gradientStops: z.array(z.string()).optional(),
   }).optional(),
 })
 

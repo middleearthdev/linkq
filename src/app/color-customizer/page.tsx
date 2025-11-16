@@ -14,78 +14,14 @@ import { Input } from '@/components/ui/input'
 import { ArrowLeft, Palette, RotateCcw } from 'lucide-react'
 import Link from 'next/link'
 import { cn } from '@/lib/utils'
+import {
+  COLOR_PRESETS,
+  ALL_STYLES,
+  DEFAULT_COLORS,
+  LinkListStyle
+} from '@/lib/link-list-styles'
 
-// Popular color presets
-const colorPresets = [
-  {
-    name: 'Ocean Blue',
-    colors: {
-      primary: '#0ea5e9',
-      secondary: '#0284c7',
-      text: '#ffffff',
-      accent: '#38bdf8',
-      background: '#f0f9ff'
-    }
-  },
-  {
-    name: 'Forest Green',
-    colors: {
-      primary: '#10b981',
-      secondary: '#059669',
-      text: '#ffffff',
-      accent: '#34d399',
-      background: '#f0fdf4'
-    }
-  },
-  {
-    name: 'Sunset Orange',
-    colors: {
-      primary: '#f97316',
-      secondary: '#ea580c',
-      text: '#ffffff',
-      accent: '#fb923c',
-      background: '#fff7ed'
-    }
-  },
-  {
-    name: 'Royal Purple',
-    colors: {
-      primary: '#8b5cf6',
-      secondary: '#7c3aed',
-      text: '#ffffff',
-      accent: '#a78bfa',
-      background: '#faf5ff'
-    }
-  },
-  {
-    name: 'Rose Pink',
-    colors: {
-      primary: '#f43f5e',
-      secondary: '#e11d48',
-      text: '#ffffff',
-      accent: '#fb7185',
-      background: '#fff1f2'
-    }
-  },
-  {
-    name: 'Dark Mode',
-    colors: {
-      primary: '#374151',
-      secondary: '#1f2937',
-      text: '#ffffff',
-      accent: '#6b7280',
-      background: '#111827'
-    }
-  }
-]
 
-// All available styles to showcase
-const showcaseStyles = [
-  'pill', 'underline', 'card', 'modern', 'modern-cream', 'vintage',
-  'ticket', 'brush', 'neon', 'origami', 'glass', 'pixel', 'hologram',
-  'neomorphism', 'bubble', 'cyberpunk', 'sketch', 'metallic', 'wood',
-  'neon-outline', 'minimal-line', 'elastic', 'terminal'
-]
 
 // Mock data for preview
 const mockData = {
@@ -98,14 +34,8 @@ const mockData = {
 }
 
 export default function ColorCustomizerPage() {
-  const [selectedStyle, setSelectedStyle] = useState<string>('pill')
-  const [customColors, setCustomColors] = useState({
-    primary: '#3b82f6',
-    secondary: '#1d4ed8',
-    text: '#ffffff',
-    accent: '#60a5fa',
-    background: '#f3f4f6'
-  })
+  const [selectedStyle, setSelectedStyle] = useState<LinkListStyle>('pill')
+  const [customColors, setCustomColors] = useState(DEFAULT_COLORS)
 
   const handleColorChange = (colorKey: string, value: string) => {
     setCustomColors(prev => ({
@@ -114,18 +44,12 @@ export default function ColorCustomizerPage() {
     }))
   }
 
-  const applyPreset = (preset: typeof colorPresets[0]) => {
+  const applyPreset = (preset: typeof COLOR_PRESETS[0]) => {
     setCustomColors(preset.colors)
   }
 
   const resetColors = () => {
-    setCustomColors({
-      primary: '#3b82f6',
-      secondary: '#1d4ed8',
-      text: '#ffffff',
-      accent: '#60a5fa',
-      background: '#f3f4f6'
-    })
+    setCustomColors(DEFAULT_COLORS)
   }
 
   const copyColors = () => {
@@ -182,7 +106,7 @@ export default function ColorCustomizerPage() {
                 <CardDescription>Quick start with popular color combinations</CardDescription>
               </CardHeader>
               <CardContent className="space-y-3">
-                {colorPresets.map((preset) => (
+                {COLOR_PRESETS.map((preset) => (
                   <Button
                     key={preset.name}
                     variant="outline"
@@ -247,7 +171,7 @@ export default function ColorCustomizerPage() {
               </CardHeader>
               <CardContent>
                 <div className="grid grid-cols-1 gap-2 max-h-96 overflow-y-auto">
-                  {showcaseStyles.map((style) => (
+                  {ALL_STYLES.map((style) => (
                     <Button
                       key={style}
                       variant={selectedStyle === style ? 'default' : 'outline'}
@@ -278,7 +202,7 @@ export default function ColorCustomizerPage() {
                     <LinkListBlock
                       props={{
                         ...mockData,
-                        style: selectedStyle as any,
+                        style: selectedStyle,
                         customColors
                       }}
                     />
@@ -295,7 +219,7 @@ export default function ColorCustomizerPage() {
               </CardHeader>
               <CardContent>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                  {showcaseStyles.map((style) => (
+                  {ALL_STYLES.map((style) => (
                     <div key={style} className="space-y-2">
                       <div className="text-xs font-medium text-muted-foreground capitalize flex items-center justify-between">
                         <span>{style.replace('-', ' ')}</span>
@@ -315,7 +239,7 @@ export default function ColorCustomizerPage() {
                         <div className="w-full max-w-xs">
                           <LinkListBlock
                             props={{
-                              style: style as any,
+                              style: style,
                               items: [
                                 { id: '1', title: 'Sample', url: '#', isActive: true }
                               ],
