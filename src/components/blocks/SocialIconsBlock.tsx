@@ -3,18 +3,34 @@
  * Displays social media icons and links
  */
 
+import React from 'react'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { SocialIconsBlockProps } from '@/types'
 import { cn, trackEvent } from '@/lib/utils'
 import { Plus, Trash2 } from 'lucide-react'
-import { 
-  TwitterIcon, 
-  InstagramIcon, 
-  FacebookIcon, 
-  LinkedinIcon, 
-  GithubIcon, 
-  YoutubeIcon 
+import {
+  TwitterIcon,
+  InstagramIcon,
+  FacebookIcon,
+  LinkedinIcon,
+  GithubIcon,
+  YoutubeIcon,
+  TikTokIcon,
+  WhatsAppIcon,
+  TelegramIcon,
+  DiscordIcon,
+  ThreadsIcon,
+  XIcon,
+  PinterestIcon,
+  SnapchatIcon,
+  RedditIcon,
+  TwitchIcon,
+  SpotifyIcon,
+  SoundCloudIcon,
+  BehanceIcon,
+  DribbbleIcon,
+  MediumIcon
 } from '@/components/icons/social'
 
 interface SocialIconsBlockComponentProps {
@@ -25,52 +41,170 @@ interface SocialIconsBlockComponentProps {
 
 // Social platform configurations
 const SOCIAL_PLATFORMS = {
+  // Social Media
   twitter: {
     name: 'Twitter',
     icon: TwitterIcon,
     color: '#1DA1F2',
     baseUrl: 'https://twitter.com/',
+    category: 'social',
+  },
+  x: {
+    name: 'X (Twitter)',
+    icon: XIcon,
+    color: '#000000',
+    baseUrl: 'https://x.com/',
+    category: 'social',
   },
   instagram: {
     name: 'Instagram',
     icon: InstagramIcon,
     color: '#E4405F',
     baseUrl: 'https://instagram.com/',
+    category: 'social',
   },
   facebook: {
     name: 'Facebook',
     icon: FacebookIcon,
     color: '#1877F2',
     baseUrl: 'https://facebook.com/',
+    category: 'social',
   },
+  threads: {
+    name: 'Threads',
+    icon: ThreadsIcon,
+    color: '#000000',
+    baseUrl: 'https://threads.net/@',
+    category: 'social',
+  },
+  tiktok: {
+    name: 'TikTok',
+    icon: TikTokIcon,
+    color: '#000000',
+    baseUrl: 'https://tiktok.com/@',
+    category: 'social',
+  },
+  snapchat: {
+    name: 'Snapchat',
+    icon: SnapchatIcon,
+    color: '#FFFC00',
+    baseUrl: 'https://snapchat.com/add/',
+    category: 'social',
+  },
+  pinterest: {
+    name: 'Pinterest',
+    icon: PinterestIcon,
+    color: '#E60023',
+    baseUrl: 'https://pinterest.com/',
+    category: 'social',
+  },
+  reddit: {
+    name: 'Reddit',
+    icon: RedditIcon,
+    color: '#FF4500',
+    baseUrl: 'https://reddit.com/u/',
+    category: 'social',
+  },
+
+  // Professional
   linkedin: {
     name: 'LinkedIn',
     icon: LinkedinIcon,
     color: '#0A66C2',
     baseUrl: 'https://linkedin.com/in/',
+    category: 'professional',
   },
   github: {
     name: 'GitHub',
     icon: GithubIcon,
-    color: '#333',
+    color: '#181717',
     baseUrl: 'https://github.com/',
+    category: 'professional',
   },
+  medium: {
+    name: 'Medium',
+    icon: MediumIcon,
+    color: '#000000',
+    baseUrl: 'https://medium.com/@',
+    category: 'professional',
+  },
+  behance: {
+    name: 'Behance',
+    icon: BehanceIcon,
+    color: '#1769FF',
+    baseUrl: 'https://behance.net/',
+    category: 'professional',
+  },
+  dribbble: {
+    name: 'Dribbble',
+    icon: DribbbleIcon,
+    color: '#EA4C89',
+    baseUrl: 'https://dribbble.com/',
+    category: 'professional',
+  },
+
+  // Messaging
+  whatsapp: {
+    name: 'WhatsApp',
+    icon: WhatsAppIcon,
+    color: '#25D366',
+    baseUrl: 'https://wa.me/',
+    category: 'messaging',
+  },
+  telegram: {
+    name: 'Telegram',
+    icon: TelegramIcon,
+    color: '#0088cc',
+    baseUrl: 'https://t.me/',
+    category: 'messaging',
+  },
+  discord: {
+    name: 'Discord',
+    icon: DiscordIcon,
+    color: '#5865F2',
+    baseUrl: 'https://discord.com/users/',
+    category: 'messaging',
+  },
+
+  // Entertainment & Media
   youtube: {
     name: 'YouTube',
     icon: YoutubeIcon,
     color: '#FF0000',
     baseUrl: 'https://youtube.com/',
+    category: 'entertainment',
   },
-  tiktok: {
-    name: 'TikTok',
-    icon: () => <span className="text-xl font-bold">🎵</span>,
-    color: '#000',
-    baseUrl: 'https://tiktok.com/@',
+  twitch: {
+    name: 'Twitch',
+    icon: TwitchIcon,
+    color: '#9146FF',
+    baseUrl: 'https://twitch.tv/',
+    category: 'entertainment',
+  },
+  spotify: {
+    name: 'Spotify',
+    icon: SpotifyIcon,
+    color: '#1DB954',
+    baseUrl: 'https://open.spotify.com/user/',
+    category: 'entertainment',
+  },
+  soundcloud: {
+    name: 'SoundCloud',
+    icon: SoundCloudIcon,
+    color: '#FF5500',
+    baseUrl: 'https://soundcloud.com/',
+    category: 'entertainment',
   },
 } as const
 
 export function SocialIconsBlock({ props, className, isEditing = false }: SocialIconsBlockComponentProps) {
-  const { platforms = [], style = 'round', size = 'md' } = props
+  const {
+    platforms = [],
+    style = 'round',
+    size = 'md',
+    colorMode = 'brand',
+    customColors
+  } = props
 
   const handleSocialClick = (platform: any) => {
     if (!isEditing) {
@@ -94,13 +228,53 @@ export function SocialIconsBlock({ props, className, isEditing = false }: Social
     lg: 'w-8 h-8',
   }
 
+  // Get icon style based on color mode
+  const getIconStyle = (config: any) => {
+    if (colorMode === 'monochrome') {
+      return {
+        backgroundColor: customColors?.backgroundColor || '#f3f4f6',
+        color: customColors?.iconColor || '#374151',
+        borderColor: customColors?.borderColor || '#d1d5db',
+      }
+    }
+
+    if (colorMode === 'custom' && customColors) {
+      return {
+        backgroundColor: customColors.backgroundColor || config.color + '20',
+        color: customColors.iconColor || config.color,
+        borderColor: customColors.borderColor || config.color,
+      }
+    }
+
+    // Default: brand colors
+    return {
+      backgroundColor: config.color + '20',
+      borderColor: config.color,
+      color: config.color,
+    }
+  }
+
+  // Style classes with animations
+  const styleClasses: Record<string, string> = {
+    round: 'rounded-full',
+    square: 'rounded-lg',
+    minimal: 'rounded-none border-0 bg-transparent hover:bg-transparent',
+    neon: 'rounded-full shadow-[0_0_10px_currentColor] hover:shadow-[0_0_20px_currentColor,0_0_30px_currentColor]',
+    glassmorphism: 'rounded-full backdrop-blur-md bg-white/20 border border-white/30 shadow-lg hover:bg-white/30',
+    neumorphic: 'rounded-full shadow-[8px_8px_16px_#d1d9e6,-8px_-8px_16px_#ffffff] hover:shadow-[4px_4px_8px_#d1d9e6,-4px_-4px_8px_#ffffff]',
+    floating: 'rounded-full animate-float',
+    rotating: 'rounded-full transition-transform duration-500 hover:rotate-[360deg]',
+    pulse: 'rounded-full animate-pulse',
+    bounce: 'rounded-full hover:animate-bounce',
+  }
+
   if (platforms.length === 0 && !isEditing) {
     return null
   }
 
   return (
     <div className={cn(
-      'flex items-center justify-center gap-4 p-6',
+      'flex items-center justify-center gap-4 p-6 flex-wrap',
       'social-icons-block', // CSS class for template styling
       className
     )}>
@@ -109,7 +283,8 @@ export function SocialIconsBlock({ props, className, isEditing = false }: Social
         if (!config) return null
 
         const IconComponent = config.icon
-        
+        const iconStyle = getIconStyle(config)
+
         return (
           <Button
             key={`${platform.platform}-${index}`}
@@ -117,21 +292,19 @@ export function SocialIconsBlock({ props, className, isEditing = false }: Social
             size="icon"
             className={cn(
               sizeClasses[size],
-              style === 'round' && 'rounded-full',
-              style === 'square' && 'rounded-lg',
-              style === 'minimal' && 'rounded-none border-0 bg-transparent hover:bg-transparent',
+              styleClasses[style] || styleClasses.round,
               'social-icon', // CSS class for template styling
               isEditing && 'outline-dashed outline-2 outline-blue-400 outline-offset-2',
-              'transition-all duration-200 hover:scale-110'
+              'transition-all duration-300 hover:scale-110',
+              style !== 'minimal' && 'border-2',
+              // Custom hover color
+              customColors?.hoverColor && `hover:bg-[${customColors.hoverColor}]`
             )}
-            style={style !== 'minimal' ? { 
-              backgroundColor: config.color + '20',
-              borderColor: config.color,
-              color: config.color,
-            } : { color: config.color }}
+            style={style !== 'minimal' ? iconStyle : { color: iconStyle.color }}
             onClick={() => handleSocialClick(platform)}
             disabled={isEditing}
             title={`Visit ${config.name}`}
+            aria-label={`Visit ${config.name}`}
           >
             <IconComponent className={iconSizeClasses[size]} />
           </Button>
@@ -149,21 +322,37 @@ export function SocialIconsBlock({ props, className, isEditing = false }: Social
 }
 
 // Editor component for customizing SocialIconsBlock props
-export function SocialIconsBlockEditor({ 
-  props, 
-  onChange, 
-  className 
+export function SocialIconsBlockEditor({
+  props,
+  onChange,
+  className
 }: {
   props: SocialIconsBlockProps
   onChange: (props: SocialIconsBlockProps) => void
   className?: string
 }) {
-  const handleStyleChange = (style: 'round' | 'square' | 'minimal') => {
-    onChange({ ...props, style })
+  const [categoryFilter, setCategoryFilter] = React.useState<string>('all')
+
+  const handleStyleChange = (style: string) => {
+    onChange({ ...props, style: style as any })
   }
 
   const handleSizeChange = (size: 'sm' | 'md' | 'lg') => {
     onChange({ ...props, size })
+  }
+
+  const handleColorModeChange = (colorMode: 'brand' | 'monochrome' | 'custom') => {
+    onChange({ ...props, colorMode })
+  }
+
+  const handleCustomColorChange = (field: string, value: string) => {
+    onChange({
+      ...props,
+      customColors: {
+        ...props.customColors,
+        [field]: value
+      }
+    })
   }
 
   const handleAddPlatform = () => {
@@ -187,19 +376,26 @@ export function SocialIconsBlockEditor({
     onChange({ ...props, platforms })
   }
 
+  // Filter platforms by category
+  const filteredPlatforms = categoryFilter === 'all'
+    ? Object.keys(SOCIAL_PLATFORMS)
+    : Object.entries(SOCIAL_PLATFORMS)
+        .filter(([_, config]) => config.category === categoryFilter)
+        .map(([key]) => key)
+
   return (
     <div className={cn('space-y-6 p-4', className)}>
       {/* Style selector */}
       <div>
         <label className="block text-sm font-medium mb-2">Icon Style</label>
-        <div className="flex gap-2">
-          {(['round', 'square', 'minimal'] as const).map((style) => (
+        <div className="grid grid-cols-3 gap-2">
+          {(['round', 'square', 'minimal', 'neon', 'glassmorphism', 'neumorphic', 'floating', 'rotating', 'pulse'] as const).map((style) => (
             <Button
               key={style}
               variant={props.style === style ? 'default' : 'outline'}
               size="sm"
               onClick={() => handleStyleChange(style)}
-              className="capitalize"
+              className="capitalize text-xs"
             >
               {style}
             </Button>
@@ -225,6 +421,89 @@ export function SocialIconsBlockEditor({
         </div>
       </div>
 
+      {/* Color Mode selector */}
+      <div>
+        <label className="block text-sm font-medium mb-2">Color Mode</label>
+        <div className="flex gap-2">
+          {(['brand', 'monochrome', 'custom'] as const).map((mode) => (
+            <Button
+              key={mode}
+              variant={props.colorMode === mode ? 'default' : 'outline'}
+              size="sm"
+              onClick={() => handleColorModeChange(mode)}
+              className="capitalize"
+            >
+              {mode}
+            </Button>
+          ))}
+        </div>
+      </div>
+
+      {/* Custom color pickers */}
+      {props.colorMode === 'custom' && (
+        <div className="space-y-3 border-t pt-4">
+          <div>
+            <label className="block text-sm font-medium mb-2">Icon Color</label>
+            <input
+              type="color"
+              value={props.customColors?.iconColor || '#000000'}
+              onChange={(e) => handleCustomColorChange('iconColor', e.target.value)}
+              className="w-full h-10 rounded border cursor-pointer"
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium mb-2">Background Color</label>
+            <input
+              type="color"
+              value={props.customColors?.backgroundColor || '#f3f4f6'}
+              onChange={(e) => handleCustomColorChange('backgroundColor', e.target.value)}
+              className="w-full h-10 rounded border cursor-pointer"
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium mb-2">Border Color</label>
+            <input
+              type="color"
+              value={props.customColors?.borderColor || '#d1d5db'}
+              onChange={(e) => handleCustomColorChange('borderColor', e.target.value)}
+              className="w-full h-10 rounded border cursor-pointer"
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium mb-2">Hover Color</label>
+            <input
+              type="color"
+              value={props.customColors?.hoverColor || '#e5e7eb'}
+              onChange={(e) => handleCustomColorChange('hoverColor', e.target.value)}
+              className="w-full h-10 rounded border cursor-pointer"
+            />
+          </div>
+        </div>
+      )}
+
+      {props.colorMode === 'monochrome' && (
+        <div className="space-y-3 border-t pt-4">
+          <div>
+            <label className="block text-sm font-medium mb-2">Icon Color</label>
+            <input
+              type="color"
+              value={props.customColors?.iconColor || '#374151'}
+              onChange={(e) => handleCustomColorChange('iconColor', e.target.value)}
+              className="w-full h-10 rounded border cursor-pointer"
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium mb-2">Background Color</label>
+            <input
+              type="color"
+              value={props.customColors?.backgroundColor || '#f3f4f6'}
+              onChange={(e) => handleCustomColorChange('backgroundColor', e.target.value)}
+              className="w-full h-10 rounded border cursor-pointer"
+            />
+          </div>
+        </div>
+      )}
+
       {/* Social platforms */}
       <div>
         <div className="flex items-center justify-between mb-2">
@@ -234,7 +513,25 @@ export function SocialIconsBlockEditor({
             Add Platform
           </Button>
         </div>
-        
+
+        {/* Category Filter */}
+        <div className="mb-4">
+          <label className="block text-sm font-medium mb-2">Filter by Category</label>
+          <div className="flex gap-2 flex-wrap">
+            {['all', 'social', 'professional', 'messaging', 'entertainment'].map((category) => (
+              <Button
+                key={category}
+                variant={categoryFilter === category ? 'default' : 'outline'}
+                size="sm"
+                onClick={() => setCategoryFilter(category)}
+                className="capitalize text-xs"
+              >
+                {category}
+              </Button>
+            ))}
+          </div>
+        </div>
+
         <div className="space-y-3">
           {(props.platforms || []).map((platform, index) => (
             <Card key={index} className="p-3">
@@ -245,11 +542,14 @@ export function SocialIconsBlockEditor({
                     onChange={(e) => handleUpdatePlatform(index, { platform: e.target.value })}
                     className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                   >
-                    {Object.entries(SOCIAL_PLATFORMS).map(([key, config]) => (
-                      <option key={key} value={key}>
-                        {config.name}
-                      </option>
-                    ))}
+                    {filteredPlatforms.map((key) => {
+                      const config = SOCIAL_PLATFORMS[key as keyof typeof SOCIAL_PLATFORMS]
+                      return (
+                        <option key={key} value={key}>
+                          {config.name}
+                        </option>
+                      )
+                    })}
                   </select>
                   <Button
                     variant="outline"

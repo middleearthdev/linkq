@@ -4,6 +4,7 @@
  */
 
 import { z } from 'zod'
+import { ALL_STYLES, type LinkListStyle } from '@/lib/link-list-styles'
 
 // ====================================
 // CORE ENUMS (matching Prisma)
@@ -89,10 +90,11 @@ export const BioBlockPropsSchema = z.object({
   avatar: z.string().optional(),
   showAvatar: z.boolean().default(true),
   avatarSize: z.enum(['sm', 'md', 'lg', 'xl', 'xxl']).default('lg'),
-  avatarStyle: z.enum(['circle', 'rounded', 'rounded-frame', 'blob', 'hexagon', 'star', 'diamond', 'wave', 'flower', 'badge', 'polaroid', 'vintage']).default('circle'),
+  avatarStyle: z.enum(['circle', 'rounded-frame', 'square', 'blob', 'hexagon', 'star', 'diamond', 'wave', 'flower', 'badge', 'polaroid', 'vintage']).default('circle'),
   textAlign: z.enum(['left', 'center', 'right']).default('center'),
-  nameStyle: z.enum(['default', 'large-elegant']).default('default'),
-  spacing: z.enum(['normal', 'wide']).default('normal'),
+  nameStyle: z.enum(['default', 'large-elegant', 'compact', 'modern-minimal', 'bold-impact', 'script-handwritten', 'tech-mono', 'gradient-text', 'neon-glow', 'vintage-serif']).default('default'),
+  spacing: z.enum(['tight', 'normal', 'wide']).default('normal'),
+  bioStyle: z.enum(['default', 'large', 'small', 'quote', 'modern']).default('default'),
 })
 
 export const LinkItemSchema = z.object({
@@ -101,10 +103,13 @@ export const LinkItemSchema = z.object({
   url: z.string().url(),
   icon: z.string().optional(),
   isActive: z.boolean().default(true),
+  // Optional fields for future extensibility
+  thumbnail: z.string().url().optional(), // Image URL for link thumbnail/preview
+  description: z.string().optional(),      // Short description for the link
 })
 
 export const LinkListBlockPropsSchema = z.object({
-  style: z.enum(['pill', 'underline', 'card', 'modern', 'modern-cream', 'vintage', 'ticket', 'brush', 'neon', 'origami', 'glass', 'pixel', 'hologram', 'neomorphism', 'bubble', 'cyberpunk', 'sketch', 'metallic', 'wood', 'neon-outline', 'minimal-line', 'elastic', 'terminal']).default('pill'),
+  style: z.enum(ALL_STYLES as [LinkListStyle, ...LinkListStyle[]]).default('pill'),
   items: z.array(LinkItemSchema),
   maxItems: z.number().optional(),
   customColors: z.object({
@@ -133,8 +138,26 @@ export const SocialIconsBlockPropsSchema = z.object({
     url: z.string().url(),
     username: z.string().optional(),
   })),
-  style: z.enum(['round', 'square', 'minimal']).default('round'),
+  style: z.enum([
+    'round',
+    'square',
+    'minimal',
+    'neon',
+    'glassmorphism',
+    'neumorphic',
+    'floating',
+    'rotating',
+    'pulse',
+    'bounce'
+  ]).default('round'),
   size: z.enum(['sm', 'md', 'lg']).default('md'),
+  colorMode: z.enum(['brand', 'monochrome', 'custom']).default('brand'),
+  customColors: z.object({
+    iconColor: z.string().optional(),
+    backgroundColor: z.string().optional(),
+    borderColor: z.string().optional(),
+    hoverColor: z.string().optional(),
+  }).optional(),
 })
 
 export const CTABlockPropsSchema = z.object({
@@ -156,8 +179,44 @@ export const GalleryBlockPropsSchema = z.object({
     thumbnail: z.string().optional(),
     caption: z.string().optional(),
   })),
-  layout: z.enum(['grid', 'masonry', 'carousel']).default('grid'),
+  layout: z.enum(['grid', 'carousel']).default('grid'),
   columns: z.number().min(1).max(6).default(3),
+  aspectRatio: z.enum(['square', 'landscape', 'portrait', 'widescreen', 'original']).default('square'),
+  imageFilter: z.enum(['none', 'grayscale', 'sepia', 'vintage', 'dramatic', 'warm', 'cool', 'noir']).default('none'),
+  showCaptions: z.boolean().default(true),
+  spacing: z.enum(['none', 'sm', 'md', 'lg']).default('md'),
+  rounded: z.enum(['none', 'sm', 'md', 'lg', 'xl']).default('md'),
+})
+
+export const DividerBlockPropsSchema = z.object({
+  style: z.enum(['solid', 'dashed', 'dotted', 'double', 'gradient', 'gradient-rainbow', 'gradient-sunset', 'gradient-ocean']).default('solid'),
+  thickness: z.number().min(1).max(10).default(1),
+  color: z.string().default('#e5e7eb'),
+  spacing: z.enum(['none', 'sm', 'md', 'lg', 'xl']).default('md'),
+  width: z.enum(['25', '50', '75', '100']).default('100'),
+  alignment: z.enum(['left', 'center', 'right']).default('center'),
+  icon: z.enum(['none', 'sparkles', 'circle', 'square', 'star', 'heart', 'zap']).default('none'),
+  animated: z.boolean().default(false),
+})
+
+export const FooterBlockPropsSchema = z.object({
+  copyrightText: z.string().default('© 2024 Your Name'),
+  layout: z.enum(['centered', 'minimal', 'stacked', 'split']).default('centered'),
+  showSocial: z.boolean().default(true),
+  showLinks: z.boolean().default(true),
+  links: z.array(z.object({
+    label: z.string(),
+    url: z.string(),
+    external: z.boolean().default(false),
+  })).default([]),
+  socialLinks: z.array(z.object({
+    platform: z.enum(['facebook', 'twitter', 'instagram', 'linkedin', 'github', 'youtube', 'email', 'website']),
+    url: z.string(),
+  })).default([]),
+  backgroundColor: z.string().default('#ffffff'),
+  textColor: z.string().default('#374151'),
+  spacing: z.enum(['none', 'sm', 'md', 'lg', 'xl']).default('md'),
+  borderTop: z.boolean().default(false),
 })
 
 export type BioBlockProps = z.infer<typeof BioBlockPropsSchema>
@@ -165,6 +224,8 @@ export type LinkListBlockProps = z.infer<typeof LinkListBlockPropsSchema>
 export type SocialIconsBlockProps = z.infer<typeof SocialIconsBlockPropsSchema>
 export type CTABlockProps = z.infer<typeof CTABlockPropsSchema>
 export type GalleryBlockProps = z.infer<typeof GalleryBlockPropsSchema>
+export type DividerBlockProps = z.infer<typeof DividerBlockPropsSchema>
+export type FooterBlockProps = z.infer<typeof FooterBlockPropsSchema>
 
 // ====================================
 // USER SITE DATA

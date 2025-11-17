@@ -528,22 +528,30 @@ export function LinkListEditor({ props, onChange, onSave, onClose }: LinkListEdi
   const updateCustomization = (updates: any) => {
     const newCustomization = { ...customization, ...updates }
     setCustomization(newCustomization)
-    
+
     // Always set customColors when user is actively customizing
     // This allows each style to use the custom colors instead of their original defaults
+    // All 13+ properties are properly mapped for standardization
     updateProps({
       customColors: {
+        // Basic colors (5 properties)
         primary: newCustomization.primaryColor,
         secondary: newCustomization.secondaryColor,
         text: newCustomization.textColor,
-        accent: newCustomization.primaryColor,
-        background: newCustomization.secondaryColor,
+        accent: newCustomization.accentColor || newCustomization.primaryColor,
+        background: newCustomization.backgroundColor || newCustomization.secondaryColor,
+        // Extended gradient colors (2 properties)
         tertiary: newCustomization.tertiaryColor,
         quaternary: newCustomization.quaternaryColor,
+        // Effect colors (4 properties)
         glow: newCustomization.glowColor,
         highlight: newCustomization.highlightColor,
-        gradientType: 'linear',
-        gradientDirection: newCustomization.gradientDirection
+        shadow: newCustomization.shadowColor,
+        border: newCustomization.borderColor,
+        // Gradient configuration (2+ properties)
+        gradientType: newCustomization.gradientType || 'linear',
+        gradientDirection: newCustomization.gradientDirection || 'to right',
+        gradientStops: newCustomization.gradientStops
       }
     })
   }
@@ -802,14 +810,24 @@ export function LinkListEditor({ props, onChange, onSave, onClose }: LinkListEdi
                           onClick={() => {
                             const advanced = preset.advanced;
                             updateCustomization({
+                              // Basic colors (5 properties)
                               primaryColor: preset.colors.primary,
                               secondaryColor: preset.colors.secondary,
                               textColor: preset.colors.text,
-                              tertiaryColor: advanced?.tertiary || preset.colors.accent,
-                              quaternaryColor: advanced?.quaternary || preset.colors.primary,
-                              glowColor: advanced?.glow || preset.colors.primary,
-                              highlightColor: advanced?.highlight || '#ffffff',
-                              gradientDirection: advanced?.gradientDirection || 'to right'
+                              accentColor: preset.colors.accent,
+                              backgroundColor: preset.colors.background,
+                              // Extended gradient colors (2 properties)
+                              tertiaryColor: advanced.tertiary,
+                              quaternaryColor: advanced.quaternary,
+                              // Effect colors (4 properties)
+                              glowColor: advanced.glow,
+                              highlightColor: advanced.highlight,
+                              shadowColor: advanced.shadow,
+                              borderColor: advanced.border,
+                              // Gradient configuration (2+ properties)
+                              gradientType: advanced.gradientType,
+                              gradientDirection: advanced.gradientDirection,
+                              gradientStops: advanced.gradientStops
                             })
                           }}
                           className="p-3 border border-gray-200 rounded-lg hover:border-gray-300 transition-colors text-left"
