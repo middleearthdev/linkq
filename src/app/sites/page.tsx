@@ -498,7 +498,7 @@ export default function MySitesPage() {
                       key={site.id}
                       className="border-gray-700 hover:shadow-lg transition-all cursor-pointer"
                       style={{ backgroundColor: '#1A2332', borderColor: '#2A3441' }}
-                      onClick={() => window.location.href = `/editor/${site.handle}`}
+                      onClick={() => window.location.href = `/editor/${site.id}`}
                     >
                       <CardContent className="p-4">
                         <div className="flex items-center justify-between">
@@ -591,7 +591,7 @@ export default function MySitesPage() {
                                 className="h-8 w-8 p-0 text-gray-400 hover:text-white"
                                 onClick={(e) => {
                                   e.stopPropagation()
-                                  window.location.href = `/editor/${site.handle}`
+                                  window.location.href = `/editor/${site.id}`
                                 }}
                               >
                                 <Edit3 className="h-4 w-4" />
@@ -654,7 +654,7 @@ export default function MySitesPage() {
                       key={site.id}
                       className="border-gray-700 hover:shadow-lg transition-all cursor-pointer"
                       style={{ backgroundColor: '#1A2332', borderColor: '#2A3441' }}
-                      onClick={() => window.location.href = `/editor/${site.handle}`}
+                      onClick={() => window.location.href = `/editor/${site.id}`}
                     >
                       <CardHeader className="pb-3">
                         <div className="flex items-start justify-between">

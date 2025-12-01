@@ -1,12 +1,15 @@
 /**
  * Dynamic Template Renderer Component
  * Renders templates using Block Registry - Zero Code Changes for New Templates!
+ * Now supports Background Registry System for consistent background management
  */
 
 "use client"
 
 import { useEffect } from "react"
 import { getBlockComponent } from "@/components/blocks/registry"
+import { getBackground, getBackgroundStyles, migrateOldBackground } from "@/lib/backgrounds/registry"
+import { BackgroundRenderer } from "@/components/backgrounds/BackgroundRenderer"
 
 interface BlockData {
   id: string
@@ -21,6 +24,7 @@ interface SiteData {
     description: string
     theme: Record<string, string>
     font?: string
+    backgroundKey?: string // New: Background registry key
   }
 }
 
@@ -36,6 +40,7 @@ export function DynamicTemplateRenderer({
   isPreview = false
 }: DynamicTemplateRendererProps) {
 
+  console.log(siteData, 'siteData')
   // Apply CSS variables from theme - scoped for preview mode, global for client sites
   useEffect(() => {
     console.log(siteData)
@@ -111,11 +116,13 @@ export function DynamicTemplateRenderer({
   // Dynamic block rendering using registry
   const renderBlock = (block: BlockData) => {
     const BlockComponent = getBlockComponent(block.type)
-
     if (!BlockComponent) {
       console.warn(`Block component not found for type: ${block.type}`)
       return null
     }
+
+    console.log(BlockComponent, 'BlockComponent')
+    console.log(block.type, 'block.type')
 
     return (
       <BlockComponent
@@ -160,13 +167,67 @@ export function DynamicTemplateRenderer({
       })
     }
 
-    // Default styles
-    style.background = style['--background'] || 'linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%)'
+    // Background handling with new registry system
+    let backgroundKey = siteData.meta?.backgroundKey
+
+    // Backward compatibility: migrate old --background CSS variable to registry key
+    if (!backgroundKey && style['--background']) {
+      backgroundKey = migrateOldBackground(style['--background'])
+    }
+
+    // Apply background from registry or fallback to old system
+    if (backgroundKey) {
+      const bgStyles = getBackgroundStyles(backgroundKey)
+      Object.assign(style, bgStyles)
+    } else {
+      // Fallback to old --background CSS variable
+      style.background = style['--background'] || 'linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%)'
+    }
+
     style.color = style['--text-color'] || '#333'
 
     return style
   }
 
+  // Check if we need to use BackgroundRenderer (for animated/video backgrounds)
+  const backgroundKey = siteData.meta?.backgroundKey || (siteData.meta.theme?.['--background'] ? migrateOldBackground(siteData.meta.theme['--background']) : null)
+  const background = backgroundKey ? getBackground(backgroundKey) : null
+  const needsBackgroundRenderer = background && (background.type === 'animated' || background.type === 'video')
+
+  // If we need BackgroundRenderer, wrap content with it
+  if (needsBackgroundRenderer && backgroundKey) {
+    return (
+      <BackgroundRenderer backgroundKey={backgroundKey} className={`min-h-screen ${className}`}>
+        <div className="relative container mx-auto px-4 py-8" style={{ zIndex: 2, ...getContainerStyle() }}>
+          <div className="max-w-2xl mx-auto template-content">
+            {siteData.blocks.map(renderBlock)}
+
+            {/* LinkQ Branding */}
+            {!isPreview && (
+              <div className="text-center mt-12 pt-8 border-t border-opacity-20"
+                style={{ borderColor: 'var(--border-color, #e5e7eb)' }}>
+                <p className="text-sm opacity-60"
+                  style={{ color: 'var(--text-secondary, #6b7280)' }}>
+                  Made with{" "}
+                  <a
+                    href="https://linkq.id"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="font-semibold hover:opacity-80 transition-opacity"
+                    style={{ color: 'var(--primary-color, #66A38A)' }}
+                  >
+                    LinkQ
+                  </a>
+                </p>
+              </div>
+            )}
+          </div>
+        </div>
+      </BackgroundRenderer>
+    )
+  }
+
+  // Otherwise, use regular CSS background
   return (
     <div
       className={`min-h-screen template-container ${className} relative`}
@@ -182,7 +243,7 @@ export function DynamicTemplateRenderer({
       />
 
       <div className="relative container mx-auto px-4 py-8" style={{ zIndex: 2 }}>
-        <div className="max-w-md mx-auto template-content">
+        <div className="max-w-2xl mx-auto template-content">
           {siteData.blocks.map(renderBlock)}
 
           {/* LinkQ Branding */}

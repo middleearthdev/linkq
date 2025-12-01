@@ -24,6 +24,7 @@ export interface TemplateManifest {
   defaults: {
     tokens: Record<string, string>      // CSS custom properties
     blockProps: Record<string, any>     // Default props per block type
+    backgroundKey?: string              // Background registry key
     meta: {
       title?: string
       description?: string
@@ -85,6 +86,7 @@ export interface UserSiteData {
     description: string
     theme: Record<string, string>
     font?: string
+    backgroundKey?: string   // Background registry key
   }
   
   // Premium features
@@ -121,16 +123,41 @@ export interface TemplatePreview {
   description?: string
   thumbnail?: string
   category: 'free' | 'premium' | 'pro'
-  
+
   // Pricing
   isPaid: boolean
   priceCents?: number
   requiredPlan?: 'FREE' | 'STARTER' | 'PRO'
-  
+
+  // Industry category system (new)
+  primaryCategory?: string
+  subCategory?: string
+  industryTags?: string[]
+  targetAudience?: string[]
+  recommendedFor?: string[]
+  includesFeatures?: string[]
+  localizedName?: { en: string; id: string }
+  localizedDesc?: { en: string; id: string }
+
+  // Tags (from template_tags relation)
+  tags?: Array<{
+    id: string
+    name: string
+    slug: string
+    description?: string
+    color?: string
+    icon?: string
+    category?: 'industry' | 'style' | 'purpose' | 'audience'
+    isPopular: boolean
+    sortOrder: number
+    createdAt: string
+    updatedAt: string
+  }>
+
   // Preview data
   previewData: UserSiteData
   features: string[]
-  
+
   // Status for current user
   isOwned: boolean
   canAccess: boolean

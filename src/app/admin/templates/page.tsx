@@ -45,7 +45,11 @@ import {
   XCircle,
   Palette,
   ChevronLeft,
-  ChevronRight
+  ChevronRight,
+  Download,
+  Upload,
+  LayoutGrid,
+  LayoutList
 } from "lucide-react"
 
 interface Template {
@@ -86,8 +90,10 @@ export default function AdminTemplatesPage() {
   const [filterStatus, setFilterStatus] = useState<string>("all")
   const [isAdmin, setIsAdmin] = useState(false)
   const [selectedTemplate, setSelectedTemplate] = useState<Template | null>(null)
+  const [selectedTemplateIds, setSelectedTemplateIds] = useState<Set<string>>(new Set())
   const [currentPage, setCurrentPage] = useState(1)
   const [itemsPerPage] = useState(10)
+  const [viewMode, setViewMode] = useState<'table' | 'card'>('table')
 
   useEffect(() => {
     async function checkAdminAndFetch() {
@@ -173,6 +179,188 @@ export default function AdminTemplatesPage() {
     }
   }
 
+  const handleDuplicateTemplate = async (templateId: string) => {
+    try {
+      const response = await fetch(`/api/admin/templates/${templateId}/duplicate`, {
+        method: "POST"
+      })
+
+      const result = await response.json()
+
+      if (response.ok && result.success) {
+        // Add the new template to the list
+        setTemplates(prev => [result.data, ...prev])
+
+        // Show success message
+        alert(result.message || "Template duplicated successfully!")
+      } else {
+        alert(result.error?.message || "Failed to duplicate template")
+      }
+    } catch (error) {
+      console.error("Failed to duplicate template:", error)
+      alert("Failed to duplicate template")
+    }
+  }
+
+  const handleExportTemplate = async (templateId: string) => {
+    try {
+      const response = await fetch(`/api/admin/templates/${templateId}/export`)
+
+      if (response.ok) {
+        // Get the filename from Content-Disposition header
+        const contentDisposition = response.headers.get('Content-Disposition')
+        const filename = contentDisposition
+          ? contentDisposition.split('filename=')[1].replace(/"/g, '')
+          : `template-export-${new Date().toISOString()}.json`
+
+        // Download the file
+        const blob = await response.blob()
+        const url = window.URL.createObjectURL(blob)
+        const a = document.createElement('a')
+        a.href = url
+        a.download = filename
+        document.body.appendChild(a)
+        a.click()
+        window.URL.revokeObjectURL(url)
+        document.body.removeChild(a)
+
+        alert("Template exported successfully!")
+      } else {
+        alert("Failed to export template")
+      }
+    } catch (error) {
+      console.error("Failed to export template:", error)
+      alert("Failed to export template")
+    }
+  }
+
+  const handleImportTemplate = async (file: File) => {
+    try {
+      // Read file content
+      const content = await file.text()
+      const importData = JSON.parse(content)
+
+      // Send to import API
+      const response = await fetch('/api/admin/templates/import', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(importData),
+      })
+
+      const result = await response.json()
+
+      if (response.ok && result.success) {
+        // Add the new template to the list
+        setTemplates(prev => [result.data, ...prev])
+
+        // Show success message
+        alert(result.message || "Template imported successfully!")
+      } else {
+        alert(result.error?.message || "Failed to import template")
+      }
+    } catch (error) {
+      console.error("Failed to import template:", error)
+      alert("Failed to import template. Please check the file format.")
+    }
+  }
+
+  // Bulk operations
+  const toggleSelectTemplate = (templateId: string) => {
+    const newSelected = new Set(selectedTemplateIds)
+    if (newSelected.has(templateId)) {
+      newSelected.delete(templateId)
+    } else {
+      newSelected.add(templateId)
+    }
+    setSelectedTemplateIds(newSelected)
+  }
+
+  const toggleSelectAll = () => {
+    if (selectedTemplateIds.size === paginatedTemplates.length) {
+      setSelectedTemplateIds(new Set())
+    } else {
+      setSelectedTemplateIds(new Set(paginatedTemplates.map(t => t.id)))
+    }
+  }
+
+  const handleBulkPublish = async () => {
+    if (selectedTemplateIds.size === 0) return
+    if (!confirm(`Publish ${selectedTemplateIds.size} template(s)?`)) return
+
+    try {
+      const promises = Array.from(selectedTemplateIds).map(id =>
+        fetch(`/api/admin/templates/${id}`, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ status: "PUBLISHED" })
+        })
+      )
+
+      await Promise.all(promises)
+
+      // Update local state
+      setTemplates(prev => prev.map(t =>
+        selectedTemplateIds.has(t.id) ? { ...t, status: "PUBLISHED" } : t
+      ))
+
+      setSelectedTemplateIds(new Set())
+      alert(`${selectedTemplateIds.size} template(s) published successfully!`)
+    } catch (error) {
+      console.error("Bulk publish failed:", error)
+      alert("Failed to publish templates")
+    }
+  }
+
+  const handleBulkArchive = async () => {
+    if (selectedTemplateIds.size === 0) return
+    if (!confirm(`Archive ${selectedTemplateIds.size} template(s)?`)) return
+
+    try {
+      const promises = Array.from(selectedTemplateIds).map(id =>
+        fetch(`/api/admin/templates/${id}`, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ status: "ARCHIVED" })
+        })
+      )
+
+      await Promise.all(promises)
+
+      // Update local state
+      setTemplates(prev => prev.map(t =>
+        selectedTemplateIds.has(t.id) ? { ...t, status: "ARCHIVED" } : t
+      ))
+
+      setSelectedTemplateIds(new Set())
+      alert(`${selectedTemplateIds.size} template(s) archived successfully!`)
+    } catch (error) {
+      console.error("Bulk archive failed:", error)
+      alert("Failed to archive templates")
+    }
+  }
+
+  const handleBulkDelete = async () => {
+    if (selectedTemplateIds.size === 0) return
+    if (!confirm(`Delete ${selectedTemplateIds.size} template(s)? This action cannot be undone.`)) return
+
+    try {
+      const promises = Array.from(selectedTemplateIds).map(id =>
+        fetch(`/api/admin/templates/${id}`, { method: "DELETE" })
+      )
+
+      await Promise.all(promises)
+
+      // Update local state
+      setTemplates(prev => prev.filter(t => !selectedTemplateIds.has(t.id)))
+
+      setSelectedTemplateIds(new Set())
+      alert(`${selectedTemplateIds.size} template(s) deleted successfully!`)
+    } catch (error) {
+      console.error("Bulk delete failed:", error)
+      alert("Failed to delete templates")
+    }
+  }
+
   const filteredTemplates = templates.filter(template => {
     const matchesSearch = template.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       template.description.toLowerCase().includes(searchTerm.toLowerCase())
@@ -237,16 +425,43 @@ export default function AdminTemplatesPage() {
               <h1 className="text-2xl font-bold text-white ml-4">Templates</h1>
             </div>
 
-            <Button
-              onClick={() => router.push("/admin/templates/new")}
-              className="text-white"
-              style={{ backgroundColor: '#66A38A' }}
-              onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#5A8F7A'}
-              onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#66A38A'}
-            >
-              <Plus className="h-4 w-4 mr-2" />
-              Create Template
-            </Button>
+            <div className="flex gap-2">
+              <label htmlFor="import-file">
+                <Button
+                  variant="outline"
+                  className="text-gray-300 border-gray-600 hover:bg-gray-800"
+                  onClick={() => document.getElementById('import-file')?.click()}
+                  type="button"
+                >
+                  <Upload className="h-4 w-4 mr-2" />
+                  Import
+                </Button>
+              </label>
+              <input
+                id="import-file"
+                type="file"
+                accept=".json"
+                onChange={(e) => {
+                  const file = e.target.files?.[0]
+                  if (file) {
+                    handleImportTemplate(file)
+                    e.target.value = '' // Reset input
+                  }
+                }}
+                className="hidden"
+              />
+
+              <Button
+                onClick={() => router.push("/admin/templates/new")}
+                className="text-white"
+                style={{ backgroundColor: '#66A38A' }}
+                onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#5A8F7A'}
+                onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#66A38A'}
+              >
+                <Plus className="h-4 w-4 mr-2" />
+                Create Template
+              </Button>
+            </div>
           </div>
         </div>
       </header>
@@ -254,15 +469,15 @@ export default function AdminTemplatesPage() {
       {/* Main Content */}
       <main className="max-w-full mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Filters */}
-        <div className="flex justify-between items-center mb-6">
-          <div className="flex items-center space-x-4">
-            <div className="relative">
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
+          <div className="flex flex-wrap items-center gap-2 sm:gap-4 w-full sm:w-auto">
+            <div className="relative flex-1 sm:flex-initial min-w-[200px]">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
               <Input
                 placeholder="Search templates..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-10 w-64 bg-gray-800 border-gray-600 text-white placeholder-gray-400 focus:border-gray-500"
+                className="pl-10 w-full sm:w-64 bg-gray-800 border-gray-600 text-white placeholder-gray-400 focus:border-gray-500"
               />
             </div>
 
@@ -270,7 +485,8 @@ export default function AdminTemplatesPage() {
               <DropdownMenuTrigger asChild>
                 <Button variant="outline" className="text-gray-300 border-gray-600 hover:bg-gray-700 hover:text-white">
                   <Filter className="h-4 w-4 mr-2" />
-                  Filter: {filterStatus === "all" ? "All" : filterStatus}
+                  <span className="hidden sm:inline">Filter: {filterStatus === "all" ? "All" : filterStatus}</span>
+                  <span className="sm:hidden">{filterStatus === "all" ? "All" : filterStatus}</span>
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent className="bg-gray-800 border-gray-600">
@@ -290,9 +506,29 @@ export default function AdminTemplatesPage() {
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
+
+            {/* View Mode Toggle */}
+            <div className="flex border border-gray-600 rounded-md">
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setViewMode('table')}
+                className={`rounded-r-none ${viewMode === 'table' ? 'bg-gray-700 text-white' : 'text-gray-400 hover:text-white hover:bg-gray-800'}`}
+              >
+                <LayoutList className="h-4 w-4" />
+              </Button>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setViewMode('card')}
+                className={`rounded-l-none border-l border-gray-600 ${viewMode === 'card' ? 'bg-gray-700 text-white' : 'text-gray-400 hover:text-white hover:bg-gray-800'}`}
+              >
+                <LayoutGrid className="h-4 w-4" />
+              </Button>
+            </div>
           </div>
 
-          <div className="text-sm text-gray-400">
+          <div className="text-sm text-gray-400 w-full sm:w-auto text-left sm:text-right">
             {totalPages > 1 ? (
               <>
                 Page {currentPage} of {totalPages} • {filteredTemplates.length} of {templates.length} templates
@@ -305,25 +541,80 @@ export default function AdminTemplatesPage() {
           </div>
         </div>
 
+        {/* Bulk Actions Toolbar */}
+        {selectedTemplateIds.size > 0 && (
+          <div className="bg-blue-900/30 border border-blue-500/50 rounded-lg p-3 sm:p-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-0 mb-6">
+            <div className="text-white font-medium text-sm sm:text-base">
+              {selectedTemplateIds.size} template(s) selected
+            </div>
+            <div className="flex flex-wrap gap-2 w-full sm:w-auto">
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={handleBulkPublish}
+                className="text-green-400 border-green-500/50 hover:bg-green-900/20 flex-1 sm:flex-initial"
+              >
+                <CheckCircle className="h-4 w-4 sm:mr-2" />
+                <span className="hidden sm:inline">Publish</span>
+              </Button>
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={handleBulkArchive}
+                className="text-yellow-400 border-yellow-500/50 hover:bg-yellow-900/20 flex-1 sm:flex-initial"
+              >
+                <Archive className="h-4 w-4 sm:mr-2" />
+                <span className="hidden sm:inline">Archive</span>
+              </Button>
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={handleBulkDelete}
+                className="text-red-400 border-red-500/50 hover:bg-red-900/20 flex-1 sm:flex-initial"
+              >
+                <Trash2 className="h-4 w-4 sm:mr-2" />
+                <span className="hidden sm:inline">Delete</span>
+              </Button>
+              <Button
+                size="sm"
+                variant="ghost"
+                onClick={() => setSelectedTemplateIds(new Set())}
+                className="text-gray-400 hover:text-white"
+              >
+                Clear
+              </Button>
+            </div>
+          </div>
+        )}
+
         {/* Split Layout - Template List & Preview */}
-        <div className="grid grid-cols-1 lg:grid-cols-10 gap-6 h-[calc(120vh-80px)]">
+        <div className="grid grid-cols-1 xl:grid-cols-12 gap-4 lg:gap-6">
 
           {/* Left Side - Template List */}
-          <Card className="border-gray-700 lg:col-span-6" style={{ backgroundColor: '#1A2332', borderColor: '#2A3441' }}>
-            <CardHeader>
-              <CardTitle className="text-white">Template List</CardTitle>
-              <CardDescription className="text-gray-400">
+          <Card className="border-gray-700 xl:col-span-8" style={{ backgroundColor: '#1A2332', borderColor: '#2A3441' }}>
+            <CardHeader className="pb-4">
+              <CardTitle className="text-white text-lg sm:text-xl">Template List</CardTitle>
+              <CardDescription className="text-gray-400 text-sm">
                 Select a template to preview
               </CardDescription>
             </CardHeader>
             <CardContent className="p-0 overflow-hidden">
-              <div className="h-[calc(120vh-200px)] overflow-y-auto">
-                <div className="p-6 pt-0">
-                  <div className="overflow-x-auto scrollbar-thin scrollbar-thumb-gray-600 scrollbar-track-gray-800">
-                    <Table className="min-w-[1200px]">
+              <div className="max-h-[calc(100vh-280px)] overflow-y-auto">
+                <div className="p-4 sm:p-6 pt-0">
+                  {viewMode === 'table' ? (
+                    /* Table View */
+                    <div className="overflow-x-auto scrollbar-thin scrollbar-thumb-gray-600 scrollbar-track-gray-800">
+                      <Table className="min-w-[1000px]">
                     <TableHeader>
                       <TableRow className="border-gray-700 hover:bg-[#1F2937]">
-                        <TableHead className="text-gray-300 text-xs w-16 sticky left-0 bg-[#1A2332] z-10 shadow-[2px_0_5px_rgba(0,0,0,0.1)]"></TableHead>
+                        <TableHead className="text-gray-300 text-xs w-16 sticky left-0 bg-[#1A2332] z-10 shadow-[2px_0_5px_rgba(0,0,0,0.1)]">
+                          <input
+                            type="checkbox"
+                            checked={selectedTemplateIds.size === paginatedTemplates.length && paginatedTemplates.length > 0}
+                            onChange={toggleSelectAll}
+                            className="w-4 h-4 rounded border-gray-600 bg-gray-700 text-blue-600 focus:ring-blue-500"
+                          />
+                        </TableHead>
                         <TableHead className="text-gray-300 text-xs min-w-[250px] sticky left-16 bg-[#1A2332] z-10 shadow-[2px_0_5px_rgba(0,0,0,0.1)]">Template</TableHead>
                         <TableHead className="text-gray-300 text-xs min-w-[100px]">Creator</TableHead>
                         <TableHead className="text-gray-300 text-xs min-w-[80px]">Category</TableHead>
@@ -343,10 +634,16 @@ export default function AdminTemplatesPage() {
                             }`}
                           onClick={() => setSelectedTemplate(template)}
                         >
-                          <TableCell className={`w-16 sticky left-0 z-10 shadow-[2px_0_5px_rgba(0,0,0,0.1)] ${selectedTemplate?.id === template.id ? 'bg-gray-700' : 'bg-[#1A2332]'} hover:bg-gray-800 transition-colors`}>
-                            <div className="w-8 h-8 bg-gradient-to-br from-green-400 to-green-600 rounded-md flex items-center justify-center flex-shrink-0">
-                              <Palette className="w-4 h-4 text-white" />
-                            </div>
+                          <TableCell
+                            className={`w-16 sticky left-0 z-10 shadow-[2px_0_5px_rgba(0,0,0,0.1)] ${selectedTemplate?.id === template.id ? 'bg-gray-700' : 'bg-[#1A2332]'} hover:bg-gray-800 transition-colors`}
+                            onClick={(e) => e.stopPropagation()}
+                          >
+                            <input
+                              type="checkbox"
+                              checked={selectedTemplateIds.has(template.id)}
+                              onChange={() => toggleSelectTemplate(template.id)}
+                              className="w-4 h-4 rounded border-gray-600 bg-gray-700 text-blue-600 focus:ring-blue-500"
+                            />
                           </TableCell>
                           <TableCell className={`min-w-[250px] sticky left-16 z-10 shadow-[2px_0_5px_rgba(0,0,0,0.1)] ${selectedTemplate?.id === template.id ? 'bg-gray-700' : 'bg-[#1A2332]'} hover:bg-gray-800 transition-colors`}>
                             <div>
@@ -414,9 +711,13 @@ export default function AdminTemplatesPage() {
                                   <Edit className="h-4 w-4 mr-2" />
                                   Edit
                                 </DropdownMenuItem>
-                                <DropdownMenuItem className="text-white hover:bg-gray-700">
+                                <DropdownMenuItem onClick={() => handleDuplicateTemplate(template.id)} className="text-white hover:bg-gray-700">
                                   <Copy className="h-4 w-4 mr-2" />
                                   Duplicate
+                                </DropdownMenuItem>
+                                <DropdownMenuItem onClick={() => handleExportTemplate(template.id)} className="text-white hover:bg-gray-700">
+                                  <Download className="h-4 w-4 mr-2" />
+                                  Export
                                 </DropdownMenuItem>
                                 <DropdownMenuSeparator />
                                 {template.status === "PUBLISHED" ? (
@@ -444,7 +745,105 @@ export default function AdminTemplatesPage() {
                       ))}
                     </TableBody>
                   </Table>
-                  </div>
+                    </div>
+                  ) : (
+                    /* Card View */
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                      {paginatedTemplates.map((template) => (
+                        <Card
+                          key={template.id}
+                          className={`border-gray-700 hover:border-gray-600 cursor-pointer transition-all ${selectedTemplate?.id === template.id ? 'ring-2 ring-green-500 border-green-500' : ''}`}
+                          style={{ backgroundColor: '#1F2937' }}
+                          onClick={() => setSelectedTemplate(template)}
+                        >
+                          <CardContent className="p-4">
+                            <div className="flex items-start justify-between mb-3">
+                              <input
+                                type="checkbox"
+                                checked={selectedTemplateIds.has(template.id)}
+                                onChange={(e) => {
+                                  e.stopPropagation()
+                                  toggleSelectTemplate(template.id)
+                                }}
+                                className="w-4 h-4 rounded border-gray-600 bg-gray-700 text-blue-600 focus:ring-blue-500 mt-1"
+                              />
+                              <DropdownMenu>
+                                <DropdownMenuTrigger asChild onClick={(e) => e.stopPropagation()}>
+                                  <Button variant="ghost" className="h-6 w-6 p-0 text-gray-300 hover:text-white hover:bg-gray-700">
+                                    <MoreHorizontal className="h-4 w-4" />
+                                  </Button>
+                                </DropdownMenuTrigger>
+                                <DropdownMenuContent align="end" className="bg-gray-800 border-gray-600">
+                                  <DropdownMenuLabel className="text-gray-300">Actions</DropdownMenuLabel>
+                                  <DropdownMenuSeparator />
+                                  <DropdownMenuItem onClick={() => setSelectedTemplate(template)} className="text-white hover:bg-gray-700">
+                                    <Eye className="h-4 w-4 mr-2" />
+                                    Preview
+                                  </DropdownMenuItem>
+                                  <DropdownMenuItem onClick={() => router.push(`/admin/templates/${template.id}`)} className="text-white hover:bg-gray-700">
+                                    <Edit className="h-4 w-4 mr-2" />
+                                    Edit
+                                  </DropdownMenuItem>
+                                  <DropdownMenuItem onClick={() => handleDuplicateTemplate(template.id)} className="text-white hover:bg-gray-700">
+                                    <Copy className="h-4 w-4 mr-2" />
+                                    Duplicate
+                                  </DropdownMenuItem>
+                                  <DropdownMenuItem onClick={() => handleExportTemplate(template.id)} className="text-white hover:bg-gray-700">
+                                    <Download className="h-4 w-4 mr-2" />
+                                    Export
+                                  </DropdownMenuItem>
+                                  <DropdownMenuSeparator />
+                                  {template.status === "PUBLISHED" ? (
+                                    <DropdownMenuItem onClick={() => handleStatusChange(template.id, "ARCHIVED")} className="text-white hover:bg-gray-700">
+                                      <Archive className="h-4 w-4 mr-2" />
+                                      Archive
+                                    </DropdownMenuItem>
+                                  ) : (
+                                    <DropdownMenuItem onClick={() => handleStatusChange(template.id, "PUBLISHED")} className="text-white hover:bg-gray-700">
+                                      <CheckCircle className="h-4 w-4 mr-2" />
+                                      Publish
+                                    </DropdownMenuItem>
+                                  )}
+                                  <DropdownMenuItem
+                                    className="text-red-400 hover:bg-red-900/20"
+                                    onClick={() => handleDeleteTemplate(template.id)}
+                                  >
+                                    <Trash2 className="h-4 w-4 mr-2" />
+                                    Delete
+                                  </DropdownMenuItem>
+                                </DropdownMenuContent>
+                              </DropdownMenu>
+                            </div>
+
+                            <div className="mb-3">
+                              <h3 className="font-semibold text-white text-sm mb-1">{template.name}</h3>
+                              <p className="text-xs text-gray-400 line-clamp-2">{template.description}</p>
+                            </div>
+
+                            <div className="flex flex-wrap gap-2 mb-3">
+                              {getStatusBadge(template.status)}
+                              {getPriceBadge(template.isPaid, template.priceCents)}
+                              <Badge variant="outline" className="text-gray-300 border-gray-600 text-[10px] px-1.5 py-0 h-5">
+                                {template.category}
+                              </Badge>
+                            </div>
+
+                            <div className="flex items-center justify-between text-xs text-gray-400 pt-3 border-t border-gray-700">
+                              <div>
+                                <span className="text-white font-medium">{template._count.purchases}</span> purchases
+                              </div>
+                              <div>
+                                {new Date(template.updatedAt).toLocaleDateString('id-ID', {
+                                  day: '2-digit',
+                                  month: 'short'
+                                })}
+                              </div>
+                            </div>
+                          </CardContent>
+                        </Card>
+                      ))}
+                    </div>
+                  )}
 
                   {filteredTemplates.length === 0 && (
                     <div className="text-center py-8 text-gray-400">
@@ -531,14 +930,14 @@ export default function AdminTemplatesPage() {
           </Card>
 
           {/* Right Side - Template Preview */}
-          <Card className="border-gray-700 lg:col-span-4" style={{ backgroundColor: '#1A2332', borderColor: '#2A3441' }}>
-            <CardHeader>
-              <CardTitle className="text-white">Template Preview</CardTitle>
-              <CardDescription className="text-gray-400">
+          <Card className="border-gray-700 xl:col-span-4 hidden xl:block" style={{ backgroundColor: '#1A2332', borderColor: '#2A3441' }}>
+            <CardHeader className="pb-4">
+              <CardTitle className="text-white text-lg">Template Preview</CardTitle>
+              <CardDescription className="text-gray-400 text-sm">
                 {selectedTemplate ? `Previewing: ${selectedTemplate.name}` : 'Select a template to preview'}
               </CardDescription>
             </CardHeader>
-            <CardContent className="flex items-center justify-center p-6">
+            <CardContent className="flex items-center justify-center p-4">
               {selectedTemplate ? (
                 <div className="w-full h-full flex items-center justify-center">
                   {/* Mobile Frame - iPhone 14 Pro dimensions */}
@@ -590,7 +989,8 @@ export default function AdminTemplatesPage() {
                               meta: {
                                 title: selectedTemplate.name,
                                 description: selectedTemplate.description || 'Template preview',
-                                theme: selectedTemplate.activeVersion?.cssVarsJson || {}
+                                theme: selectedTemplate.activeVersion?.cssVarsJson || {},
+                                backgroundKey: selectedTemplate.activeVersion?.manifestJson?.defaults?.backgroundKey
                               }
                             }
                           }

@@ -5,6 +5,9 @@ import { FooterBlock } from '@/components/blocks/FooterBlock'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { FooterBlockProps } from '@/types'
+import { Smartphone, Tablet } from 'lucide-react'
+
+type DeviceType = 'mobile' | 'tablet'
 
 export default function FooterBlockDemoPage() {
   // State for live customization
@@ -16,6 +19,12 @@ export default function FooterBlockDemoPage() {
   const [showSocial, setShowSocial] = useState(true)
   const [showLinks, setShowLinks] = useState(true)
   const [borderTop, setBorderTop] = useState(false)
+  const [deviceType, setDeviceType] = useState<DeviceType>('mobile')
+
+  const deviceFrameClass = {
+    mobile: 'max-w-[375px] mx-auto',
+    tablet: 'max-w-2xl mx-auto'
+  }
 
   // Sample data
   const sampleLinks = [
@@ -243,27 +252,79 @@ export default function FooterBlockDemoPage() {
             </div>
           </div>
 
-          {/* Live Preview */}
-          <div className="bg-gradient-to-br from-gray-50 to-gray-100 rounded-xl border-2 border-dashed border-gray-300 overflow-hidden">
-            <div className="bg-white p-8 mb-4">
-              <div className="text-center text-gray-600">
-                <p className="text-sm">Page content above footer...</p>
+          {/* Device Preview Toggle */}
+          <div className="mb-6 p-4 bg-gradient-to-r from-indigo-50 to-purple-50 rounded-lg border-2 border-indigo-200">
+            <label className="block text-sm font-semibold text-gray-700 mb-3">
+              Device Preview
+            </label>
+            <div className="flex gap-2">
+              <Button
+                onClick={() => setDeviceType('mobile')}
+                variant={deviceType === 'mobile' ? 'default' : 'outline'}
+                className="flex-1 gap-2"
+              >
+                <Smartphone className="w-4 h-4" />
+                <span>Mobile</span>
+                <span className="text-xs opacity-70">(375px)</span>
+              </Button>
+              <Button
+                onClick={() => setDeviceType('tablet')}
+                variant={deviceType === 'tablet' ? 'default' : 'outline'}
+                className="flex-1 gap-2"
+              >
+                <Tablet className="w-4 h-4" />
+                <span>Tablet</span>
+                <span className="text-xs opacity-70">(672px)</span>
+              </Button>
+            </div>
+          </div>
+
+          {/* Device Frame Preview */}
+          <div className="text-center mb-4">
+            <div className="inline-flex items-center gap-2 bg-gray-100 px-4 py-2 rounded-full text-sm font-medium">
+              {deviceType === 'mobile' ? (
+                <>
+                  <Smartphone className="w-4 h-4" />
+                  <span>Mobile Preview</span>
+                </>
+              ) : (
+                <>
+                  <Tablet className="w-4 h-4" />
+                  <span>Tablet Preview</span>
+                </>
+              )}
+            </div>
+          </div>
+
+          <div className={deviceFrameClass[deviceType]}>
+            <div className="bg-white rounded-2xl shadow-2xl overflow-hidden border-8 border-gray-800">
+              <div className="bg-gray-900 h-6 flex items-center justify-center">
+                <div className="w-20 h-4 bg-gray-800 rounded-full"></div>
+              </div>
+              <div className={`bg-gradient-to-br from-gray-50 to-gray-100 relative overflow-y-auto flex flex-col ${
+                deviceType === 'mobile' ? 'h-[500px]' : 'h-[400px]'
+              }`}>
+                <div className="flex-1 bg-white p-6">
+                  <div className="text-center text-gray-600">
+                    <p className="text-sm">Page content above footer...</p>
+                  </div>
+                </div>
+                <FooterBlock
+                  props={{
+                    copyrightText,
+                    layout: selectedLayout,
+                    showSocial,
+                    showLinks,
+                    links: sampleLinks,
+                    socialLinks: sampleSocialLinks,
+                    backgroundColor,
+                    textColor,
+                    spacing: selectedSpacing,
+                    borderTop,
+                  }}
+                />
               </div>
             </div>
-            <FooterBlock
-              props={{
-                copyrightText,
-                layout: selectedLayout,
-                showSocial,
-                showLinks,
-                links: sampleLinks,
-                socialLinks: sampleSocialLinks,
-                backgroundColor,
-                textColor,
-                spacing: selectedSpacing,
-                borderTop,
-              }}
-            />
           </div>
         </Card>
 

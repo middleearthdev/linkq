@@ -241,19 +241,243 @@ export function generateTemplatePreviewData(manifest: TemplateManifest): any {
             style: props.style || 'round'
           }
         })
+      } else if (blockType === 'gallery') {
+        blocks.push({
+          id: (blockId++).toString(),
+          type: 'gallery',
+          props: {
+            items: props.items || props.images || [
+              { id: '1', type: 'image', url: 'https://images.unsplash.com/photo-1501594907352-04cda38ebc29?w=400', caption: 'Gallery 1' },
+              { id: '2', type: 'image', url: 'https://images.unsplash.com/photo-1506102383123-c8ef1e872756?w=400', caption: 'Gallery 2' },
+              { id: '3', type: 'image', url: 'https://images.unsplash.com/photo-1470071459604-3b5ec3a7fe05?w=400', caption: 'Gallery 3' },
+              { id: '4', type: 'image', url: 'https://images.unsplash.com/photo-1441974231531-c6227db76b6e?w=400', caption: 'Gallery 4' }
+            ],
+            layout: props.layout || 'grid',
+            columns: props.columns || 2,
+            aspectRatio: props.aspectRatio || 'square',
+            imageFilter: props.imageFilter || 'none',
+            spacing: props.spacing || 'md',
+            rounded: props.rounded || 'md',
+            showCaptions: props.showCaptions !== false
+          }
+        })
+      } else if (blockType === 'divider') {
+        blocks.push({
+          id: (blockId++).toString(),
+          type: 'divider',
+          props: {
+            style: props.style || 'solid',
+            thickness: props.thickness || 1,
+            color: props.color || '#e5e7eb',
+            spacing: props.spacing || 'md',
+            width: props.width || '100',
+            alignment: props.alignment || 'center',
+            icon: props.icon || 'none',
+            animated: props.animated || false
+          }
+        })
+      } else if (blockType === 'footer') {
+        blocks.push({
+          id: (blockId++).toString(),
+          type: 'footer',
+          props: {
+            copyrightText: props.copyrightText || '© 2024 Your Name',
+            layout: props.layout || 'centered',
+            showSocial: props.showSocial !== false,
+            showLinks: props.showLinks !== false,
+            links: props.links || [],
+            socialLinks: props.socialLinks || [],
+            backgroundColor: props.backgroundColor || 'transparent',
+            textColor: props.textColor || '#374151',
+            spacing: props.spacing || 'md',
+            borderTop: props.borderTop || false
+          }
+        })
+      } else if (blockType === 'analytics') {
+        blocks.push({
+          id: (blockId++).toString(),
+          type: 'analytics',
+          props: {
+            provider: props.provider || 'none',
+            trackingId: props.trackingId || ''
+          }
+        })
+      } else if (blockType === 'whatsapp-business') {
+        blocks.push({
+          id: (blockId++).toString(),
+          type: 'whatsapp-business',
+          props: {
+            phoneNumber: props.phoneNumber || '081234567890',
+            message: props.message || 'Halo, saya tertarik dengan produk Anda',
+            buttonText: props.buttonText || 'Chat via WhatsApp',
+            buttonStyle: props.buttonStyle || 'fab',
+            showIcon: props.showIcon !== false,
+            businessName: props.businessName || 'Business',
+            fabPosition: props.fabPosition || 'bottom-right',
+            fabSize: props.fabSize || 'default',
+            showLabel: props.showLabel !== false,
+            enablePulse: props.enablePulse !== false,
+            expandOnHover: props.expandOnHover !== false
+          }
+        })
+      } else if (blockType === 'qris-payment') {
+        blocks.push({
+          id: (blockId++).toString(),
+          type: 'qris-payment',
+          props: {
+            qrisImage: props.qrisImage || 'https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=QRIS_PREVIEW',
+            merchantName: props.merchantName || 'Merchant Name',
+            paymentMethods: props.paymentMethods || ['Gopay', 'OVO', 'Dana', 'ShopeePay'],
+            presetAmounts: props.presetAmounts || [50000, 100000, 200000],
+            allowCustomAmount: props.allowCustomAmount !== false,
+            instructions: props.instructions || 'Scan QR code dengan aplikasi e-wallet Anda',
+            showPaymentLogos: props.showPaymentLogos !== false
+          }
+        })
+      } else if (blockType === 'marketplace') {
+        blocks.push({
+          id: (blockId++).toString(),
+          type: 'marketplace',
+          props: {
+            stores: props.stores || {
+              tokopedia: {
+                storeUrl: 'https://tokopedia.com/your-store',
+                storeName: 'Your Store'
+              },
+              shopee: {
+                storeUrl: 'https://shopee.co.id/your-store',
+                shopId: 'yourstore'
+              }
+            },
+            layout: props.layout || 'buttons',
+            showBadges: props.showBadges !== false,
+            showRatings: props.showRatings !== false,
+            featuredProducts: props.featuredProducts || []
+          }
+        })
+      } else if (blockType === 'delivery-platform') {
+        blocks.push({
+          id: (blockId++).toString(),
+          type: 'delivery-platform',
+          props: {
+            platforms: props.platforms || {
+              gofood: {
+                url: 'https://gofood.link/a/preview',
+                merchantName: 'Your Restaurant'
+              },
+              grabfood: {
+                url: 'https://food.grab.com/id/en/restaurant/preview',
+                restaurantId: '1-PREVIEW'
+              }
+            },
+            layout: props.layout || 'buttons',
+            showRatings: props.showRatings !== false,
+            showPromos: props.showPromos !== false,
+            primaryPlatform: props.primaryPlatform || 'gofood'
+          }
+        })
+      } else if (blockType === 'location') {
+        blocks.push({
+          id: (blockId++).toString(),
+          type: 'location',
+          props: {
+            googleMapsUrl: props.googleMapsUrl || 'https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3966.521260322283!2d106.8195613!3d-6.1753924',
+            address: props.address || 'Your Address',
+            phone: props.phone || '021-12345678',
+            openingHours: props.openingHours || [
+              { day: 'Monday - Friday', hours: '09:00 - 18:00' },
+              { day: 'Saturday - Sunday', hours: 'Closed' }
+            ],
+            locationName: props.locationName || 'Your Location',
+            showDirectionsButton: props.showDirectionsButton !== false,
+            mapHeight: props.mapHeight || 300,
+            showCurrentStatus: props.showCurrentStatus !== false
+          }
+        })
+      } else if (blockType === 'product-catalog') {
+        blocks.push({
+          id: (blockId++).toString(),
+          type: 'product-catalog',
+          props: {
+            items: props.items || [
+              {
+                id: '1',
+                name: 'Nasi Goreng Spesial',
+                image: 'https://images.unsplash.com/photo-1603133872878-684f208fb84b?w=400',
+                price: 25000,
+                originalPrice: 30000,
+                description: 'Nasi goreng dengan telur, ayam, dan sayuran segar',
+                category: 'Main Course',
+                stock: 'available',
+                stockCount: 20,
+                badges: ['Hot', 'Promo'],
+                rating: 4.5,
+                reviewCount: 128
+              },
+              {
+                id: '2',
+                name: 'Mie Ayam Bakso',
+                image: 'https://images.unsplash.com/photo-1569718212165-3a8278d5f624?w=400',
+                price: 20000,
+                description: 'Mie ayam dengan bakso sapi dan pangsit goreng',
+                category: 'Main Course',
+                stock: 'available',
+                stockCount: 15,
+                badges: ['Popular'],
+                rating: 4.7,
+                reviewCount: 96
+              },
+              {
+                id: '3',
+                name: 'Es Teh Manis',
+                image: 'https://images.unsplash.com/photo-1556679343-c7306c1976bc?w=400',
+                price: 5000,
+                description: 'Teh manis dingin segar',
+                category: 'Beverages',
+                stock: 'available',
+                stockCount: 50,
+                rating: 4.2,
+                reviewCount: 45
+              },
+              {
+                id: '4',
+                name: 'Paket Nasi Ayam',
+                image: 'https://images.unsplash.com/photo-1598103442097-8b74394b95c6?w=400',
+                price: 35000,
+                originalPrice: 40000,
+                description: 'Paket lengkap dengan nasi, ayam goreng, sayur, dan sambal',
+                category: 'Packages',
+                stock: 'low',
+                stockCount: 3,
+                badges: ['Limited'],
+                rating: 4.8,
+                reviewCount: 203
+              }
+            ],
+            style: props.style || 'grid-card',
+            columns: props.columns || 2,
+            showSearch: props.showSearch !== false,
+            showCategories: props.showCategories !== false,
+            showStockIndicator: props.showStockIndicator !== false,
+            showRating: props.showRating !== false,
+            whatsappNumber: props.whatsappNumber || '081234567890',
+            ctaText: props.ctaText || 'Order via WhatsApp'
+          }
+        })
       }
     }
   }
 
   return {
     id: 'preview',
-    handle: 'preview', 
+    handle: 'preview',
     templateVersionId: 'preview',
     blocks,
     meta: {
       title: manifest.defaults?.meta?.title || 'Preview',
       description: manifest.defaults?.meta?.description || 'Template preview',
-      theme: manifest.defaults?.tokens || {}
+      theme: manifest.defaults?.tokens || {},
+      backgroundKey: manifest.defaults?.backgroundKey
     }
   }
 }

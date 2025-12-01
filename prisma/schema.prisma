@@ -139,27 +139,43 @@ model Template {
   name        String         // Display name
   description String?
   thumbnail   String?        // Preview image URL
-  category    String?        // "free", "premium", "pro"
+  category    String?        // "free", "premium", "pro" (kept for backward compatibility)
   status      TemplateStatus @default(DRAFT)
-  
+
+  // New: Industry-specific categorization
+  primaryCategory   String?  // 'creator', 'umkm', 'fnb', 'skincare', etc.
+  subCategory       String?  // 'beauty-creator', 'fashion-umkm', 'cafe', etc.
+  industryTags      String[] // ['food', 'instagram', 'ecommerce']
+  targetAudience    String[] // ['influencer', 'small-business', 'entrepreneur']
+
+  // Localization (JSON stored as JSONB in PostgreSQL)
+  localizedName     Json?    // { en: 'Creator Template', id: 'Template Kreator' }
+  localizedDesc     Json?    // { en: '...', id: '...' }
+
+  // Features & use cases
+  recommendedFor    String[] // Use cases: ['content-creator', 'online-shop', etc.]
+  includesFeatures  String[] // ['whatsapp', 'gallery', 'testimonials', 'analytics']
+
   // Creator info (for marketplace)
   creatorId   String?
   creator     String?        // Creator name
   revenueShare Int?          // Percentage (0-100)
-  
+
   // Timestamps
   createdAt   DateTime       @default(now())
   updatedAt   DateTime       @updatedAt
-  
+
   // Relations
   versions    TemplateVersion[]
   purchases   UserTemplatePurchase[]
   tags        TemplateTag[]
-  
+
   @@map("templates")
   @@index([slug])
   @@index([status])
   @@index([category])
+  @@index([primaryCategory])
+  @@index([subCategory])
 }
 
 model Tag {
@@ -276,30 +292,35 @@ model UserSite {
   id          String         @id @default(cuid())
   userId      String
   handle      String         @unique // e.g., "johndoe"
-  
+
   // Site configuration
   templateVersionId String
   dataJson    Json           // Block data and configuration
   customCss   String?        // Custom CSS (pro feature)
-  
+
+  // Background configuration (NEW)
+  backgroundType    String?  @default("gradient-soft-clouds") // Key from background registry
+  backgroundCustom  Json?    // Custom background config for advanced users
+  backgroundImage   String?  // Uploaded background image URL
+
   // SEO & metadata
   title       String?
   description String?
   favicon     String?
-  
+
   // Premium features
   customDomain String?       // Custom domain (pro feature)
   analyticsEnabled Boolean  @default(false)
   removeBranding Boolean    @default(false)
-  
+
   // Status
   status      UserSiteStatus @default(DRAFT)
   publishedAt DateTime?
-  
+
   // Timestamps
   createdAt   DateTime       @default(now())
   updatedAt   DateTime       @updatedAt
-  
+
   // Relations
   user        User           @relation(fields: [userId], references: [id], onDelete: Cascade)
   templateVersion TemplateVersion @relation(fields: [templateVersionId], references: [id])

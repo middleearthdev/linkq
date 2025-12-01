@@ -96,6 +96,16 @@ export async function GET(request: NextRequest) {
         priceCents: version.priceCents || undefined,
         requiredPlan: version.requiredPlan || undefined,
 
+        // New category system fields
+        primaryCategory: template.primaryCategory || undefined,
+        subCategory: template.subCategory || undefined,
+        industryTags: template.industryTags || [],
+        targetAudience: template.targetAudience || [],
+        recommendedFor: template.recommendedFor || [],
+        includesFeatures: template.includesFeatures || [],
+        localizedName: template.localizedName as { en: string; id: string } | undefined,
+        localizedDesc: template.localizedDesc as { en: string; id: string } | undefined,
+
         tags: template.tags.map(tagRelation => ({
           id: tagRelation.tag.id,
           name: tagRelation.tag.name,

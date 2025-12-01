@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { LinkListBlockProps } from '@/types'
 import { cn, trackEvent } from '@/lib/utils'
-import { generateCustomStyle } from '@/lib/link-list-styles'
+import { generateCustomStyle, isValidStyle, LinkListStyle } from '@/lib/link-list-styles'
 import { ExternalLink, Plus, Trash2 } from 'lucide-react'
 
 interface LinkListBlockComponentProps {
@@ -18,6 +18,13 @@ interface LinkListBlockComponentProps {
 
 export function LinkListBlock({ props, className, isEditing = false }: LinkListBlockComponentProps) {
   const { style = 'pill', items = [], maxItems, customColors } = props
+
+  // Validate style and fallback to 'card' if invalid
+  let validatedStyle = style
+  if (!isValidStyle(style)) {
+    console.warn(`[LinkListBlock] Style "${style}" not found in registry. Falling back to 'pill' style.`)
+    validatedStyle = 'pill'
+  }
 
   const displayItems = maxItems ? items.slice(0, maxItems) : items
   const activeItems = displayItems.filter(item => item.isActive !== false)
@@ -62,7 +69,7 @@ export function LinkListBlock({ props, className, isEditing = false }: LinkListB
       </>
     )
 
-    if (style === 'pill') {
+    if (validatedStyle === 'pill') {
       return (
         <button
           key={item.id || index}
@@ -90,101 +97,7 @@ export function LinkListBlock({ props, className, isEditing = false }: LinkListB
       )
     }
 
-    if (style === 'underline') {
-      return (
-        <button
-          key={item.id || index}
-          className={cn(
-            baseClasses,
-            'h-12 px-4 text-lg border-b-2 border-transparent',
-            customColors
-              ? 'text-[var(--custom-text)] hover:text-[var(--custom-primary)]'
-              : 'text-[var(--text-color)] hover:text-[var(--primary-color)]',
-            'bg-transparent hover:bg-[var(--card-background)]',
-            customColors
-              ? 'hover:border-[var(--custom-primary)]'
-              : 'hover:border-[var(--primary-color)]',
-            'transition-all duration-200'
-          )}
-          style={{
-            ...(customColors && {
-              color: customColors.text,
-              borderBottomColor: 'transparent',
-              ...customStyle
-            })
-          }}
-          onClick={() => handleLinkClick(item)}
-          disabled={isEditing}
-        >
-          {content}
-        </button>
-      )
-    }
-
-    if (style === 'card') {
-      return (
-        <button
-          key={item.id || index}
-          className={cn(
-            baseClasses,
-            'h-12 sm:h-16 px-4 sm:px-6 font-medium',
-            customColors
-              ? 'bg-[var(--custom-background)] text-[var(--custom-text)]'
-              : 'bg-[var(--card-background)] text-[var(--text-color)]',
-            'border border-[var(--border)] rounded-[var(--border-radius)]',
-            'shadow-[var(--shadow)] hover:shadow-lg',
-            customColors
-              ? 'hover:bg-[var(--custom-primary)] hover:text-[var(--custom-text)]'
-              : 'hover:bg-[var(--primary-color)] hover:text-[var(--card-background)]',
-            'transition-all duration-200 active:scale-98'
-          )}
-          style={{
-            ...(customColors && {
-              backgroundColor: customColors.background || customColors.secondary,
-              color: customColors.text,
-              borderColor: customColors.primary,
-              ...customStyle
-            })
-          }}
-          onClick={() => handleLinkClick(item)}
-          disabled={isEditing}
-        >
-          {content}
-        </button>
-      )
-    }
-
-    if (style === 'modern') {
-      return (
-        <button
-          key={item.id || index}
-          className={cn(
-            baseClasses,
-            'h-12 sm:h-14 px-4 sm:px-6 rounded-3xl font-medium text-base',
-            'shadow-[var(--shadow)] border',
-            'transition-all duration-200 active:scale-[0.98] hover:scale-[1.02]'
-          )}
-          style={{
-            ...(customColors ? {
-              backgroundColor: customColors.background || customColors.secondary,
-              color: customColors.text,
-              borderColor: customColors.primary,
-              ...customStyle
-            } : {
-              backgroundColor: 'var(--card-background)',
-              color: 'var(--card-text)',
-              borderColor: 'var(--border-color)'
-            })
-          }}
-          onClick={() => handleLinkClick(item)}
-          disabled={isEditing}
-        >
-          {content}
-        </button>
-      )
-    }
-
-    if (style === 'modern-cream') {
+    if (validatedStyle === 'vintage') {
       return (
         <button
           key={item.id || index}
@@ -215,59 +128,7 @@ export function LinkListBlock({ props, className, isEditing = false }: LinkListB
       )
     }
 
-    if (style === 'vintage') {
-      return (
-        <button
-          key={item.id || index}
-          className={cn(
-            baseClasses,
-            'h-12 sm:h-14 px-4 sm:px-6 relative group',
-            'transition-all duration-200 active:scale-[0.98]'
-          )}
-          onClick={() => handleLinkClick(item)}
-          disabled={isEditing}
-        >
-          {/* Outer border */}
-          <div 
-            className="absolute inset-0 rounded-2xl border-2" 
-            style={{
-              borderColor: customColors?.primary || '#1f2937'
-            }}
-          />
-
-          {/* Inner border with background */}
-          <div 
-            className="absolute inset-1 rounded-xl border group-hover:bg-opacity-80 transition-colors duration-200" 
-            style={{
-              borderColor: customColors?.secondary || '#374151',
-              backgroundColor: customColors?.background || customColors?.secondary || '#fef7ed'
-            }}
-          />
-
-          {/* Content */}
-          <div className="relative z-10 flex items-center justify-center gap-2">
-            {item.icon && (
-              <span 
-                className="text-base"
-                style={{
-                  color: 'var(--custom-text-color)'
-                }}
-              >{item.icon}</span>
-            )}
-            <span 
-              className="font-medium text-sm uppercase tracking-wider group-hover:opacity-90"
-              style={{
-                color: 'var(--custom-text-color)'
-              }}
-            >
-              {item.title}
-            </span>
-          </div>
-        </button>
-      )
-    }
-
-    if (style === 'ticket') {
+    if (validatedStyle === 'ticket') {
       return (
         <button
           key={item.id || index}
@@ -326,7 +187,7 @@ export function LinkListBlock({ props, className, isEditing = false }: LinkListB
       )
     }
 
-    if (style === 'brush') {
+    if (validatedStyle === 'brush') {
       return (
         <button
           key={item.id || index}
@@ -372,7 +233,7 @@ export function LinkListBlock({ props, className, isEditing = false }: LinkListB
       )
     }
 
-    if (style === 'neon') {
+    if (validatedStyle === 'neon') {
       return (
         <button
           key={item.id || index}
@@ -437,7 +298,7 @@ export function LinkListBlock({ props, className, isEditing = false }: LinkListB
       )
     }
 
-    if (style === 'origami') {
+    if (validatedStyle === 'origami') {
       return (
         <button
           key={item.id || index}
@@ -505,62 +366,7 @@ export function LinkListBlock({ props, className, isEditing = false }: LinkListB
       )
     }
 
-    if (style === 'glass') {
-      return (
-        <button
-          key={item.id || index}
-          className={cn(
-            baseClasses,
-            'h-12 sm:h-14 px-4 sm:px-6 relative group rounded-2xl overflow-hidden',
-            'transition-all duration-300 active:scale-[0.98]',
-            'backdrop-blur-md shadow-[0_8px_32px_rgba(31,38,135,0.15)]'
-          )}
-          style={{
-            backgroundColor: customColors 
-              ? `${customColors.primary}10` 
-              : 'rgba(255,255,255,0.1)',
-            borderColor: customColors 
-              ? `${customColors.primary}20` 
-              : 'rgba(255,255,255,0.2)',
-            border: '1px solid'
-          }}
-          onClick={() => handleLinkClick(item)}
-          disabled={isEditing}
-        >
-          {/* Glass shine effect */}
-          <div 
-            className="absolute inset-0 rounded-2xl opacity-50 group-hover:opacity-70 transition-opacity duration-300"
-            style={{
-              background: customColors 
-                ? `linear-gradient(135deg, ${customColors.primary}20, transparent, transparent)`
-                : 'linear-gradient(135deg, rgba(255,255,255,0.2), transparent, transparent)'
-            }}
-          />
-
-          {/* Content */}
-          <div className="relative z-10 flex items-center justify-center gap-2">
-            {item.icon && (
-              <span 
-                className="text-base"
-                style={{
-                  color: 'var(--custom-text-color)'
-                }}
-              >{item.icon}</span>
-            )}
-            <span 
-              className="font-medium text-sm"
-              style={{
-                color: 'var(--custom-text-color)'
-              }}
-            >
-              {item.title}
-            </span>
-          </div>
-        </button>
-      )
-    }
-
-    if (style === 'pixel') {
+    if (validatedStyle === 'pixel') {
       return (
         <button
           key={item.id || index}
@@ -618,7 +424,7 @@ export function LinkListBlock({ props, className, isEditing = false }: LinkListB
       )
     }
 
-    if (style === 'hologram') {
+    if (validatedStyle === 'hologram') {
       return (
         <button
           key={item.id || index}
@@ -671,44 +477,7 @@ export function LinkListBlock({ props, className, isEditing = false }: LinkListB
       )
     }
 
-    if (style === 'neomorphism') {
-      return (
-        <button
-          key={item.id || index}
-          className={cn(
-            baseClasses,
-            'h-12 sm:h-14 px-4 sm:px-6 relative group rounded-2xl',
-            'transition-all duration-300 active:scale-[0.98]',
-            'shadow-[8px_8px_16px_rgba(0,0,0,0.15),-8px_-8px_16px_rgba(255,255,255,0.7)]',
-            'hover:shadow-[4px_4px_8px_rgba(0,0,0,0.2),-4px_-4px_8px_rgba(255,255,255,0.8)]'
-          )}
-          style={{
-            backgroundColor: customColors?.background || '#f3f4f6',
-            color: 'var(--custom-text-color)'
-          }}
-          onClick={() => handleLinkClick(item)}
-          disabled={isEditing}
-        >
-          {/* Content */}
-          <div className="relative z-10 flex items-center justify-center gap-2">
-            {item.icon && (
-              <span 
-                className="text-base"
-                style={{ color: 'var(--custom-text-color)' }}
-              >{item.icon}</span>
-            )}
-            <span 
-              className="font-medium text-sm"
-              style={{ color: 'var(--custom-text-color)' }}
-            >
-              {item.title}
-            </span>
-          </div>
-        </button>
-      )
-    }
-
-    if (style === 'bubble') {
+    if (validatedStyle === 'bubble') {
       return (
         <button
           key={item.id || index}
@@ -759,7 +528,7 @@ export function LinkListBlock({ props, className, isEditing = false }: LinkListB
       )
     }
 
-    if (style === 'cyberpunk') {
+    if (validatedStyle === 'cyberpunk') {
       return (
         <button
           key={item.id || index}
@@ -830,7 +599,7 @@ export function LinkListBlock({ props, className, isEditing = false }: LinkListB
       )
     }
 
-    if (style === 'sketch') {
+    if (validatedStyle === 'sketch') {
       return (
         <button
           key={item.id || index}
@@ -890,7 +659,7 @@ export function LinkListBlock({ props, className, isEditing = false }: LinkListB
       )
     }
 
-    if (style === 'metallic') {
+    if (validatedStyle === 'metallic') {
       return (
         <button
           key={item.id || index}
@@ -943,46 +712,7 @@ export function LinkListBlock({ props, className, isEditing = false }: LinkListB
       )
     }
 
-    if (style === 'wood') {
-      return (
-        <button
-          key={item.id || index}
-          className={cn(
-            baseClasses,
-            'h-12 sm:h-14 px-4 sm:px-6 relative group rounded-xl overflow-hidden',
-            'transition-all duration-200 active:scale-[0.98]',
-            'bg-gradient-to-r from-amber-700 via-amber-600 to-amber-800',
-            'hover:from-amber-600 hover:via-amber-500 hover:to-amber-700',
-            'border-2 border-amber-800 shadow-lg',
-          )}
-          onClick={() => handleLinkClick(item)}
-          disabled={isEditing}
-        >
-          {/* Wood grain texture */}
-          <div className="absolute inset-0 opacity-40"
-            style={{
-              backgroundImage: `repeating-linear-gradient(90deg, transparent, transparent 8px, rgba(139,69,19,0.3) 8px, rgba(139,69,19,0.3) 12px),
-                                   repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(160,82,45,0.2) 2px, rgba(160,82,45,0.2) 4px)`,
-            }} />
-
-          {/* Wood highlights */}
-          <div className="absolute top-2 left-4 w-8 h-1 bg-amber-400/30 rounded-full transform rotate-12"></div>
-          <div className="absolute bottom-3 right-6 w-6 h-1 bg-amber-300/20 rounded-full transform -rotate-6"></div>
-
-          {/* Content */}
-          <div className="relative z-10 flex items-center justify-center gap-2">
-            {item.icon && (
-              <span className="text-base text-amber-100">{item.icon}</span>
-            )}
-            <span className="font-semibold text-amber-100 text-sm">
-              {item.title}
-            </span>
-          </div>
-        </button>
-      )
-    }
-
-    if (style === 'neon-outline') {
+    if (validatedStyle === 'neon-outline') {
       return (
         <button
           key={item.id || index}
@@ -1042,102 +772,7 @@ export function LinkListBlock({ props, className, isEditing = false }: LinkListB
       )
     }
 
-    if (style === 'minimal-line') {
-      return (
-        <button
-          key={item.id || index}
-          className={cn(
-            baseClasses,
-            'h-12 px-4 sm:px-6 relative group bg-transparent',
-            'transition-all duration-200 active:scale-[0.98]',
-            'border-b-2'
-          )}
-          style={{
-            borderBottomColor: customColors?.secondary || '#d1d5db'
-          }}
-          onClick={() => handleLinkClick(item)}
-          disabled={isEditing}
-        >
-          {/* Animated underline */}
-          <div 
-            className="absolute bottom-0 left-0 h-0.5 w-0 group-hover:w-full transition-all duration-300 ease-out"
-            style={{
-              backgroundColor: customColors?.primary || '#3b82f6'
-            }}
-          />
-
-          {/* Content */}
-          <div className="relative z-10 flex items-center justify-center gap-3">
-            {item.icon && (
-              <span 
-                className="text-base transition-colors duration-200"
-                style={{
-                  color: 'var(--custom-text-color)'
-                }}
-              >{item.icon}</span>
-            )}
-            <span 
-              className="font-normal text-sm transition-colors duration-200"
-              style={{
-                color: 'var(--custom-text-color)'
-              }}
-            >
-              {item.title}
-            </span>
-          </div>
-        </button>
-      )
-    }
-
-    if (style === 'elastic') {
-      return (
-        <button
-          key={item.id || index}
-          className={cn(
-            baseClasses,
-            'h-12 sm:h-14 px-4 sm:px-6 relative group rounded-full',
-            'transition-all duration-150 hover:duration-300',
-            'hover:scale-110 active:scale-95',
-            'shadow-lg hover:shadow-xl',
-            'animate-pulse hover:animate-none',
-          )}
-          style={{
-            background: customColors 
-              ? `linear-gradient(${customColors.gradientDirection || 'to right'}, ${customColors.primary || '#f472b6'}, ${customColors.secondary || '#a855f7'}, ${customColors.tertiary || '#ec4899'})`
-              : 'linear-gradient(to right, #f472b6, #a855f7, #ec4899)',
-            animation: 'elastic 0.6s ease-out'
-          }}
-          onClick={() => handleLinkClick(item)}
-          disabled={isEditing}
-        >
-          {/* Elastic shine */}
-          <div className="absolute inset-0 rounded-full bg-gradient-to-r from-white/20 to-transparent 
-                          opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-
-          {/* Content */}
-          <div className="relative z-10 flex items-center justify-center gap-2 transform group-hover:scale-105 transition-transform duration-200">
-            {item.icon && (
-              <span 
-                className="text-base"
-                style={{
-                  color: 'var(--custom-text-color)'
-                }}
-              >{item.icon}</span>
-            )}
-            <span 
-              className="font-bold text-sm"
-              style={{
-                color: 'var(--custom-text-color)'
-              }}
-            >
-              {item.title}
-            </span>
-          </div>
-        </button>
-      )
-    }
-
-    if (style === 'terminal') {
+    if (validatedStyle === 'terminal') {
       return (
         <button
           key={item.id || index}
@@ -1209,7 +844,7 @@ export function LinkListBlock({ props, className, isEditing = false }: LinkListB
     // ========== GAME-INSPIRED STYLES ==========
 
     // RPG Fantasy - Medieval/Fantasy RPG style inspired by WoW, Final Fantasy
-    if (style === 'rpg-fantasy') {
+    if (validatedStyle === 'rpg-fantasy') {
       return (
         <button
           key={item.id || index}
@@ -1291,7 +926,7 @@ export function LinkListBlock({ props, className, isEditing = false }: LinkListB
     }
 
     // Battle Royale - Modern tactical shooter style inspired by Fortnite, Apex, PUBG
-    if (style === 'battle-royale') {
+    if (validatedStyle === 'battle-royale') {
       return (
         <button
           key={item.id || index}
@@ -1380,7 +1015,7 @@ export function LinkListBlock({ props, className, isEditing = false }: LinkListB
     }
 
     // Casual Game - Colorful, playful mobile game style inspired by Candy Crush, Among Us
-    if (style === 'casual-game') {
+    if (validatedStyle === 'casual-game') {
       return (
         <button
           key={item.id || index}
@@ -1456,7 +1091,7 @@ export function LinkListBlock({ props, className, isEditing = false }: LinkListB
     }
 
     // JRPG Anime - Vibrant anime-style RPG inspired by Genshin Impact, Blue Archive
-    if (style === 'jrpg-anime') {
+    if (validatedStyle === 'jrpg-anime') {
       return (
         <button
           key={item.id || index}
@@ -1545,7 +1180,7 @@ export function LinkListBlock({ props, className, isEditing = false }: LinkListB
     }
 
     // Dark Souls - Dark fantasy gothic style inspired by Dark Souls, Elden Ring, Diablo
-    if (style === 'dark-souls') {
+    if (validatedStyle === 'dark-souls') {
       return (
         <button
           key={item.id || index}
@@ -1654,7 +1289,7 @@ export function LinkListBlock({ props, className, isEditing = false }: LinkListB
     // ========== GAME-INSPIRED STYLES (ROUND 2) ==========
 
     // Arcade Retro - 80s neon arcade with CRT scanlines inspired by Pac-Man, Space Invaders
-    if (style === 'arcade-retro') {
+    if (validatedStyle === 'arcade-retro') {
       return (
         <button
           key={item.id || index}
@@ -1771,7 +1406,7 @@ export function LinkListBlock({ props, className, isEditing = false }: LinkListB
     }
 
     // Racing Speed - Racing game HUD style inspired by Need for Speed, Forza
-    if (style === 'racing-speed') {
+    if (validatedStyle === 'racing-speed') {
       return (
         <button
           key={item.id || index}
@@ -1892,7 +1527,7 @@ export function LinkListBlock({ props, className, isEditing = false }: LinkListB
     }
 
     // Horror Glitch - Horror game corrupted effect inspired by Resident Evil, Silent Hill
-    if (style === 'horror-glitch') {
+    if (validatedStyle === 'horror-glitch') {
       return (
         <button
           key={item.id || index}
@@ -2027,7 +1662,7 @@ export function LinkListBlock({ props, className, isEditing = false }: LinkListB
     }
 
     // Fighting Combo - Fighting game combo meter inspired by Street Fighter, Mortal Kombat
-    if (style === 'fighting-combo') {
+    if (validatedStyle === 'fighting-combo') {
       return (
         <button
           key={item.id || index}
@@ -2165,7 +1800,7 @@ export function LinkListBlock({ props, className, isEditing = false }: LinkListB
     }
 
     // Card Holographic - Trading card holographic foil inspired by Pokemon, Yu-Gi-Oh, MTG
-    if (style === 'card-holo') {
+    if (validatedStyle === 'card-holo') {
       return (
         <button
           key={item.id || index}
@@ -2318,7 +1953,7 @@ export function LinkListBlock({ props, className, isEditing = false }: LinkListB
     // ========== GAME-INSPIRED STYLES (ROUND 3) ==========
 
     // Puzzle Block - Tetris/puzzle game style inspired by Tetris, Portal, Monument Valley
-    if (style === 'puzzle-block') {
+    if (validatedStyle === 'puzzle-block') {
       return (
         <button
           key={item.id || index}
@@ -2425,7 +2060,7 @@ export function LinkListBlock({ props, className, isEditing = false }: LinkListB
     }
 
     // Strategy RTS - Real-time strategy style inspired by StarCraft, Age of Empires, C&C
-    if (style === 'strategy-rts') {
+    if (validatedStyle === 'strategy-rts') {
       return (
         <button
           key={item.id || index}
@@ -2564,7 +2199,7 @@ export function LinkListBlock({ props, className, isEditing = false }: LinkListB
     }
 
     // MOBA Ability - MOBA ability button inspired by League of Legends, Dota 2
-    if (style === 'moba-ability') {
+    if (validatedStyle === 'moba-ability') {
       return (
         <button
           key={item.id || index}
@@ -2693,7 +2328,7 @@ export function LinkListBlock({ props, className, isEditing = false }: LinkListB
     }
 
     // Sandbox Craft - Minecraft/sandbox style inspired by Minecraft, Terraria
-    if (style === 'sandbox-craft') {
+    if (validatedStyle === 'sandbox-craft') {
       return (
         <button
           key={item.id || index}
@@ -2819,7 +2454,7 @@ export function LinkListBlock({ props, className, isEditing = false }: LinkListB
     }
 
     // Rhythm Beat - Rhythm game style inspired by Guitar Hero, Beat Saber, osu!
-    if (style === 'rhythm-beat') {
+    if (validatedStyle === 'rhythm-beat') {
       return (
         <button
           key={item.id || index}
@@ -2946,13 +2581,13 @@ export function LinkListBlock({ props, className, isEditing = false }: LinkListB
     // ========== CULINARY & F&B STYLES ==========
 
     // Coffee Shop - Warm coffee aesthetic with beans, steam, and latte art
-    if (style === 'coffee-shop') {
+    if (validatedStyle === 'coffee-shop') {
       return (
         <button
           key={item.id || index}
           className={cn(
             baseClasses,
-            'h-14 sm:h-20 px-4 sm:px-8 relative group overflow-hidden rounded-2xl',
+            'h-12 sm:h-14 px-4 sm:px-6 relative group overflow-hidden rounded-2xl',
             'transition-all duration-300 hover:scale-105 active:scale-95'
           )}
           onClick={() => handleLinkClick(item)}
@@ -3030,7 +2665,7 @@ export function LinkListBlock({ props, className, isEditing = false }: LinkListB
           <div className="relative z-10 flex items-center justify-center gap-3 h-full">
             {item.icon && (
               <span
-                className="text-lg sm:text-2xl transform group-hover:rotate-12 transition-transform duration-300"
+                className="text-base sm:text-lg transform group-hover:rotate-12 transition-transform duration-300"
                 style={{
                   color: 'var(--custom-text-color)',
                   filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.5))'
@@ -3038,7 +2673,7 @@ export function LinkListBlock({ props, className, isEditing = false }: LinkListB
               >{item.icon}</span>
             )}
             <span
-              className="text-lg font-bold tracking-wide"
+              className="text-sm sm:text-base font-bold tracking-wide"
               style={{
                 color: 'var(--custom-text-color)',
                 textShadow: '0 2px 4px rgba(0,0,0,0.6)',
@@ -3062,13 +2697,13 @@ export function LinkListBlock({ props, className, isEditing = false }: LinkListB
     }
 
     // Bakery Sweet - Sweet bakery style with frosting swirls and sprinkles
-    if (style === 'bakery-sweet') {
+    if (validatedStyle === 'bakery-sweet') {
       return (
         <button
           key={item.id || index}
           className={cn(
             baseClasses,
-            'h-14 sm:h-20 px-4 sm:px-8 relative group overflow-visible rounded-3xl',
+            'h-12 sm:h-14 px-4 sm:px-6 relative group overflow-visible rounded-3xl',
             'transition-all duration-300 hover:scale-105 hover:-translate-y-1 active:scale-95'
           )}
           onClick={() => handleLinkClick(item)}
@@ -3155,7 +2790,7 @@ export function LinkListBlock({ props, className, isEditing = false }: LinkListB
           <div className="relative z-10 flex items-center justify-center gap-3 h-full">
             {item.icon && (
               <span
-                className="text-lg sm:text-2xl transform group-hover:scale-110 transition-transform"
+                className="text-base sm:text-lg transform group-hover:scale-110 transition-transform"
                 style={{
                   color: 'var(--custom-text-color)',
                   filter: 'drop-shadow(0 2px 3px rgba(255,255,255,0.5))'
@@ -3163,7 +2798,7 @@ export function LinkListBlock({ props, className, isEditing = false }: LinkListB
               >{item.icon}</span>
             )}
             <span
-              className="text-lg font-bold tracking-wide"
+              className="text-sm sm:text-base font-bold tracking-wide"
               style={{
                 color: 'var(--custom-text-color)',
                 textShadow: '0 2px 4px rgba(255,255,255,0.5)',
@@ -3188,13 +2823,13 @@ export function LinkListBlock({ props, className, isEditing = false }: LinkListB
     }
 
     // Cocktail Bar - Sophisticated bar style with ice cubes and neon lights
-    if (style === 'cocktail-bar') {
+    if (validatedStyle === 'cocktail-bar') {
       return (
         <button
           key={item.id || index}
           className={cn(
             baseClasses,
-            'h-16 sm:h-24 px-5 sm:px-10 relative group overflow-hidden rounded-lg',
+            'h-12 sm:h-14 px-4 sm:px-6 relative group overflow-hidden rounded-lg',
             'transition-all duration-300 hover:scale-105 active:scale-95'
           )}
           onClick={() => handleLinkClick(item)}
@@ -3285,7 +2920,7 @@ export function LinkListBlock({ props, className, isEditing = false }: LinkListB
           <div className="relative z-10 flex items-center justify-center gap-4 h-full">
             {item.icon && (
               <span
-                className="text-xl sm:text-3xl transform group-hover:rotate-12 transition-transform"
+                className="text-sm sm:text-base sm:text-3xl transform group-hover:rotate-12 transition-transform"
                 style={{
                   color: 'var(--custom-text-color)',
                   filter: `drop-shadow(0 0 8px ${customColors?.text || '#ffffff'})`
@@ -3293,7 +2928,7 @@ export function LinkListBlock({ props, className, isEditing = false }: LinkListB
               >{item.icon}</span>
             )}
             <span
-              className="text-lg sm:text-xl font-semibold tracking-wide"
+              className="text-base sm:text-lg font-semibold tracking-wide"
               style={{
                 color: 'var(--custom-text-color)',
                 textShadow: `0 0 15px ${customColors?.text || '#ffffff'}80, 0 2px 4px rgba(0,0,0,0.8)`,
@@ -3316,13 +2951,13 @@ export function LinkListBlock({ props, className, isEditing = false }: LinkListB
     }
 
     // Fine Dining - Elegant restaurant menu style with silver cloche
-    if (style === 'fine-dining') {
+    if (validatedStyle === 'fine-dining') {
       return (
         <button
           key={item.id || index}
           className={cn(
             baseClasses,
-            'h-14 sm:h-20 px-5 sm:px-10 relative group overflow-hidden',
+            'h-12 sm:h-14 px-4 sm:px-6 relative group overflow-hidden',
             'transition-all duration-500 hover:scale-105 active:scale-95'
           )}
           onClick={() => handleLinkClick(item)}
@@ -3410,7 +3045,7 @@ export function LinkListBlock({ props, className, isEditing = false }: LinkListB
           <div className="relative z-10 flex items-center justify-center gap-4 h-full">
             {item.icon && (
               <span
-                className="text-lg sm:text-2xl transform group-hover:scale-110 transition-transform"
+                className="text-base sm:text-lg transform group-hover:scale-110 transition-transform"
                 style={{
                   color: 'var(--custom-text-color)',
                   filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.6))'
@@ -3418,7 +3053,7 @@ export function LinkListBlock({ props, className, isEditing = false }: LinkListB
               >{item.icon}</span>
             )}
             <span
-              className="text-lg font-serif italic tracking-wide"
+              className="text-sm sm:text-base font-serif italic tracking-wide"
               style={{
                 color: 'var(--custom-text-color)',
                 textShadow: '0 2px 4px rgba(0,0,0,0.7)'
@@ -3441,13 +3076,13 @@ export function LinkListBlock({ props, className, isEditing = false }: LinkListB
     }
 
     // Street Food - Vibrant street food style with smoke and spice effects
-    if (style === 'street-food') {
+    if (validatedStyle === 'street-food') {
       return (
         <button
           key={item.id || index}
           className={cn(
             baseClasses,
-            'h-14 sm:h-20 px-4 sm:px-8 relative group overflow-visible rounded-xl',
+            'h-12 sm:h-14 px-4 sm:px-6 relative group overflow-visible rounded-xl',
             'transition-all duration-300 hover:scale-110 hover:rotate-1 active:scale-95'
           )}
           onClick={() => handleLinkClick(item)}
@@ -3541,7 +3176,7 @@ export function LinkListBlock({ props, className, isEditing = false }: LinkListB
           <div className="relative z-10 flex items-center justify-center gap-3 h-full">
             {item.icon && (
               <span
-                className="text-xl sm:text-3xl transform group-hover:scale-125 group-hover:rotate-12 transition-transform"
+                className="text-sm sm:text-base sm:text-3xl transform group-hover:scale-125 group-hover:rotate-12 transition-transform"
                 style={{
                   color: 'var(--custom-text-color)',
                   filter: 'drop-shadow(0 4px 6px rgba(0,0,0,0.7))',
@@ -3550,7 +3185,7 @@ export function LinkListBlock({ props, className, isEditing = false }: LinkListB
               >{item.icon}</span>
             )}
             <span
-              className="text-lg sm:text-xl font-black uppercase tracking-wider italic"
+              className="text-base sm:text-lg font-black uppercase tracking-wider italic"
               style={{
                 color: 'var(--custom-text-color)',
                 textShadow: '3px 3px 0 rgba(0,0,0,0.8), 0 0 20px rgba(255,255,255,0.3)',
@@ -3579,13 +3214,13 @@ export function LinkListBlock({ props, className, isEditing = false }: LinkListB
     }
 
     // Sushi Bar - Japanese sushi bar with bamboo mat and minimalist design
-    if (style === 'sushi-bar') {
+    if (validatedStyle === 'sushi-bar') {
       return (
         <button
           key={item.id || index}
           className={cn(
             baseClasses,
-            'h-12 sm:h-16 px-4 sm:px-8 relative group overflow-hidden rounded-sm',
+            'h-12 sm:h-16 px-4 sm:px-6 relative group overflow-hidden rounded-sm',
             'transition-all duration-300 hover:scale-105 active:scale-95'
           )}
           onClick={() => handleLinkClick(item)}
@@ -3652,7 +3287,7 @@ export function LinkListBlock({ props, className, isEditing = false }: LinkListB
           <div className="relative z-10 flex items-center justify-center gap-3 h-full">
             {item.icon && (
               <span
-                className="text-lg sm:text-2xl transform group-hover:scale-110 transition-transform"
+                className="text-base sm:text-lg transform group-hover:scale-110 transition-transform"
                 style={{
                   color: 'var(--custom-text-color)',
                   filter: 'drop-shadow(0 1px 2px rgba(0,0,0,0.1))'
@@ -3682,13 +3317,13 @@ export function LinkListBlock({ props, className, isEditing = false }: LinkListB
     }
 
     // Pizza Oven - Italian pizza style with wood fire and cheese stretch
-    if (style === 'pizza-oven') {
+    if (validatedStyle === 'pizza-oven') {
       return (
         <button
           key={item.id || index}
           className={cn(
             baseClasses,
-            'h-14 sm:h-20 px-4 sm:px-8 relative group overflow-hidden rounded-full',
+            'h-12 sm:h-14 px-4 sm:px-6 relative group overflow-hidden rounded-full',
             'transition-all duration-300 hover:scale-105 active:scale-95'
           )}
           onClick={() => handleLinkClick(item)}
@@ -3770,7 +3405,7 @@ export function LinkListBlock({ props, className, isEditing = false }: LinkListB
           <div className="relative z-10 flex items-center justify-center gap-3 h-full">
             {item.icon && (
               <span
-                className="text-xl sm:text-3xl transform group-hover:scale-110 group-hover:rotate-12 transition-transform"
+                className="text-sm sm:text-base sm:text-3xl transform group-hover:scale-110 group-hover:rotate-12 transition-transform"
                 style={{
                   color: 'var(--custom-text-color)',
                   filter: 'drop-shadow(0 4px 6px rgba(0,0,0,0.6))',
@@ -3779,7 +3414,7 @@ export function LinkListBlock({ props, className, isEditing = false }: LinkListB
               >{item.icon}</span>
             )}
             <span
-              className="text-lg sm:text-xl font-bold italic tracking-wide"
+              className="text-base sm:text-lg font-bold italic tracking-wide"
               style={{
                 color: 'var(--custom-text-color)',
                 textShadow: '2px 2px 0 rgba(0,0,0,0.8), 0 0 10px rgba(255,255,255,0.3)',
@@ -3805,13 +3440,13 @@ export function LinkListBlock({ props, className, isEditing = false }: LinkListB
     }
 
     // Ice Cream - Sweet ice cream parlor with pastel colors and drips
-    if (style === 'ice-cream') {
+    if (validatedStyle === 'ice-cream') {
       return (
         <button
           key={item.id || index}
           className={cn(
             baseClasses,
-            'h-16 sm:h-24 px-4 sm:px-8 relative group overflow-visible',
+            'h-12 sm:h-14 px-4 sm:px-6 relative group overflow-visible',
             'transition-all duration-300 hover:scale-105 hover:-translate-y-2 active:scale-95'
           )}
           onClick={() => handleLinkClick(item)}
@@ -3931,7 +3566,7 @@ export function LinkListBlock({ props, className, isEditing = false }: LinkListB
           <div className="relative z-10 flex items-center justify-center gap-3 h-full pt-2">
             {item.icon && (
               <span
-                className="text-lg sm:text-2xl transform group-hover:scale-110 transition-transform"
+                className="text-base sm:text-lg transform group-hover:scale-110 transition-transform"
                 style={{
                   color: 'var(--custom-text-color)',
                   filter: 'drop-shadow(0 2px 4px rgba(255,255,255,0.6))'
@@ -3939,7 +3574,7 @@ export function LinkListBlock({ props, className, isEditing = false }: LinkListB
               >{item.icon}</span>
             )}
             <span
-              className="text-lg font-bold tracking-wide"
+              className="text-sm sm:text-base font-bold tracking-wide"
               style={{
                 color: 'var(--custom-text-color)',
                 textShadow: '0 2px 4px rgba(255,255,255,0.6)',
@@ -3954,13 +3589,13 @@ export function LinkListBlock({ props, className, isEditing = false }: LinkListB
     }
 
     // Burger Joint - American diner burger style with grill marks and sesame seeds
-    if (style === 'burger-joint') {
+    if (validatedStyle === 'burger-joint') {
       return (
         <button
           key={item.id || index}
           className={cn(
             baseClasses,
-            'h-14 sm:h-20 px-4 sm:px-8 relative group overflow-hidden',
+            'h-12 sm:h-14 px-4 sm:px-6 relative group overflow-hidden',
             'transition-all duration-300 hover:scale-105 active:scale-95'
           )}
           onClick={() => handleLinkClick(item)}
@@ -4068,7 +3703,7 @@ export function LinkListBlock({ props, className, isEditing = false }: LinkListB
           <div className="relative z-10 flex items-center justify-center gap-3 h-full">
             {item.icon && (
               <span
-                className="text-lg sm:text-2xl transform group-hover:scale-110 group-hover:rotate-6 transition-transform"
+                className="text-base sm:text-lg transform group-hover:scale-110 group-hover:rotate-6 transition-transform"
                 style={{
                   color: 'var(--custom-text-color)',
                   filter: 'drop-shadow(0 2px 4px rgba(255,255,255,0.4))'
@@ -4076,7 +3711,7 @@ export function LinkListBlock({ props, className, isEditing = false }: LinkListB
               >{item.icon}</span>
             )}
             <span
-              className="text-lg font-black uppercase tracking-wide"
+              className="text-sm sm:text-base font-black uppercase tracking-wide"
               style={{
                 color: 'var(--custom-text-color)',
                 textShadow: '0 2px 4px rgba(255,255,255,0.4)',
@@ -4104,13 +3739,13 @@ export function LinkListBlock({ props, className, isEditing = false }: LinkListB
     }
 
     // Ramen Shop - Japanese ramen style with steam, chopsticks, and noodles
-    if (style === 'ramen-shop') {
+    if (validatedStyle === 'ramen-shop') {
       return (
         <button
           key={item.id || index}
           className={cn(
             baseClasses,
-            'h-14 sm:h-20 px-4 sm:px-8 relative group overflow-hidden rounded-2xl',
+            'h-12 sm:h-14 px-4 sm:px-6 relative group overflow-hidden rounded-2xl',
             'transition-all duration-300 hover:scale-105 active:scale-95'
           )}
           onClick={() => handleLinkClick(item)}
@@ -4226,7 +3861,7 @@ export function LinkListBlock({ props, className, isEditing = false }: LinkListB
           <div className="relative z-10 flex items-center justify-center gap-3 h-full">
             {item.icon && (
               <span
-                className="text-lg sm:text-2xl transform group-hover:scale-110 transition-transform"
+                className="text-base sm:text-lg transform group-hover:scale-110 transition-transform"
                 style={{
                   color: 'var(--custom-text-color)',
                   filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.6))',
@@ -4235,7 +3870,7 @@ export function LinkListBlock({ props, className, isEditing = false }: LinkListB
               >{item.icon}</span>
             )}
             <span
-              className="text-lg font-bold tracking-wide"
+              className="text-sm sm:text-base font-bold tracking-wide"
               style={{
                 color: 'var(--custom-text-color)',
                 textShadow: '0 2px 4px rgba(0,0,0,0.7)'
@@ -4263,13 +3898,13 @@ export function LinkListBlock({ props, className, isEditing = false }: LinkListB
     }
 
     // Wine Cellar - Elegant wine cellar with barrel wood and grape vines
-    if (style === 'wine-cellar') {
+    if (validatedStyle === 'wine-cellar') {
       return (
         <button
           key={item.id || index}
           className={cn(
             baseClasses,
-            'h-14 sm:h-20 px-5 sm:px-10 relative group overflow-hidden rounded-lg',
+            'h-12 sm:h-14 px-4 sm:px-6 relative group overflow-hidden rounded-lg',
             'transition-all duration-500 hover:scale-105 active:scale-95'
           )}
           onClick={() => handleLinkClick(item)}
@@ -4349,7 +3984,7 @@ export function LinkListBlock({ props, className, isEditing = false }: LinkListB
           <div className="relative z-10 flex items-center justify-center gap-4 h-full">
             {item.icon && (
               <span
-                className="text-lg sm:text-2xl transform group-hover:scale-110 transition-transform"
+                className="text-base sm:text-lg transform group-hover:scale-110 transition-transform"
                 style={{
                   color: 'var(--custom-text-color)',
                   filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.7))'
@@ -4357,7 +3992,7 @@ export function LinkListBlock({ props, className, isEditing = false }: LinkListB
               >{item.icon}</span>
             )}
             <span
-              className="text-lg font-serif italic tracking-wide"
+              className="text-sm sm:text-base font-serif italic tracking-wide"
               style={{
                 color: 'var(--custom-text-color)',
                 textShadow: '0 2px 4px rgba(0,0,0,0.8)'
@@ -4383,13 +4018,13 @@ export function LinkListBlock({ props, className, isEditing = false }: LinkListB
     }
 
     // Tea House - Zen tea house with ceramic cups and tea leaves
-    if (style === 'tea-house') {
+    if (validatedStyle === 'tea-house') {
       return (
         <button
           key={item.id || index}
           className={cn(
             baseClasses,
-            'h-18 px-4 sm:px-8 relative group overflow-hidden rounded-xl',
+            'h-18 px-4 sm:px-6 relative group overflow-hidden rounded-xl',
             'transition-all duration-300 hover:scale-105 active:scale-95'
           )}
           onClick={() => handleLinkClick(item)}
@@ -4479,7 +4114,7 @@ export function LinkListBlock({ props, className, isEditing = false }: LinkListB
           <div className="relative z-10 flex items-center justify-center gap-3 h-full">
             {item.icon && (
               <span
-                className="text-xl transform group-hover:scale-110 transition-transform"
+                className="text-sm sm:text-base transform group-hover:scale-110 transition-transform"
                 style={{
                   color: 'var(--custom-text-color)',
                   filter: 'drop-shadow(0 1px 2px rgba(0,0,0,0.1))'
@@ -4511,13 +4146,13 @@ export function LinkListBlock({ props, className, isEditing = false }: LinkListB
     }
 
     // Chocolate Factory - Rich chocolate factory with cocoa swirls and gold wrapper
-    if (style === 'chocolate-factory') {
+    if (validatedStyle === 'chocolate-factory') {
       return (
         <button
           key={item.id || index}
           className={cn(
             baseClasses,
-            'h-14 sm:h-20 px-4 sm:px-8 relative group overflow-hidden rounded-lg',
+            'h-12 sm:h-14 px-4 sm:px-6 relative group overflow-hidden rounded-lg',
             'transition-all duration-300 hover:scale-105 active:scale-95'
           )}
           onClick={() => handleLinkClick(item)}
@@ -4621,7 +4256,7 @@ export function LinkListBlock({ props, className, isEditing = false }: LinkListB
           <div className="relative z-10 flex items-center justify-center gap-3 h-full">
             {item.icon && (
               <span
-                className="text-lg sm:text-2xl transform group-hover:scale-110 transition-transform"
+                className="text-base sm:text-lg transform group-hover:scale-110 transition-transform"
                 style={{
                   color: 'var(--custom-text-color)',
                   filter: `drop-shadow(0 0 8px ${customColors?.accent || '#fbbf24'}60)`
@@ -4629,7 +4264,7 @@ export function LinkListBlock({ props, className, isEditing = false }: LinkListB
               >{item.icon}</span>
             )}
             <span
-              className="text-lg font-bold tracking-wide"
+              className="text-sm sm:text-base font-bold tracking-wide"
               style={{
                 color: 'var(--custom-text-color)',
                 textShadow: `0 0 12px ${customColors?.accent || '#fbbf24'}80, 0 2px 4px rgba(0,0,0,0.8)`,
@@ -4658,13 +4293,13 @@ export function LinkListBlock({ props, className, isEditing = false }: LinkListB
     }
 
     // Juice Bar - Fresh juice bar with fruit splash and tropical vibes
-    if (style === 'juice-bar') {
+    if (validatedStyle === 'juice-bar') {
       return (
         <button
           key={item.id || index}
           className={cn(
             baseClasses,
-            'h-22 px-4 sm:px-8 relative group overflow-visible rounded-2xl',
+            'h-22 px-4 sm:px-6 relative group overflow-visible rounded-2xl',
             'transition-all duration-300 hover:scale-110 hover:-translate-y-1 active:scale-95'
           )}
           onClick={() => handleLinkClick(item)}
@@ -4771,7 +4406,7 @@ export function LinkListBlock({ props, className, isEditing = false }: LinkListB
           <div className="relative z-10 flex items-center justify-center gap-3 h-full">
             {item.icon && (
               <span
-                className="text-xl sm:text-3xl transform group-hover:scale-125 group-hover:rotate-12 transition-transform"
+                className="text-sm sm:text-base sm:text-3xl transform group-hover:scale-125 group-hover:rotate-12 transition-transform"
                 style={{
                   color: 'var(--custom-text-color)',
                   filter: 'drop-shadow(0 4px 6px rgba(0,0,0,0.4))',
@@ -4780,7 +4415,7 @@ export function LinkListBlock({ props, className, isEditing = false }: LinkListB
               >{item.icon}</span>
             )}
             <span
-              className="text-lg sm:text-xl font-black uppercase tracking-wide italic"
+              className="text-base sm:text-lg font-black uppercase tracking-wide italic"
               style={{
                 color: 'var(--custom-text-color)',
                 textShadow: '2px 2px 0 rgba(0,0,0,0.5), 0 0 20px rgba(255,255,255,0.5)',
@@ -4808,13 +4443,13 @@ export function LinkListBlock({ props, className, isEditing = false }: LinkListB
     }
 
     // BBQ Grill - BBQ grill style with smoke, char marks, and flame effects
-    if (style === 'bbq-grill') {
+    if (validatedStyle === 'bbq-grill') {
       return (
         <button
           key={item.id || index}
           className={cn(
             baseClasses,
-            'h-14 sm:h-20 px-4 sm:px-8 relative group overflow-visible rounded-lg',
+            'h-12 sm:h-14 px-4 sm:px-6 relative group overflow-visible rounded-lg',
             'transition-all duration-300 hover:scale-105 active:scale-95'
           )}
           onClick={() => handleLinkClick(item)}
@@ -5018,7 +4653,7 @@ export function LinkListBlockEditor({
   onChange: (props: LinkListBlockProps) => void
   className?: string
 }) {
-  const handleStyleChange = (style: 'pill' | 'underline' | 'card' | 'modern' | 'modern-cream' | 'vintage' | 'ticket' | 'brush' | 'neon' | 'origami' | 'glass' | 'pixel' | 'hologram' | 'neomorphism' | 'bubble' | 'cyberpunk' | 'sketch' | 'metallic' | 'wood' | 'neon-outline' | 'minimal-line' | 'elastic' | 'terminal') => {
+  const handleStyleChange = (style: LinkListStyle) => {
     onChange({ ...props, style })
   }
 
@@ -5050,7 +4685,7 @@ export function LinkListBlockEditor({
       <div>
         <label className="block text-sm font-medium mb-2">Link Style</label>
         <div className="flex gap-2 flex-wrap">
-          {(['pill', 'underline', 'card', 'modern', 'modern-cream', 'vintage', 'ticket', 'brush', 'neon', 'origami', 'glass', 'pixel', 'hologram', 'neomorphism', 'bubble', 'cyberpunk', 'sketch', 'metallic', 'wood', 'neon-outline', 'minimal-line', 'elastic', 'terminal'] as const).map((style) => (
+          {(['pill', 'vintage', 'ticket', 'brush', 'neon', 'origami', 'pixel', 'hologram', 'bubble', 'cyberpunk', 'sketch', 'metallic', 'neon-outline', 'terminal'] as const).map((style) => (
             <Button
               key={style}
               variant={props.style === style ? 'default' : 'outline'}

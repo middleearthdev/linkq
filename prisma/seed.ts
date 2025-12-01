@@ -4,6 +4,9 @@
  */
 
 import { PrismaClient } from '../src/generated/prisma'
+import { getTemplateCategoryData } from './template-category-mapping'
+import { indonesiaTemplates } from './indonesia-templates'
+import { newTemplates2024 } from './new-templates-2024'
 
 const prisma = new PrismaClient()
 
@@ -79,9 +82,10 @@ async function main() {
           showAvatar: { type: 'boolean', title: 'Show Avatar', default: true },
           textAlign: { type: 'string', enum: ['left', 'center', 'right'], default: 'center' },
           avatarSize: { type: 'string', enum: ['sm', 'md', 'lg', 'xl', 'xxl'], default: 'lg' },
-          avatarStyle: { type: 'string', enum: ['circle', 'rounded', 'rounded-frame', 'blob', 'hexagon', 'star', 'diamond', 'wave', 'flower', 'badge', 'polaroid', 'vintage'], default: 'circle' },
-          nameStyle: { type: 'string', enum: ['default', 'large-elegant'], default: 'default' },
-          spacing: { type: 'string', enum: ['normal', 'wide'], default: 'normal' }
+          avatarStyle: { type: 'string', enum: ['circle', 'rounded-frame', 'square', 'blob', 'hexagon', 'star', 'diamond', 'wave', 'flower', 'badge', 'polaroid', 'vintage'], default: 'circle' },
+          nameStyle: { type: 'string', enum: ['default', 'large-elegant', 'compact', 'modern-minimal', 'bold-impact', 'script-handwritten', 'tech-mono', 'gradient-text', 'neon-glow', 'vintage-serif'], default: 'default' },
+          bioStyle: { type: 'string', enum: ['default', 'large', 'small', 'quote', 'modern'], default: 'default' },
+          spacing: { type: 'string', enum: ['tight', 'normal', 'wide'], default: 'normal' }
         },
         required: ['name']
       },
@@ -90,7 +94,11 @@ async function main() {
         bio: 'Add your bio here',
         showAvatar: true,
         textAlign: 'center',
-        avatarSize: 'lg'
+        avatarSize: 'lg',
+        avatarStyle: 'circle',
+        nameStyle: 'default',
+        bioStyle: 'default',
+        spacing: 'normal'
       }
     },
     {
@@ -135,25 +143,28 @@ async function main() {
       schemaJson: {
         type: 'object',
         properties: {
-          items: {
+          platforms: {
             type: 'array',
             items: {
               type: 'object',
               properties: {
-                platform: { type: 'string', enum: ['instagram', 'twitter', 'linkedin', 'github', 'youtube', 'tiktok'] },
-                url: { type: 'string', title: 'URL' }
+                platform: { type: 'string', enum: ['twitter', 'x', 'instagram', 'facebook', 'threads', 'tiktok', 'snapchat', 'pinterest', 'reddit', 'linkedin', 'github', 'medium', 'behance', 'dribbble', 'whatsapp', 'telegram', 'discord', 'youtube', 'twitch', 'spotify', 'soundcloud'] },
+                url: { type: 'string', title: 'URL' },
+                username: { type: 'string', title: 'Username' }
               },
               required: ['platform', 'url']
             }
           },
           size: { type: 'string', enum: ['sm', 'md', 'lg'], default: 'md' },
-          style: { type: 'string', enum: ['rounded', 'square', 'minimal'], default: 'rounded' }
+          style: { type: 'string', enum: ['round', 'square', 'minimal', 'neon', 'glassmorphism', 'neumorphic', 'floating', 'rotating', 'pulse', 'bounce'], default: 'round' },
+          colorMode: { type: 'string', enum: ['brand', 'monochrome', 'custom'], default: 'brand' }
         }
       },
       defaultProps: {
-        items: [],
+        platforms: [],
         size: 'md',
-        style: 'rounded'
+        style: 'round',
+        colorMode: 'brand'
       }
     },
     {
@@ -213,6 +224,201 @@ async function main() {
         showClicks: true,
         timeframe: '30d'
       }
+    },
+    {
+      type: 'divider',
+      name: 'Divider',
+      description: 'Visual separator with multiple styles',
+      category: 'basic',
+      isPremium: false,
+      schemaJson: {
+        type: 'object',
+        properties: {
+          style: { type: 'string', enum: ['solid', 'dashed', 'dotted', 'double', 'gradient', 'gradient-rainbow', 'gradient-sunset', 'gradient-ocean'], default: 'solid' },
+          thickness: { type: 'number', minimum: 1, maximum: 10, default: 1 },
+          color: { type: 'string', default: '#e5e7eb' },
+          spacing: { type: 'string', enum: ['none', 'sm', 'md', 'lg', 'xl'], default: 'md' },
+          width: { type: 'string', enum: ['25', '50', '75', '100'], default: '100' },
+          alignment: { type: 'string', enum: ['left', 'center', 'right'], default: 'center' },
+          icon: { type: 'string', enum: ['none', 'sparkles', 'circle', 'square', 'star', 'heart', 'zap'], default: 'none' },
+          animated: { type: 'boolean', default: false }
+        }
+      },
+      defaultProps: {
+        style: 'solid',
+        thickness: 1,
+        color: '#e5e7eb',
+        spacing: 'md',
+        width: '100',
+        alignment: 'center',
+        icon: 'none',
+        animated: false
+      }
+    },
+    {
+      type: 'footer',
+      name: 'Footer',
+      description: 'Footer section with copyright and links',
+      category: 'basic',
+      isPremium: false,
+      schemaJson: {
+        type: 'object',
+        properties: {
+          copyrightText: { type: 'string', default: '© 2024 Your Name' },
+          layout: { type: 'string', enum: ['centered', 'minimal', 'stacked', 'split'], default: 'centered' },
+          showSocial: { type: 'boolean', default: true },
+          showLinks: { type: 'boolean', default: true },
+          links: { type: 'array', default: [] },
+          socialLinks: { type: 'array', default: [] },
+          backgroundColor: { type: 'string', default: '#ffffff' },
+          textColor: { type: 'string', default: '#374151' },
+          spacing: { type: 'string', enum: ['none', 'sm', 'md', 'lg', 'xl'], default: 'md' },
+          borderTop: { type: 'boolean', default: false }
+        }
+      },
+      defaultProps: {
+        copyrightText: '© 2024 Your Name',
+        layout: 'centered',
+        showSocial: true,
+        showLinks: true,
+        links: [],
+        socialLinks: [],
+        backgroundColor: '#ffffff',
+        textColor: '#374151',
+        spacing: 'md',
+        borderTop: false
+      }
+    },
+    // Indonesia-Specific Blocks
+    {
+      type: 'whatsapp-business',
+      name: 'WhatsApp Business',
+      description: 'WhatsApp Business contact with Indonesian phone formatting',
+      category: 'indonesia',
+      isPremium: false,
+      schemaJson: {
+        type: 'object',
+        properties: {
+          phoneNumber: { type: 'string', title: 'Phone Number' },
+          message: { type: 'string', title: 'Pre-filled Message' },
+          buttonText: { type: 'string', default: 'Chat via WhatsApp' },
+          buttonStyle: { type: 'string', enum: ['fab', 'filled', 'outlined', 'minimal'], default: 'fab' },
+          showIcon: { type: 'boolean', default: true },
+          businessName: { type: 'string', title: 'Business Name' },
+          fabPosition: { type: 'string', enum: ['bottom-right', 'bottom-left', 'top-right', 'top-left', 'bottom-center'], default: 'bottom-right' },
+          fabSize: { type: 'string', enum: ['small', 'default', 'large'], default: 'default' },
+          showLabel: { type: 'boolean', default: true },
+          enablePulse: { type: 'boolean', default: true },
+          expandOnHover: { type: 'boolean', default: true }
+        },
+        required: ['phoneNumber']
+      },
+      defaultProps: {
+        phoneNumber: '081234567890',
+        buttonText: 'Chat via WhatsApp',
+        buttonStyle: 'fab',
+        showIcon: true,
+        fabPosition: 'bottom-right',
+        fabSize: 'default',
+        showLabel: true,
+        enablePulse: true,
+        expandOnHover: true
+      }
+    },
+    {
+      type: 'delivery-platform',
+      name: 'Delivery Platform',
+      description: 'Food delivery platform links (GoFood, GrabFood, ShopeeFood)',
+      category: 'indonesia',
+      isPremium: false,
+      schemaJson: {
+        type: 'object',
+        properties: {
+          platforms: { type: 'object' },
+          layout: { type: 'string', enum: ['buttons', 'grid', 'carousel'], default: 'buttons' },
+          showRatings: { type: 'boolean', default: true },
+          showPromos: { type: 'boolean', default: true },
+          primaryPlatform: { type: 'string', enum: ['gofood', 'grabfood', 'shopeefood'], default: 'gofood' }
+        }
+      },
+      defaultProps: {
+        platforms: {},
+        layout: 'buttons',
+        showRatings: true,
+        showPromos: true
+      }
+    },
+    {
+      type: 'marketplace',
+      name: 'Marketplace',
+      description: 'E-commerce marketplace store links (Tokopedia, Shopee, TikTok Shop)',
+      category: 'indonesia',
+      isPremium: false,
+      schemaJson: {
+        type: 'object',
+        properties: {
+          stores: { type: 'object' },
+          layout: { type: 'string', enum: ['buttons', 'grid', 'mixed'], default: 'buttons' },
+          showBadges: { type: 'boolean', default: true },
+          showRatings: { type: 'boolean', default: true },
+          featuredProducts: { type: 'array', default: [] }
+        }
+      },
+      defaultProps: {
+        stores: {},
+        layout: 'buttons',
+        showBadges: true,
+        showRatings: true
+      }
+    },
+    {
+      type: 'location',
+      name: 'Location',
+      description: 'Google Maps location with opening hours',
+      category: 'indonesia',
+      isPremium: false,
+      schemaJson: {
+        type: 'object',
+        properties: {
+          googleMapsUrl: { type: 'string', title: 'Google Maps Embed URL' },
+          address: { type: 'string', title: 'Address' },
+          phone: { type: 'string', title: 'Phone' },
+          openingHours: { type: 'array', default: [] },
+          locationName: { type: 'string', title: 'Location Name' },
+          showDirectionsButton: { type: 'boolean', default: true },
+          mapHeight: { type: 'number', default: 300 },
+          showCurrentStatus: { type: 'boolean', default: true }
+        }
+      },
+      defaultProps: {
+        showDirectionsButton: true,
+        mapHeight: 300,
+        showCurrentStatus: true
+      }
+    },
+    {
+      type: 'qris-payment',
+      name: 'QRIS Payment',
+      description: 'QRIS QR code payment for Indonesian e-wallets',
+      category: 'indonesia',
+      isPremium: false,
+      schemaJson: {
+        type: 'object',
+        properties: {
+          qrisImage: { type: 'string', title: 'QRIS QR Code Image URL' },
+          merchantName: { type: 'string', title: 'Merchant Name' },
+          paymentMethods: { type: 'array', default: ['Gopay', 'OVO', 'Dana', 'ShopeePay'] },
+          presetAmounts: { type: 'array', default: [] },
+          allowCustomAmount: { type: 'boolean', default: true },
+          instructions: { type: 'string', title: 'Payment Instructions' },
+          showPaymentLogos: { type: 'boolean', default: true }
+        }
+      },
+      defaultProps: {
+        paymentMethods: ['Gopay', 'OVO', 'Dana', 'ShopeePay'],
+        allowCustomAmount: true,
+        showPaymentLogos: true
+      }
     }
   ]
 
@@ -252,10 +458,10 @@ async function main() {
           'social-icons': 1
         },
         defaults: {
+          backgroundKey: 'gradient-soft-clouds',
           tokens: {
             '--primary-color': '#66A38A',
             '--secondary-color': '#2A3441',
-            '--background': 'linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%)',
             '--text-color': '#2D3748',
             '--card-background': '#FFFFFF',
             '--border-radius': '12px',
@@ -302,10 +508,10 @@ async function main() {
           'social-icons': 1
         },
         defaults: {
+          backgroundKey: 'gradient-carbon-fiber',
           tokens: {
             '--primary-color': '#FFFFFF',
             '--secondary-color': '#A8A8A8',
-            '--background': 'linear-gradient(135deg, #3A3A3A 0%, #2A2A2A 100%)',
             '--text-color': '#FFFFFF',
             '--text-secondary': '#D4D4D4',
             '--card-background': '#F5F4F0',
@@ -367,10 +573,10 @@ async function main() {
           'gallery': 2
         },
         defaults: {
+          backgroundKey: 'gradient-ocean-breeze',
           tokens: {
             '--primary-color': '#8B5CF6',
             '--secondary-color': '#06B6D4',
-            '--background': 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
             '--text-color': '#FFFFFF',
             '--card-background': 'rgba(255, 255, 255, 0.15)',
             '--border-radius': '20px',
@@ -387,7 +593,7 @@ async function main() {
               style: 'rounded'
             },
             'gallery': {
-              layout: 'masonry',
+              layout: 'grid',
               columns: 2
             }
           },
@@ -419,10 +625,10 @@ async function main() {
         },
         allowedBlocks: ['bio', 'link-list', 'social-icons', 'analytics', 'gallery'],
         defaults: {
+          backgroundKey: 'gradient-pearl-white',
           tokens: {
             '--primary-color': '#1E40AF',
             '--secondary-color': '#64748B',
-            '--background': 'linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%)',
             '--text-color': '#1E293B',
             '--card-background': '#FFFFFF',
             '--border-radius': '8px',
@@ -475,10 +681,10 @@ async function main() {
           'social-icons': 1
         },
         defaults: {
+          backgroundKey: 'gradient-aurora-borealis',
           tokens: {
             '--primary-color': '#8B5CF6',
             '--secondary-color': '#EC4899',
-            '--background': 'linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%)',
             '--text-color': '#FFFFFF',
             '--card-background': 'rgba(255, 255, 255, 0.1)',
             '--border-radius': '20px',
@@ -542,10 +748,10 @@ async function main() {
           'social-icons': 1
         },
         defaults: {
+          backgroundKey: 'gradient-dark-ocean',
           tokens: {
             '--primary-color': '#00FFFF',
             '--secondary-color': '#FF0080',
-            '--background': 'linear-gradient(135deg, #0a0a0a 0%, #1a1a2e 50%, #16213e 100%)',
             '--text-color': '#00FFFF',
             '--card-background': '#000000',
             '--border-radius': '8px',
@@ -561,7 +767,7 @@ async function main() {
               spacing: 'normal'
             },
             'link-list': {
-              style: 'cyberpunk',
+              style: 'terminal',
               gap: 'md',
               customColors: {
                 primary: '#00FFFF',
@@ -605,10 +811,10 @@ async function main() {
         allowedBlocks: ['bio', 'link-list', 'social-icons'],
         maxBlocks: { 'bio': 1, 'link-list': 1, 'social-icons': 1 },
         defaults: {
+          backgroundKey: 'gradient-cyberpunk-night',
           tokens: {
             '--primary-color': '#FF0080',
             '--secondary-color': '#8B5CF6',
-            '--background': 'linear-gradient(135deg, #1a0028 0%, #4c0080 50%, #ff0080 100%)',
             '--text-color': '#FFE0FF',
             '--card-background': 'rgba(255, 0, 128, 0.1)',
             '--border-radius': '12px',
@@ -616,7 +822,7 @@ async function main() {
           },
           blockProps: {
             'bio': { showAvatar: true, avatarSize: 'xl', avatarStyle: 'circle', textAlign: 'center', nameStyle: 'large-elegant', spacing: 'wide' },
-            'link-list': { style: 'neon-outline', gap: 'lg', customColors: { primary: '#FF0080', secondary: '#8B5CF6', text: '#FFE0FF', accent: '#00FFFF', background: 'rgba(255, 0, 128, 0.05)' } },
+            'link-list': { style: 'neon', gap: 'lg', customColors: { primary: '#FF0080', secondary: '#8B5CF6', text: '#FFE0FF', accent: '#00FFFF', background: 'rgba(255, 0, 128, 0.05)' } },
             'social-icons': { size: 'lg', style: 'rounded' }
           },
           meta: { title: 'RETROWAVE.LINK', description: 'Dive into the neon-soaked digital nostalgia' }
@@ -639,10 +845,10 @@ async function main() {
         allowedBlocks: ['bio', 'link-list', 'social-icons'],
         maxBlocks: { 'bio': 1, 'link-list': 1, 'social-icons': 1 },
         defaults: {
+          backgroundKey: 'gradient-mint-fresh',
           tokens: {
             '--primary-color': '#059669',
             '--secondary-color': '#065f46',
-            '--background': 'linear-gradient(135deg, #ecfdf5 0%, #a7f3d0 50%, #34d399 100%)',
             '--text-color': '#064e3b',
             '--card-background': 'rgba(255, 255, 255, 0.8)',
             '--border-radius': '16px',
@@ -673,10 +879,10 @@ async function main() {
         allowedBlocks: ['bio', 'link-list', 'social-icons'],
         maxBlocks: { 'bio': 1, 'link-list': 1, 'social-icons': 1 },
         defaults: {
+          backgroundKey: 'gradient-aqua-splash',
           tokens: {
             '--primary-color': '#0ea5e9',
             '--secondary-color': '#0284c7',
-            '--background': 'linear-gradient(135deg, #f0f9ff 0%, #7dd3fc 50%, #0ea5e9 100%)',
             '--text-color': '#0c4a6e',
             '--card-background': 'rgba(255, 255, 255, 0.9)',
             '--border-radius': '20px',
@@ -707,10 +913,10 @@ async function main() {
         allowedBlocks: ['bio', 'link-list', 'social-icons'],
         maxBlocks: { 'bio': 1, 'link-list': 1, 'social-icons': 1 },
         defaults: {
+          backgroundKey: 'gradient-peachy-keen',
           tokens: {
             '--primary-color': '#f97316',
             '--secondary-color': '#ea580c',
-            '--background': 'linear-gradient(135deg, #fed7aa 0%, #fdba74 50%, #f97316 100%)',
             '--text-color': '#9a3412',
             '--card-background': 'rgba(255, 255, 255, 0.85)',
             '--border-radius': '14px',
@@ -718,7 +924,7 @@ async function main() {
           },
           blockProps: {
             'bio': { showAvatar: true, avatarSize: 'xl', avatarStyle: 'circle', textAlign: 'center', nameStyle: 'large-elegant', spacing: 'wide' },
-            'link-list': { style: 'vintage', gap: 'lg', customColors: { primary: '#f97316', secondary: '#ea580c', text: '#9a3412', accent: '#fdba74', background: '#fff7ed' } },
+            'link-list': { style: 'pixel', gap: 'lg', customColors: { primary: '#f97316', secondary: '#ea580c', text: '#9a3412', accent: '#fdba74', background: '#fff7ed' } },
             'social-icons': { size: 'lg', style: 'rounded' }
           },
           meta: { title: 'Desert Wanderer', description: 'Following the sunset, chasing adventures' }
@@ -741,10 +947,10 @@ async function main() {
         allowedBlocks: ['bio', 'link-list', 'social-icons'],
         maxBlocks: { 'bio': 1, 'link-list': 1, 'social-icons': 1 },
         defaults: {
+          backgroundKey: 'gradient-space-void',
           tokens: {
             '--primary-color': '#22c55e',
             '--secondary-color': '#16a34a',
-            '--background': 'linear-gradient(135deg, #0a0a0a 0%, #1a1a1a 50%, #0f0f23 100%)',
             '--text-color': '#22c55e',
             '--card-background': '#111111',
             '--border-radius': '8px',
@@ -775,10 +981,10 @@ async function main() {
         allowedBlocks: ['bio', 'link-list', 'social-icons'],
         maxBlocks: { 'bio': 1, 'link-list': 1, 'social-icons': 1 },
         defaults: {
+          backgroundKey: 'gradient-pearl-white',
           tokens: {
             '--primary-color': '#d4af37',
             '--secondary-color': '#b8860b',
-            '--background': 'linear-gradient(135deg, #f8fafc 0%, #e2e8f0 50%, #cbd5e1 100%)',
             '--text-color': '#1e293b',
             '--card-background': '#ffffff',
             '--border-radius': '12px',
@@ -809,10 +1015,10 @@ async function main() {
         allowedBlocks: ['bio', 'link-list', 'social-icons'],
         maxBlocks: { 'bio': 1, 'link-list': 1, 'social-icons': 1 },
         defaults: {
+          backgroundKey: 'gradient-lavender-dream',
           tokens: {
             '--primary-color': '#f43f5e',
             '--secondary-color': '#e11d48',
-            '--background': 'linear-gradient(135deg, #fdf2f8 0%, #fce7f3 50%, #fbcfe8 100%)',
             '--text-color': '#881337',
             '--card-background': 'rgba(255, 255, 255, 0.9)',
             '--border-radius': '18px',
@@ -820,7 +1026,7 @@ async function main() {
           },
           blockProps: {
             'bio': { showAvatar: true, avatarSize: 'xl', avatarStyle: 'circle', textAlign: 'center', nameStyle: 'large-elegant', spacing: 'wide' },
-            'link-list': { style: 'origami', gap: 'lg', customColors: { primary: '#f43f5e', secondary: '#e11d48', text: '#881337', accent: '#fbcfe8', background: '#fdf2f8' } },
+            'link-list': { style: 'minimal-line', gap: 'lg', customColors: { primary: '#f43f5e', secondary: '#e11d48', text: '#881337', accent: '#fbcfe8', background: '#fdf2f8' } },
             'social-icons': { size: 'lg', style: 'rounded' }
           },
           meta: { title: '桜 Sakura Links', description: 'Beauty in simplicity, harmony in design' }
@@ -843,10 +1049,10 @@ async function main() {
         allowedBlocks: ['bio', 'link-list', 'social-icons'],
         maxBlocks: { 'bio': 1, 'link-list': 1, 'social-icons': 1 },
         defaults: {
+          backgroundKey: 'gradient-electric-violet',
           tokens: {
             '--primary-color': '#facc15',
             '--secondary-color': '#eab308',
-            '--background': 'linear-gradient(135deg, #0a0a0a 0%, #7c2d12 50%, #facc15 100%)',
             '--text-color': '#facc15',
             '--card-background': 'rgba(250, 204, 21, 0.1)',
             '--border-radius': '10px',
@@ -854,7 +1060,7 @@ async function main() {
           },
           blockProps: {
             'bio': { showAvatar: true, avatarSize: 'xl', avatarStyle: 'circle', textAlign: 'center', nameStyle: 'large-elegant', spacing: 'wide' },
-            'link-list': { style: 'elastic', gap: 'lg', customColors: { primary: '#facc15', secondary: '#eab308', text: '#000000', accent: '#fbbf24', background: 'rgba(250, 204, 21, 0.05)' } },
+            'link-list': { style: 'modern', gap: 'lg', customColors: { primary: '#facc15', secondary: '#eab308', text: '#000000', accent: '#fbbf24', background: 'rgba(250, 204, 21, 0.05)' } },
             'social-icons': { size: 'lg', style: 'rounded' }
           },
           meta: { title: '⚡ ELECTRIC BEATS', description: 'Feel the rhythm, share the energy' }
@@ -877,10 +1083,10 @@ async function main() {
         allowedBlocks: ['bio', 'link-list', 'social-icons'],
         maxBlocks: { 'bio': 1, 'link-list': 1, 'social-icons': 1 },
         defaults: {
+          backgroundKey: 'gradient-pastel-sky',
           tokens: {
             '--primary-color': '#06b6d4',
             '--secondary-color': '#0891b2',
-            '--background': 'linear-gradient(135deg, #f0f9ff 0%, #bae6fd 50%, #06b6d4 100%)',
             '--text-color': '#0c4a6e',
             '--card-background': 'rgba(255, 255, 255, 0.8)',
             '--border-radius': '16px',
@@ -911,10 +1117,10 @@ async function main() {
         allowedBlocks: ['bio', 'link-list', 'social-icons'],
         maxBlocks: { 'bio': 1, 'link-list': 1, 'social-icons': 1 },
         defaults: {
+          backgroundKey: 'gradient-cherry-blossom',
           tokens: {
             '--primary-color': '#dc2626',
             '--secondary-color': '#b91c1c',
-            '--background': 'linear-gradient(135deg, #fef2f2 0%, #fecaca 50%, #dc2626 100%)',
             '--text-color': '#7f1d1d',
             '--card-background': 'rgba(255, 255, 255, 0.9)',
             '--border-radius': '12px',
@@ -945,10 +1151,10 @@ async function main() {
         allowedBlocks: ['bio', 'link-list', 'social-icons'],
         maxBlocks: { 'bio': 1, 'link-list': 1, 'social-icons': 1 },
         defaults: {
+          backgroundKey: 'gradient-midnight-city',
           tokens: {
             '--primary-color': '#a855f7',
             '--secondary-color': '#9333ea',
-            '--background': 'linear-gradient(135deg, #0c0a1e 0%, #1e1b4b 50%, #312e81 100%)',
             '--text-color': '#e0e7ff',
             '--card-background': 'rgba(168, 85, 247, 0.1)',
             '--border-radius': '14px',
@@ -979,10 +1185,10 @@ async function main() {
         allowedBlocks: ['bio', 'link-list', 'social-icons'],
         maxBlocks: { 'bio': 1, 'link-list': 1, 'social-icons': 1 },
         defaults: {
+          backgroundKey: 'gradient-desert-sand',
           tokens: {
             '--primary-color': '#92400e',
             '--secondary-color': '#78350f',
-            '--background': 'linear-gradient(135deg, #fef7ed 0%, #fed7aa 50%, #fdba74 100%)',
             '--text-color': '#451a03',
             '--card-background': 'rgba(255, 255, 255, 0.9)',
             '--border-radius': '12px',
@@ -1013,10 +1219,10 @@ async function main() {
         allowedBlocks: ['bio', 'link-list', 'social-icons'],
         maxBlocks: { 'bio': 1, 'link-list': 1, 'social-icons': 1 },
         defaults: {
+          backgroundKey: 'gradient-pearl-white',
           tokens: {
             '--primary-color': '#374151',
             '--secondary-color': '#1f2937',
-            '--background': 'linear-gradient(135deg, #ffffff 0%, #f9fafb 50%, #e5e7eb 100%)',
             '--text-color': '#111827',
             '--card-background': '#ffffff',
             '--border-radius': '8px',
@@ -1024,7 +1230,7 @@ async function main() {
           },
           blockProps: {
             'bio': { showAvatar: true, avatarSize: 'lg', avatarStyle: 'rounded', textAlign: 'center', nameStyle: 'default', spacing: 'normal' },
-            'link-list': { style: 'minimal-line', gap: 'md', customColors: { primary: '#374151', secondary: '#1f2937', text: '#111827', accent: '#6b7280', background: '#ffffff' } },
+            'link-list': { style: 'underline', gap: 'md', customColors: { primary: '#374151', secondary: '#1f2937', text: '#111827', accent: '#6b7280', background: '#ffffff' } },
             'social-icons': { size: 'md', style: 'minimal' }
           },
           meta: { title: 'Monochrome Portfolio', description: 'Capturing life in shades of meaning' }
@@ -1047,10 +1253,10 @@ async function main() {
         allowedBlocks: ['bio', 'link-list', 'social-icons'],
         maxBlocks: { 'bio': 1, 'link-list': 1, 'social-icons': 1 },
         defaults: {
+          backgroundKey: 'gradient-aqua-splash',
           tokens: {
             '--primary-color': '#06b6d4',
             '--secondary-color': '#0891b2',
-            '--background': 'linear-gradient(135deg, #ecfeff 0%, #67e8f9 50%, #22d3ee 100%)',
             '--text-color': '#0e7490',
             '--card-background': 'rgba(255, 255, 255, 0.85)',
             '--border-radius': '20px',
@@ -1058,7 +1264,7 @@ async function main() {
           },
           blockProps: {
             'bio': { showAvatar: true, avatarSize: 'xl', avatarStyle: 'circle', textAlign: 'center', nameStyle: 'large-elegant', spacing: 'wide' },
-            'link-list': { style: 'ticket', gap: 'lg', customColors: { primary: '#06b6d4', secondary: '#0891b2', text: '#ffffff', accent: '#67e8f9', background: '#ecfeff' } },
+            'link-list': { style: 'brush', gap: 'lg', customColors: { primary: '#06b6d4', secondary: '#0891b2', text: '#ffffff', accent: '#67e8f9', background: '#ecfeff' } },
             'social-icons': { size: 'lg', style: 'rounded' }
           },
           meta: { title: '🏝️ Paradise Links', description: 'Escape to your digital tropical getaway' }
@@ -1102,24 +1308,373 @@ async function main() {
         },
         isPaid: true, priceCents: 1500, requiredFeatures: ['premium-templates']
       }
+    },
+    {
+      slug: 'student-portfolio',
+      name: 'Student Portfolio',
+      description: 'Clean academic portfolio for students and graduates',
+      category: 'free',
+      status: 'PUBLISHED' as const,
+      manifest: {
+        name: 'Student Portfolio',
+        version: '1.0.0',
+        description: 'Clean academic portfolio for students and graduates',
+        thumbnail: '/templates/student-portfolio-thumb.jpg',
+        layout: {
+          header: ['bio'],
+          body: ['link-list', 'divider', 'gallery'],
+          footer: ['footer']
+        },
+        allowedBlocks: ['bio', 'link-list', 'social-icons', 'divider', 'footer', 'gallery'],
+        defaults: {
+          backgroundKey: 'gradient-pastel-sky',
+          tokens: {
+            '--primary-color': '#3b82f6',
+            '--secondary-color': '#2563eb',
+            '--text-color': '#1e3a8a',
+            '--card-background': '#ffffff',
+            '--border-radius': '12px',
+            '--shadow': '0 4px 12px rgba(59, 130, 246, 0.15)'
+          },
+          blockProps: {
+            'bio': {
+              showAvatar: true,
+              avatarSize: 'lg',
+              avatarStyle: 'rounded-frame',
+              nameStyle: 'default',
+              textAlign: 'center',
+              spacing: 'normal'
+            },
+            'link-list': {
+              style: 'card',
+              gap: 'md'
+            },
+            'divider': {
+              style: 'solid',
+              thickness: 1,
+              color: '#3b82f6'
+            },
+            'footer': {
+              layout: 'minimal',
+              copyrightText: '© 2024 Student',
+              showSocial: true,
+              showLinks: false
+            }
+          },
+          meta: {
+            title: 'My Student Portfolio',
+            description: 'Academic achievements and projects'
+          }
+        },
+        requiredPlan: 'FREE'
+      }
+    },
+    {
+      slug: 'entrepreneur-startup',
+      name: 'Entrepreneur Startup',
+      description: 'Professional startup founder profile with bold design',
+      category: 'free',
+      status: 'PUBLISHED' as const,
+      manifest: {
+        name: 'Entrepreneur Startup',
+        version: '1.0.0',
+        description: 'Professional startup founder profile with bold design',
+        thumbnail: '/templates/entrepreneur-startup-thumb.jpg',
+        layout: {
+          header: ['bio'],
+          body: ['divider', 'link-list'],
+          footer: ['social-icons', 'footer']
+        },
+        allowedBlocks: ['bio', 'link-list', 'social-icons', 'divider', 'footer'],
+        defaults: {
+          backgroundKey: 'gradient-desert-sand',
+          tokens: {
+            '--primary-color': '#f59e0b',
+            '--secondary-color': '#d97706',
+            '--text-color': '#78350f',
+            '--card-background': '#ffffff',
+            '--border-radius': '10px',
+            '--shadow': '0 6px 16px rgba(245, 158, 11, 0.2)'
+          },
+          blockProps: {
+            'bio': {
+              showAvatar: true,
+              avatarSize: 'xl',
+              avatarStyle: 'hexagon',
+              nameStyle: 'bold-impact',
+              textAlign: 'center',
+              spacing: 'wide'
+            },
+            'link-list': {
+              style: 'modern',
+              gap: 'lg'
+            },
+            'divider': {
+              style: 'solid',
+              thickness: 2,
+              color: '#f59e0b'
+            },
+            'footer': {
+              layout: 'centered',
+              showSocial: true,
+              showLinks: true
+            }
+          },
+          meta: {
+            title: 'Startup Founder',
+            description: 'Building the future, one idea at a time'
+          }
+        },
+        requiredPlan: 'FREE'
+      }
+    },
+    {
+      slug: 'restaurant-menu',
+      name: 'Restaurant Menu',
+      description: 'Elegant restaurant and cafe menu link page',
+      category: 'premium',
+      status: 'PUBLISHED' as const,
+      manifest: {
+        name: 'Restaurant Menu',
+        version: '1.0.0',
+        description: 'Elegant restaurant and cafe menu link page',
+        thumbnail: '/templates/restaurant-menu-thumb.jpg',
+        layout: {
+          header: ['bio'],
+          body: ['gallery', 'divider', 'link-list'],
+          footer: ['footer']
+        },
+        allowedBlocks: ['bio', 'link-list', 'gallery', 'divider', 'footer'],
+        defaults: {
+          backgroundKey: 'gradient-cherry-blossom',
+          tokens: {
+            '--primary-color': '#dc2626',
+            '--secondary-color': '#b91c1c',
+            '--text-color': '#7f1d1d',
+            '--card-background': '#ffffff',
+            '--border-radius': '16px',
+            '--shadow': '0 6px 20px rgba(220, 38, 38, 0.2)'
+          },
+          blockProps: {
+            'bio': {
+              showAvatar: true,
+              avatarSize: 'xxl',
+              avatarStyle: 'rounded-frame',
+              nameStyle: 'large-elegant',
+              textAlign: 'center',
+              spacing: 'wide'
+            },
+            'link-list': {
+              style: 'card',
+              gap: 'md'
+            },
+            'gallery': {
+              layout: 'grid',
+              columns: 2,
+              aspectRatio: 'square'
+            },
+            'divider': {
+              style: 'gradient',
+              thickness: 2,
+              color: '#dc2626'
+            },
+            'footer': {
+              layout: 'stacked',
+              showSocial: true,
+              showLinks: true,
+              links: [
+                { label: 'Order Now', url: '#', external: false },
+                { label: 'Location', url: '#', external: false }
+              ]
+            }
+          },
+          meta: {
+            title: 'Our Restaurant',
+            description: 'Delicious food, memorable experiences'
+          }
+        },
+        isPaid: true,
+        priceCents: 1000,
+        requiredFeatures: ['premium-templates']
+      }
+    },
+    {
+      slug: 'wedding-event',
+      name: 'Wedding Event',
+      description: 'Romantic wedding invitation and event details page',
+      category: 'premium',
+      status: 'PUBLISHED' as const,
+      manifest: {
+        name: 'Wedding Event',
+        version: '1.0.0',
+        description: 'Romantic wedding invitation and event details page',
+        thumbnail: '/templates/wedding-event-thumb.jpg',
+        layout: {
+          header: ['bio'],
+          body: ['divider', 'link-list', 'divider', 'gallery'],
+          footer: ['footer']
+        },
+        allowedBlocks: ['bio', 'link-list', 'gallery', 'divider', 'footer'],
+        defaults: {
+          backgroundKey: 'gradient-lavender-dream',
+          tokens: {
+            '--primary-color': '#f472b6',
+            '--secondary-color': '#ec4899',
+            '--text-color': '#831843',
+            '--card-background': 'rgba(255, 255, 255, 0.9)',
+            '--border-radius': '20px',
+            '--shadow': '0 8px 24px rgba(244, 114, 182, 0.25)'
+          },
+          blockProps: {
+            'bio': {
+              showAvatar: true,
+              avatarSize: 'xxl',
+              avatarStyle: 'flower',
+              nameStyle: 'script-handwritten',
+              bioStyle: 'quote',
+              textAlign: 'center',
+              spacing: 'wide'
+            },
+            'link-list': {
+              style: 'glass',
+              gap: 'lg'
+            },
+            'divider': {
+              style: 'gradient',
+              thickness: 2,
+              icon: 'heart',
+              color: '#f472b6'
+            },
+            'gallery': {
+              layout: 'carousel',
+              columns: 1,
+              aspectRatio: 'landscape'
+            },
+            'footer': {
+              layout: 'centered',
+              copyrightText: '© 2024 Our Special Day',
+              showSocial: false,
+              showLinks: true
+            }
+          },
+          meta: {
+            title: 'Our Wedding',
+            description: 'Join us in celebrating our love'
+          }
+        },
+        isPaid: true,
+        priceCents: 1500,
+        requiredFeatures: ['premium-templates']
+      }
+    },
+    {
+      slug: 'developer-tech',
+      name: 'Developer Tech',
+      description: 'Modern developer portfolio with terminal aesthetics',
+      category: 'free',
+      status: 'PUBLISHED' as const,
+      manifest: {
+        name: 'Developer Tech',
+        version: '1.0.0',
+        description: 'Modern developer portfolio with terminal aesthetics',
+        thumbnail: '/templates/developer-tech-thumb.jpg',
+        layout: {
+          header: ['bio'],
+          body: ['link-list', 'divider'],
+          footer: ['footer']
+        },
+        allowedBlocks: ['bio', 'link-list', 'social-icons', 'divider', 'footer'],
+        defaults: {
+          backgroundKey: 'gradient-space-void',
+          tokens: {
+            '--primary-color': '#22c55e',
+            '--secondary-color': '#16a34a',
+            '--text-color': '#22c55e',
+            '--card-background': '#111111',
+            '--border-radius': '8px',
+            '--shadow': '0 0 20px rgba(34, 197, 94, 0.3)'
+          },
+          blockProps: {
+            'bio': {
+              showAvatar: true,
+              avatarSize: 'lg',
+              avatarStyle: 'hexagon',
+              nameStyle: 'tech-mono',
+              textAlign: 'center',
+              spacing: 'normal'
+            },
+            'link-list': {
+              style: 'terminal',
+              gap: 'md'
+            },
+            'divider': {
+              style: 'dashed',
+              thickness: 1,
+              color: '#22c55e'
+            },
+            'footer': {
+              layout: 'minimal',
+              copyrightText: '© 2024 Developer',
+              backgroundColor: '#000000',
+              textColor: '#22c55e',
+              showSocial: true
+            }
+          },
+          meta: {
+            title: 'DEV_PORTFOLIO',
+            description: 'Code. Build. Deploy.'
+          }
+        },
+        requiredPlan: 'FREE'
+      }
     }
   ]
 
-  for (const templateData of templates) {
+  // Merge all templates: base + Indonesia-specific + new 2024 templates
+  const allTemplates = [...templates, ...indonesiaTemplates, ...newTemplates2024]
+
+  console.log(`📦 Total templates to seed: ${allTemplates.length}`)
+
+  for (const templateData of allTemplates) {
+    // Get category data for this template
+    const categoryData = getTemplateCategoryData(templateData.slug)
+
     const template = await prisma.template.upsert({
       where: { slug: templateData.slug },
       update: {
         name: templateData.name,
         description: templateData.description,
         category: templateData.category,
-        status: templateData.status
+        status: templateData.status,
+        // Update category fields
+        ...(categoryData && {
+          primaryCategory: categoryData.primaryCategory,
+          subCategory: categoryData.subCategory,
+          industryTags: categoryData.industryTags,
+          targetAudience: categoryData.targetAudience,
+          recommendedFor: categoryData.recommendedFor,
+          includesFeatures: categoryData.includesFeatures,
+          localizedName: categoryData.localizedName,
+          localizedDesc: categoryData.localizedDesc
+        })
       },
       create: {
         slug: templateData.slug,
         name: templateData.name,
         description: templateData.description,
         category: templateData.category,
-        status: templateData.status
+        status: templateData.status,
+        // Add category fields
+        ...(categoryData && {
+          primaryCategory: categoryData.primaryCategory,
+          subCategory: categoryData.subCategory,
+          industryTags: categoryData.industryTags,
+          targetAudience: categoryData.targetAudience,
+          recommendedFor: categoryData.recommendedFor,
+          includesFeatures: categoryData.includesFeatures,
+          localizedName: categoryData.localizedName,
+          localizedDesc: categoryData.localizedDesc
+        })
       }
     })
 
@@ -1240,6 +1795,118 @@ async function main() {
     {
       templateSlug: 'mountain-landscape',
       tagSlugs: ['minimal', 'outdoor', 'personal', 'creative', 'portfolio']
+    },
+    {
+      templateSlug: 'student-portfolio',
+      tagSlugs: ['minimal', 'education', 'student', 'portfolio', 'personal']
+    },
+    {
+      templateSlug: 'entrepreneur-startup',
+      tagSlugs: ['business', 'entrepreneur', 'professional', 'colorful', 'portfolio']
+    },
+    {
+      templateSlug: 'restaurant-menu',
+      tagSlugs: ['food-beverage', 'business', 'colorful', 'shop', 'professional']
+    },
+    {
+      templateSlug: 'wedding-event',
+      tagSlugs: ['event', 'elegant', 'personal', 'colorful', 'creative']
+    },
+    {
+      templateSlug: 'developer-tech',
+      tagSlugs: ['tech', 'dark-mode', 'professional', 'portfolio', 'personal']
+    },
+    // Indonesia-specific templates
+    {
+      templateSlug: 'toko-online-modern',
+      tagSlugs: ['business', 'shop', 'personal', 'minimal', 'entrepreneur']
+    },
+    {
+      templateSlug: 'umkm-fashion-boutique',
+      tagSlugs: ['fashion', 'business', 'shop', 'elegant', 'colorful']
+    },
+    {
+      templateSlug: 'warung-kopi-cafe',
+      tagSlugs: ['food-beverage', 'business', 'personal', 'minimal']
+    },
+    {
+      templateSlug: 'restoran-delivery',
+      tagSlugs: ['food-beverage', 'business', 'colorful', 'shop']
+    },
+    {
+      templateSlug: 'beauty-creator-hub',
+      tagSlugs: ['creative', 'influencer', 'personal', 'colorful', 'elegant']
+    },
+    {
+      templateSlug: 'food-blogger-paradise',
+      tagSlugs: ['food-beverage', 'creative', 'influencer', 'personal', 'colorful']
+    },
+    {
+      templateSlug: 'brand-skincare-premium',
+      tagSlugs: ['business', 'shop', 'elegant', 'professional', 'colorful']
+    },
+    {
+      templateSlug: 'reseller-beauty',
+      tagSlugs: ['business', 'shop', 'personal', 'minimal']
+    },
+    {
+      templateSlug: 'fotografer-wedding',
+      tagSlugs: ['creative', 'professional', 'portfolio', 'event', 'elegant']
+    },
+    {
+      templateSlug: 'wedding-organizer-elegant',
+      tagSlugs: ['event', 'business', 'professional', 'elegant', 'colorful']
+    },
+    // New 2024 templates - Creator
+    {
+      templateSlug: 'gaming-streamer-hub',
+      tagSlugs: ['gaming', 'tech', 'creative', 'influencer', 'dark-mode']
+    },
+    {
+      templateSlug: 'tech-reviewer-pro',
+      tagSlugs: ['tech', 'creative', 'professional', 'dark-mode', 'portfolio']
+    },
+    {
+      templateSlug: 'travel-blogger-wanderlust',
+      tagSlugs: ['creative', 'influencer', 'personal', 'colorful', 'gradient']
+    },
+    {
+      templateSlug: 'lifestyle-influencer-modern',
+      tagSlugs: ['creative', 'influencer', 'personal', 'elegant', 'colorful']
+    },
+    // New 2024 templates - UMKM
+    {
+      templateSlug: 'food-seller-homemade',
+      tagSlugs: ['food-beverage', 'business', 'personal', 'colorful', 'shop']
+    },
+    {
+      templateSlug: 'handicraft-artisan',
+      tagSlugs: ['creative', 'business', 'shop', 'personal', 'minimal']
+    },
+    {
+      templateSlug: 'service-business-pro',
+      tagSlugs: ['business', 'professional', 'personal', 'minimal', 'entrepreneur']
+    },
+    {
+      templateSlug: 'dropship-reseller-hub',
+      tagSlugs: ['business', 'shop', 'personal', 'minimal', 'entrepreneur']
+    },
+    {
+      templateSlug: 'thrift-store-vintage',
+      tagSlugs: ['fashion', 'business', 'shop', 'retro', 'personal']
+    },
+    // New 2024 templates - F&B
+    {
+      templateSlug: 'bakery-cake-shop',
+      tagSlugs: ['food-beverage', 'business', 'elegant', 'colorful', 'shop']
+    },
+    {
+      templateSlug: 'catering-service-pro',
+      tagSlugs: ['food-beverage', 'business', 'professional', 'event', 'shop']
+    },
+    {
+      templateSlug: 'cloud-kitchen-delivery',
+      tagSlugs: ['food-beverage', 'business', 'dark-mode', 'tech', 'shop']
     }
   ]
 

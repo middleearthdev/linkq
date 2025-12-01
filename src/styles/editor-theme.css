@@ -1,0 +1,159 @@
+/**
+ * Editor Theme Styles
+ * Provides consistent theming for the editor interface
+ */
+
+/* Editor specific color variables */
+:root {
+  --editor-bg-primary: #FFFFFF;
+  --editor-bg-secondary: #F8FAFB;
+  --editor-bg-card: #FFFFFF;
+  --editor-bg-elevated: #FAFCFD;
+  --editor-border: #D1E4DD;
+  --editor-text-primary: #0F172A;
+  --editor-text-secondary: #475569;
+  --editor-text-muted: #64748B;
+  --editor-accent: #4F9D7B;
+  --editor-accent-hover: #3D8566;
+  --editor-success: #10B981;
+  --editor-success-hover: #059669;
+}
+
+.dark {
+  --editor-bg-primary: #0F1419;
+  --editor-bg-secondary: #1A2332;
+  --editor-bg-card: #1A2332;
+  --editor-bg-elevated: #2A3441;
+  --editor-border: #2A3441;
+  --editor-text-primary: #FFFFFF;
+  --editor-text-secondary: #E5E7EB;
+  --editor-text-muted: #9CA3AF;
+  --editor-accent: #66A38A;
+  --editor-accent-hover: #5A8F7A;
+  --editor-success: #10B981;
+  --editor-success-hover: #059669;
+}
+
+/* Editor utility classes */
+.editor-container {
+  background-color: var(--editor-bg-primary);
+  color: var(--editor-text-primary);
+}
+
+.editor-card {
+  background-color: var(--editor-bg-card);
+  border-color: var(--editor-border);
+  color: var(--editor-text-primary);
+}
+
+.editor-tabs {
+  background-color: var(--editor-bg-card);
+  border: 1px solid var(--editor-border);
+}
+
+.editor-tab {
+  color: var(--editor-text-muted);
+  transition: all 0.2s;
+}
+
+.editor-tab:hover {
+  background-color: var(--editor-bg-elevated);
+}
+
+.editor-tab-active {
+  background-color: var(--editor-accent);
+  color: #FFFFFF;
+}
+
+.editor-tab-active:hover {
+  background-color: var(--editor-accent-hover);
+}
+
+.editor-btn-primary {
+  background-color: var(--editor-accent);
+  border-color: var(--editor-accent);
+  color: #FFFFFF;
+}
+
+.editor-btn-primary:hover:not(:disabled) {
+  background-color: var(--editor-accent-hover);
+}
+
+.editor-btn-primary:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.editor-btn-success {
+  background-color: var(--editor-success);
+  border-color: var(--editor-success);
+  color: #FFFFFF;
+}
+
+.editor-btn-success:hover:not(:disabled) {
+  background-color: var(--editor-success-hover);
+}
+
+.editor-icon-accent {
+  color: var(--editor-accent);
+}
+
+.editor-preview-bg {
+  background-color: #F7F9FA;
+}
+
+.dark .editor-preview-bg {
+  background-color: #F7F9FA; /* Keep light for preview */
+}
+
+.editor-drag-over {
+  background-color: var(--editor-bg-elevated);
+  border-color: var(--editor-accent);
+}
+
+.editor-input {
+  background-color: var(--editor-bg-elevated);
+  border-color: var(--editor-border);
+  color: var(--editor-text-primary);
+}
+
+.editor-input:focus {
+  border-color: var(--editor-accent);
+  outline: none;
+  ring: 2px;
+  ring-color: var(--editor-accent);
+  ring-opacity: 0.2;
+}
+
+.editor-input::placeholder {
+  color: var(--editor-text-muted);
+}
+
+.editor-badge {
+  background-color: var(--editor-bg-card);
+  border-color: var(--editor-border);
+  color: var(--editor-accent);
+}
+
+.editor-divider {
+  border-color: var(--editor-border);
+}
+
+/* Toggle switch styles */
+.editor-toggle {
+  background-color: #6B7280;
+}
+
+.editor-toggle-active {
+  background-color: var(--editor-accent);
+}
+
+.editor-toggle:focus {
+  ring: 2px;
+  ring-color: var(--editor-accent);
+  ring-offset: 2px;
+}
+
+.dark .editor-toggle:focus {
+  ring-offset-color: var(--editor-bg-card);
+}

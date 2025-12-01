@@ -4,7 +4,6 @@
  */
 
 import Image from 'next/image'
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { AvatarUpload } from '@/components/ui/avatar-upload'
 import { Button } from '@/components/ui/button'
 import { BioBlockProps } from '@/types'
@@ -34,10 +33,8 @@ export function BioBlock({ props, className, isEditing = false }: BioBlockCompon
   // Avatar size mapping
   const avatarSizes = {
     sm: 'w-16 h-16',
-    md: 'w-20 h-20', 
+    md: 'w-20 h-20',
     lg: 'w-24 h-24',
-    xl: 'w-32 h-32',
-    xxl: 'w-40 h-40'
   }
 
   // Avatar style mapping with mobile-first responsive design
@@ -45,13 +42,7 @@ export function BioBlock({ props, className, isEditing = false }: BioBlockCompon
     circle: 'rounded-full',
     'rounded-frame': 'rounded-[1.5rem] sm:rounded-[2rem]',
     square: 'rounded-lg',
-    blob: 'blob-shape',
-    hexagon: 'hexagon-shape', 
-    star: 'star-shape',
-    diamond: 'diamond-shape',
     wave: 'wave-shape',
-    flower: 'flower-shape',
-    badge: 'badge-shape',
     polaroid: 'polaroid-effect rounded-none',
     vintage: 'vintage-frame rounded-[1.5rem] sm:rounded-[2rem]',
   }
@@ -82,7 +73,7 @@ export function BioBlock({ props, className, isEditing = false }: BioBlockCompon
   // Spacing mapping
   const spacingStyles = {
     tight: 'space-y-2',
-    normal: 'space-y-4', 
+    normal: 'space-y-4',
     wide: 'space-y-6'
   }
 
@@ -109,13 +100,13 @@ export function BioBlock({ props, className, isEditing = false }: BioBlockCompon
           'relative', // Required for Next.js Image with fill
           // Special handling for custom shapes
           (avatarStyle === 'polaroid') && 'bg-white',
-          (avatarStyle === 'wave' || avatarStyle === 'blob') && 'animate-morph',
+          (avatarStyle === 'wave') && 'animate-morph',
           isEditing && 'outline-dashed outline-2 outline-blue-400 outline-offset-2'
         )}>
           {avatar ? (
-            <Image 
-              src={avatar} 
-              alt={name || 'Avatar'} 
+            <Image
+              src={avatar}
+              alt={name || 'Avatar'}
               fill
               className="object-cover"
               priority={true}
@@ -130,7 +121,7 @@ export function BioBlock({ props, className, isEditing = false }: BioBlockCompon
           )}
         </div>
       )}
-      
+
       <div className={cn(
         'space-y-3',
         spacingStyles[spacing as keyof typeof spacingStyles]
@@ -143,7 +134,7 @@ export function BioBlock({ props, className, isEditing = false }: BioBlockCompon
         )}>
           {name || 'Your Name'}
         </h1>
-        
+
         {bio && (
           <p className={cn(
             bioStyles[bioStyle as keyof typeof bioStyles],
@@ -238,8 +229,7 @@ export function BioBlockEditor({
         <label className="block text-sm font-medium mb-2">Avatar Frame Style</label>
         <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
           {([
-            'circle', 'rounded-frame', 'square', 'blob', 'hexagon', 'star',
-            'diamond', 'wave', 'flower', 'badge', 'polaroid', 'vintage'
+            'circle', 'rounded-frame', 'square', 'wave', 'polaroid', 'vintage'
           ] as const).map((style) => (
             <Button
               key={style}
@@ -257,8 +247,8 @@ export function BioBlockEditor({
       {/* Avatar Size Selector */}
       <div>
         <label className="block text-sm font-medium mb-2">Avatar Size</label>
-        <div className="grid grid-cols-5 gap-2">
-          {(['sm', 'md', 'lg', 'xl', 'xxl'] as const).map((size) => (
+        <div className="grid grid-cols-3 gap-2">
+          {(['sm', 'md', 'lg'] as const).map((size) => (
             <Button
               key={size}
               variant={props.avatarSize === size ? 'default' : 'outline'}

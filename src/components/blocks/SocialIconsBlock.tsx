@@ -258,14 +258,9 @@ export function SocialIconsBlock({ props, className, isEditing = false }: Social
   const styleClasses: Record<string, string> = {
     round: 'rounded-full',
     square: 'rounded-lg',
-    minimal: 'rounded-none border-0 bg-transparent hover:bg-transparent',
-    neon: 'rounded-full shadow-[0_0_10px_currentColor] hover:shadow-[0_0_20px_currentColor,0_0_30px_currentColor]',
-    glassmorphism: 'rounded-full backdrop-blur-md bg-white/20 border border-white/30 shadow-lg hover:bg-white/30',
-    neumorphic: 'rounded-full shadow-[8px_8px_16px_#d1d9e6,-8px_-8px_16px_#ffffff] hover:shadow-[4px_4px_8px_#d1d9e6,-4px_-4px_8px_#ffffff]',
+    minimal: 'rounded-none border-0 bg-transparent',
     floating: 'rounded-full animate-float',
-    rotating: 'rounded-full transition-transform duration-500 hover:rotate-[360deg]',
     pulse: 'rounded-full animate-pulse',
-    bounce: 'rounded-full hover:animate-bounce',
   }
 
   if (platforms.length === 0 && !isEditing) {
@@ -295,10 +290,8 @@ export function SocialIconsBlock({ props, className, isEditing = false }: Social
               styleClasses[style] || styleClasses.round,
               'social-icon', // CSS class for template styling
               isEditing && 'outline-dashed outline-2 outline-blue-400 outline-offset-2',
-              'transition-all duration-300 hover:scale-110',
-              style !== 'minimal' && 'border-2',
-              // Custom hover color
-              customColors?.hoverColor && `hover:bg-[${customColors.hoverColor}]`
+              'transition-all duration-300',
+              style !== 'minimal' && 'border-2'
             )}
             style={style !== 'minimal' ? iconStyle : { color: iconStyle.color }}
             onClick={() => handleSocialClick(platform)}
@@ -387,9 +380,9 @@ export function SocialIconsBlockEditor({
     <div className={cn('space-y-6 p-4', className)}>
       {/* Style selector */}
       <div>
-        <label className="block text-sm font-medium mb-2">Icon Style</label>
+        <label className="block text-sm font-medium mb-2">Icon Style (Mobile-Friendly)</label>
         <div className="grid grid-cols-3 gap-2">
-          {(['round', 'square', 'minimal', 'neon', 'glassmorphism', 'neumorphic', 'floating', 'rotating', 'pulse'] as const).map((style) => (
+          {(['round', 'square', 'minimal', 'floating', 'pulse'] as const).map((style) => (
             <Button
               key={style}
               variant={props.style === style ? 'default' : 'outline'}

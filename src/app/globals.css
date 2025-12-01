@@ -1,6 +1,7 @@
 @import "tailwindcss";
 @import "tw-animate-css";
 @import "../styles/avatar-frames.css";
+@import "../styles/editor-theme.css";
 /* @import "../styles/template-blocks.css"; */
 
 @custom-variant dark (&:is(.dark *));
@@ -47,71 +48,126 @@
 
 :root {
   --radius: 0.625rem;
-  --background: oklch(1 0 0);
-  --foreground: oklch(0.145 0 0);
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.145 0 0);
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.145 0 0);
-  --primary: oklch(0.205 0 0);
-  --primary-foreground: oklch(0.985 0 0);
-  --secondary: oklch(0.97 0 0);
-  --secondary-foreground: oklch(0.205 0 0);
-  --muted: oklch(0.97 0 0);
-  --muted-foreground: oklch(0.556 0 0);
-  --accent: oklch(0.97 0 0);
-  --accent-foreground: oklch(0.205 0 0);
-  --destructive: oklch(0.577 0.245 27.325);
-  --border: oklch(0.922 0 0);
-  --input: oklch(0.922 0 0);
-  --ring: oklch(0.708 0 0);
-  --chart-1: oklch(0.646 0.222 41.116);
+
+  /* Light Mode Colors - Enhanced & Eye-catching */
+  --background: #F8FAFB; /* Soft blue-gray instead of pure white */
+  --foreground: #0F172A;
+  --card: #FFFFFF; /* Pure white cards for contrast */
+  --card-foreground: #0F172A;
+  --popover: #FFFFFF;
+  --popover-foreground: #0F172A;
+  --primary: #4F9D7B; /* More vibrant green */
+  --primary-foreground: #FFFFFF;
+  --secondary: #E8F4F0; /* Soft mint green tint */
+  --secondary-foreground: #0F172A;
+  --muted: #EFF6F3; /* Light mint background */
+  --muted-foreground: #475569; /* Darker for better contrast */
+  --accent: #66A38A;
+  --accent-foreground: #FFFFFF;
+  --destructive: #EF4444;
+  --border: #D1E4DD; /* Mint-tinted border */
+  --input: #E8F4F0;
+  --ring: #4F9D7B;
+
+  /* Chart colors */
+  --chart-1: #66A38A;
   --chart-2: oklch(0.6 0.118 184.704);
   --chart-3: oklch(0.398 0.07 227.392);
   --chart-4: oklch(0.828 0.189 84.429);
   --chart-5: oklch(0.769 0.188 70.08);
-  --sidebar: oklch(0.985 0 0);
-  --sidebar-foreground: oklch(0.145 0 0);
-  --sidebar-primary: oklch(0.205 0 0);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.97 0 0);
-  --sidebar-accent-foreground: oklch(0.205 0 0);
-  --sidebar-border: oklch(0.922 0 0);
-  --sidebar-ring: oklch(0.708 0 0);
+
+  /* Sidebar */
+  --sidebar: #FFFFFF;
+  --sidebar-foreground: #0F172A;
+  --sidebar-primary: #4F9D7B;
+  --sidebar-primary-foreground: #FFFFFF;
+  --sidebar-accent: #E8F4F0;
+  --sidebar-accent-foreground: #0F172A;
+  --sidebar-border: #D1E4DD;
+  --sidebar-ring: #4F9D7B;
+
+  /* Dashboard-specific light mode colors */
+  --dashboard-bg-primary: #F8FAFB;
+  --dashboard-bg-card: #FFFFFF;
+  --dashboard-bg-elevated: #FAFCFD;
+  --dashboard-bg-accent: #F0F9F6;
+  --dashboard-border-primary: #D1E4DD;
+  --dashboard-accent-primary: #4F9D7B;
+  --dashboard-accent-hover: #3D8566;
+  --dashboard-text-muted: #64748B;
 }
 
 .dark {
-  --background: oklch(0.145 0 0);
-  --foreground: oklch(0.985 0 0);
-  --card: oklch(0.205 0 0);
-  --card-foreground: oklch(0.985 0 0);
-  --popover: oklch(0.205 0 0);
-  --popover-foreground: oklch(0.985 0 0);
-  --primary: oklch(0.922 0 0);
-  --primary-foreground: oklch(0.205 0 0);
-  --secondary: oklch(0.269 0 0);
-  --secondary-foreground: oklch(0.985 0 0);
-  --muted: oklch(0.269 0 0);
-  --muted-foreground: oklch(0.708 0 0);
-  --accent: oklch(0.269 0 0);
-  --accent-foreground: oklch(0.985 0 0);
-  --destructive: oklch(0.704 0.191 22.216);
-  --border: oklch(1 0 0 / 10%);
-  --input: oklch(1 0 0 / 15%);
-  --ring: oklch(0.556 0 0);
-  --chart-1: oklch(0.488 0.243 264.376);
+  /* Dashboard Dark Theme Colors */
+  --background: #0F1419; /* Main dark background */
+  --foreground: #FFFFFF; /* White text */
+  --card: #1A2332; /* Card background */
+  --card-foreground: #FFFFFF;
+  --popover: #1A2332;
+  --popover-foreground: #FFFFFF;
+  --primary: #66A38A; /* Brand green-teal */
+  --primary-foreground: #FFFFFF;
+  --secondary: #2A3441; /* Elevated elements */
+  --secondary-foreground: #FFFFFF;
+  --muted: #2A3441;
+  --muted-foreground: #9CA3AF; /* Gray text */
+  --accent: #66A38A;
+  --accent-foreground: #FFFFFF;
+  --destructive: #EF4444; /* Red for destructive actions */
+  --border: #2A3441; /* Dark borders */
+  --input: #2A3441;
+  --ring: #66A38A;
+
+  /* Chart colors */
+  --chart-1: #66A38A;
   --chart-2: oklch(0.696 0.17 162.48);
   --chart-3: oklch(0.769 0.188 70.08);
   --chart-4: oklch(0.627 0.265 303.9);
   --chart-5: oklch(0.645 0.246 16.439);
-  --sidebar: oklch(0.205 0 0);
-  --sidebar-foreground: oklch(0.985 0 0);
-  --sidebar-primary: oklch(0.488 0.243 264.376);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.269 0 0);
-  --sidebar-accent-foreground: oklch(0.985 0 0);
-  --sidebar-border: oklch(1 0 0 / 10%);
-  --sidebar-ring: oklch(0.556 0 0);
+
+  /* Sidebar */
+  --sidebar: #1A2332;
+  --sidebar-foreground: #FFFFFF;
+  --sidebar-primary: #66A38A;
+  --sidebar-primary-foreground: #FFFFFF;
+  --sidebar-accent: #2A3441;
+  --sidebar-accent-foreground: #FFFFFF;
+  --sidebar-border: #2A3441;
+  --sidebar-ring: #66A38A;
+
+  /* Dashboard-specific colors */
+  --dashboard-bg-primary: #0F1419;
+  --dashboard-bg-card: #1A2332;
+  --dashboard-bg-elevated: #2A3441;
+  --dashboard-bg-warning: #2A2416;
+  --dashboard-border-primary: #2A3441;
+  --dashboard-border-header: #212A33;
+  --dashboard-accent-primary: #66A38A;
+  --dashboard-accent-hover: #5A8F7A;
+}
+
+/* Custom Scrollbar Styles */
+@layer utilities {
+  .scrollbar-thin {
+    scrollbar-width: thin;
+  }
+
+  .scrollbar-thin::-webkit-scrollbar {
+    width: 6px;
+  }
+
+  .scrollbar-thin::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  .scrollbar-thin::-webkit-scrollbar-thumb {
+    background: rgba(156, 163, 175, 0.5);
+    border-radius: 3px;
+  }
+
+  .scrollbar-thin::-webkit-scrollbar-thumb:hover {
+    background: rgba(156, 163, 175, 0.7);
+  }
 }
 
 @layer base {
@@ -120,6 +176,25 @@
   }
   body {
     @apply bg-background text-foreground;
+  }
+}
+
+/* Light mode enhancements */
+@layer utilities {
+  .card-elevated {
+    @apply shadow-sm hover:shadow-md transition-shadow;
+  }
+
+  .icon-badge {
+    @apply p-2 rounded-lg bg-primary/10;
+  }
+
+  .light\:gradient-bg {
+    background: linear-gradient(135deg, #F8FAFB 0%, #EFF6F3 100%);
+  }
+
+  .light\:card-hover:hover {
+    @apply border-primary/60 bg-secondary/30;
   }
 }
 

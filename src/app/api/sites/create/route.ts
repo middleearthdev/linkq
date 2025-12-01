@@ -158,8 +158,8 @@ export async function POST(request: NextRequest) {
         id: site.id,
         handle: site.handle,
         status: site.status,
-        editUrl: `/editor/${site.handle}`,
-        previewUrl: `/${site.handle}`
+        editUrl: `/editor/${site.id}`, // Use ID for editor (more secure)
+        previewUrl: `/${site.handle}` // Keep handle for public view
       }
     })
 

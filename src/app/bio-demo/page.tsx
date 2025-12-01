@@ -5,6 +5,9 @@ import { BioBlock } from '@/components/blocks/BioBlock'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { BioBlockProps } from '@/types'
+import { Smartphone, Tablet } from 'lucide-react'
+
+type DeviceType = 'mobile' | 'tablet'
 
 export default function BioBlockDemoPage() {
   // State for live customization
@@ -14,13 +17,18 @@ export default function BioBlockDemoPage() {
   const [selectedBioStyle, setSelectedBioStyle] = useState<any>('default')
   const [selectedTextAlign, setSelectedTextAlign] = useState<any>('center')
   const [selectedSpacing, setSelectedSpacing] = useState<any>('normal')
+  const [deviceType, setDeviceType] = useState<DeviceType>('mobile')
+
+  const deviceFrameClass = {
+    mobile: 'max-w-[375px] mx-auto',
+    tablet: 'max-w-2xl mx-auto'
+  }
 
   const avatarStyles = [
-    'circle', 'rounded-frame', 'square', 'blob', 'hexagon', 'star',
-    'diamond', 'wave', 'flower', 'badge', 'polaroid', 'vintage'
+    'circle', 'rounded-frame', 'square', 'wave', 'polaroid', 'vintage'
   ] as const
 
-  const avatarSizes = ['sm', 'md', 'lg', 'xl', 'xxl'] as const
+  const avatarSizes = ['sm', 'md', 'lg'] as const
 
   const nameStyles = [
     { value: 'default', label: 'Default' },
@@ -48,14 +56,13 @@ export default function BioBlockDemoPage() {
         {/* Header */}
         <div className="text-center space-y-4">
           <h1 className="text-5xl font-bold bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 bg-clip-text text-transparent">
-            BioBlock 2.0 Demo
+            BioBlock Demo
           </h1>
           <p className="text-xl text-gray-600">
-            12 Avatar Styles • 10 Name Typography • 5 Bio Styles • Mobile-First Design
+            6 Avatar Styles • 10 Name Typography • 5 Bio Styles • Mobile-First Design
           </p>
           <div className="flex gap-4 justify-center text-sm text-gray-500">
             <span>✅ Complete Editor UI</span>
-            <span>✅ 45 Options</span>
             <span>✅ Type-Safe</span>
             <span>✅ Responsive</span>
           </div>
@@ -177,29 +184,83 @@ export default function BioBlockDemoPage() {
             </div>
           </div>
 
-          {/* Live Preview */}
-          <div className="bg-gradient-to-br from-gray-50 to-gray-100 rounded-xl p-8 border-2 border-dashed border-gray-300">
-            <BioBlock
-              props={{
-                name: 'Alex Rivera',
-                bio: 'Digital creator, photographer & storyteller. Capturing moments that matter.',
-                avatar: sampleAvatar,
-                showAvatar: true,
-                avatarSize: selectedAvatarSize,
-                avatarStyle: selectedAvatarStyle,
-                textAlign: selectedTextAlign,
-                nameStyle: selectedNameStyle,
-                bioStyle: selectedBioStyle,
-                spacing: selectedSpacing,
-              }}
-            />
+          {/* Device Preview Toggle */}
+          <div className="mb-6 p-4 bg-gradient-to-r from-blue-50 to-purple-50 rounded-lg border-2 border-blue-200">
+            <label className="block text-sm font-semibold text-gray-700 mb-3">
+              Device Preview
+            </label>
+            <div className="flex gap-2">
+              <Button
+                onClick={() => setDeviceType('mobile')}
+                variant={deviceType === 'mobile' ? 'default' : 'outline'}
+                className="flex-1 gap-2"
+              >
+                <Smartphone className="w-4 h-4" />
+                <span>Mobile</span>
+                <span className="text-xs opacity-70">(375px)</span>
+              </Button>
+              <Button
+                onClick={() => setDeviceType('tablet')}
+                variant={deviceType === 'tablet' ? 'default' : 'outline'}
+                className="flex-1 gap-2"
+              >
+                <Tablet className="w-4 h-4" />
+                <span>Tablet</span>
+                <span className="text-xs opacity-70">(672px)</span>
+              </Button>
+            </div>
+          </div>
+
+          {/* Device Frame Preview */}
+          <div className="text-center mb-4">
+            <div className="inline-flex items-center gap-2 bg-gray-100 px-4 py-2 rounded-full text-sm font-medium">
+              {deviceType === 'mobile' ? (
+                <>
+                  <Smartphone className="w-4 h-4" />
+                  <span>Mobile Preview</span>
+                </>
+              ) : (
+                <>
+                  <Tablet className="w-4 h-4" />
+                  <span>Tablet Preview</span>
+                </>
+              )}
+            </div>
+          </div>
+
+          <div className={deviceFrameClass[deviceType]}>
+            <div className="bg-white rounded-2xl shadow-2xl overflow-hidden border-8 border-gray-800">
+              <div className="bg-gray-900 h-6 flex items-center justify-center">
+                <div className="w-20 h-4 bg-gray-800 rounded-full"></div>
+              </div>
+              <div className={`bg-gradient-to-br from-gray-50 to-gray-100 relative overflow-y-auto ${
+                deviceType === 'mobile' ? 'h-[667px]' : 'h-[600px]'
+              }`}>
+                <div className="p-6">
+                  <BioBlock
+                    props={{
+                      name: 'Alex Rivera',
+                      bio: 'Digital creator, photographer & storyteller. Capturing moments that matter.',
+                      avatar: sampleAvatar,
+                      showAvatar: true,
+                      avatarSize: selectedAvatarSize,
+                      avatarStyle: selectedAvatarStyle,
+                      textAlign: selectedTextAlign,
+                      nameStyle: selectedNameStyle,
+                      bioStyle: selectedBioStyle,
+                      spacing: selectedSpacing,
+                    }}
+                  />
+                </div>
+              </div>
+            </div>
           </div>
         </Card>
 
         {/* All Avatar Styles Showcase */}
         <div className="space-y-6">
-          <h2 className="text-3xl font-bold text-center">All 12 Avatar Frame Styles</h2>
-          <div className="grid md:grid-cols-3 lg:grid-cols-4 gap-6">
+          <h2 className="text-3xl font-bold text-center">All 6 Avatar Frame Styles</h2>
+          <div className="grid md:grid-cols-3 gap-6">
             {avatarStyles.map((style) => (
               <Card key={style} className="p-6 bg-white/80 backdrop-blur-sm hover:shadow-lg transition-shadow">
                 <h3 className="text-lg font-semibold mb-4 capitalize text-center text-gray-700">
@@ -324,10 +385,14 @@ export default function BioBlockDemoPage() {
 
         {/* Stats */}
         <Card className="p-8 bg-gradient-to-r from-blue-600 to-purple-600 text-white">
-          <div className="grid md:grid-cols-6 gap-6 text-center">
+          <div className="grid grid-cols-3 md:grid-cols-6 gap-6 text-center">
             <div>
-              <div className="text-4xl font-bold">12</div>
+              <div className="text-4xl font-bold">6</div>
               <div className="text-sm opacity-90">Avatar Styles</div>
+            </div>
+            <div>
+              <div className="text-4xl font-bold">3</div>
+              <div className="text-sm opacity-90">Avatar Sizes</div>
             </div>
             <div>
               <div className="text-4xl font-bold">10</div>
@@ -338,12 +403,8 @@ export default function BioBlockDemoPage() {
               <div className="text-sm opacity-90">Bio Styles</div>
             </div>
             <div>
-              <div className="text-4xl font-bold">45</div>
-              <div className="text-sm opacity-90">Total Options</div>
-            </div>
-            <div>
-              <div className="text-4xl font-bold">95%</div>
-              <div className="text-sm opacity-90">Editor Complete</div>
+              <div className="text-4xl font-bold">3</div>
+              <div className="text-sm opacity-90">Alignments</div>
             </div>
             <div>
               <div className="text-4xl font-bold">📱</div>
@@ -359,8 +420,8 @@ export default function BioBlockDemoPage() {
             <div className="flex items-start gap-3">
               <span className="text-green-500 text-xl">✓</span>
               <div>
-                <div className="font-semibold">12 Avatar Frame Styles</div>
-                <div className="text-sm text-gray-600">Circle, blob, hexagon, star, and more</div>
+                <div className="font-semibold">6 Avatar Frame Styles</div>
+                <div className="text-sm text-gray-600">Circle, rounded, square, wave, polaroid, vintage</div>
               </div>
             </div>
             <div className="flex items-start gap-3">
@@ -422,49 +483,43 @@ export default function BioBlockDemoPage() {
           </div>
         </Card>
 
-        {/* Comparison */}
+        {/* Feature Summary */}
         <Card className="p-8 bg-white/80 backdrop-blur-sm">
-          <h2 className="text-2xl font-bold mb-6 text-center">📊 Before vs After</h2>
+          <h2 className="text-2xl font-bold mb-6 text-center">📊 Feature Summary</h2>
           <div className="overflow-x-auto">
             <table className="w-full">
               <thead>
                 <tr className="border-b-2">
                   <th className="text-left p-3">Feature</th>
-                  <th className="text-center p-3">Before</th>
-                  <th className="text-center p-3">After</th>
-                  <th className="text-center p-3">Improvement</th>
+                  <th className="text-center p-3">Count</th>
+                  <th className="text-center p-3">Options</th>
                 </tr>
               </thead>
               <tbody>
                 <tr className="border-b">
-                  <td className="p-3 font-medium">Name Styles</td>
-                  <td className="text-center p-3">3</td>
-                  <td className="text-center p-3 font-bold text-green-600">10</td>
-                  <td className="text-center p-3 text-green-600">+233%</td>
+                  <td className="p-3 font-medium">Avatar Styles</td>
+                  <td className="text-center p-3 font-bold text-blue-600">6</td>
+                  <td className="text-center p-3 text-gray-600">circle, rounded, square, wave, polaroid, vintage</td>
+                </tr>
+                <tr className="border-b">
+                  <td className="p-3 font-medium">Avatar Sizes</td>
+                  <td className="text-center p-3 font-bold text-blue-600">3</td>
+                  <td className="text-center p-3 text-gray-600">sm, md, lg</td>
+                </tr>
+                <tr className="border-b">
+                  <td className="p-3 font-medium">Name Typography</td>
+                  <td className="text-center p-3 font-bold text-blue-600">10</td>
+                  <td className="text-center p-3 text-gray-600">default, elegant, compact, modern, bold, script, tech, gradient, neon, vintage</td>
                 </tr>
                 <tr className="border-b">
                   <td className="p-3 font-medium">Bio Styles</td>
-                  <td className="text-center p-3">1</td>
-                  <td className="text-center p-3 font-bold text-green-600">5</td>
-                  <td className="text-center p-3 text-green-600">+400%</td>
-                </tr>
-                <tr className="border-b">
-                  <td className="p-3 font-medium">Editor Controls</td>
-                  <td className="text-center p-3">5</td>
-                  <td className="text-center p-3 font-bold text-green-600">10</td>
-                  <td className="text-center p-3 text-green-600">+100%</td>
-                </tr>
-                <tr className="border-b">
-                  <td className="p-3 font-medium">Total Options</td>
-                  <td className="text-center p-3">28</td>
-                  <td className="text-center p-3 font-bold text-green-600">45</td>
-                  <td className="text-center p-3 text-green-600">+60%</td>
+                  <td className="text-center p-3 font-bold text-blue-600">5</td>
+                  <td className="text-center p-3 text-gray-600">default, large, small, quote, modern</td>
                 </tr>
                 <tr>
-                  <td className="p-3 font-medium">Editor Completeness</td>
-                  <td className="text-center p-3">20%</td>
-                  <td className="text-center p-3 font-bold text-green-600">95%</td>
-                  <td className="text-center p-3 text-green-600">+375%</td>
+                  <td className="p-3 font-medium">Alignments</td>
+                  <td className="text-center p-3 font-bold text-blue-600">3</td>
+                  <td className="text-center p-3 text-gray-600">left, center, right</td>
                 </tr>
               </tbody>
             </table>

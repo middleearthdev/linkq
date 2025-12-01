@@ -14,19 +14,24 @@ import { ScrollArea } from "@/components/ui/scroll-area"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Slider } from "@/components/ui/slider"
 import { Badge } from "@/components/ui/badge"
-import { 
-  Palette, 
-  Type, 
-  Layout, 
-  Eye, 
+import {
+  Palette,
+  Type,
+  Layout,
+  Eye,
   RotateCcw,
   Download,
-  Upload
+  Upload,
+  Image
 } from "lucide-react"
+import { BackgroundPicker } from "@/components/editor/BackgroundPicker"
 
 interface ThemeEditorProps {
   cssVars: Record<string, string>
   onChange: (cssVars: Record<string, string>) => void
+  backgroundKey?: string
+  onBackgroundChange?: (backgroundKey: string) => void
+  isPremiumUser?: boolean
   className?: string
 }
 
@@ -96,7 +101,14 @@ const FONT_OPTIONS = [
   { name: 'Merriweather', value: 'Merriweather' }
 ]
 
-export function ThemeEditor({ cssVars, onChange, className }: ThemeEditorProps) {
+export function ThemeEditor({
+  cssVars,
+  onChange,
+  backgroundKey = 'gradient-soft-clouds',
+  onBackgroundChange,
+  isPremiumUser = false,
+  className
+}: ThemeEditorProps) {
   const [activeTab, setActiveTab] = useState("presets")
 
   const updateCssVar = (key: string, value: string) => {
@@ -207,8 +219,12 @@ export function ThemeEditor({ cssVars, onChange, className }: ThemeEditorProps) 
       <div className="flex-1 overflow-hidden">
         <Tabs value={activeTab} onValueChange={setActiveTab} className="h-full flex flex-col">
           <div className="px-3 pt-2">
-            <TabsList className="grid w-full grid-cols-4 h-8">
+            <TabsList className="grid w-full grid-cols-5 h-8">
               <TabsTrigger value="presets" className="text-xs">Presets</TabsTrigger>
+              <TabsTrigger value="background" className="text-xs">
+                <Image className="h-3 w-3 mr-1" />
+                BG
+              </TabsTrigger>
               <TabsTrigger value="colors" className="text-xs">Colors</TabsTrigger>
               <TabsTrigger value="typography" className="text-xs">Typography</TabsTrigger>
               <TabsTrigger value="layout" className="text-xs">Layout</TabsTrigger>
@@ -238,6 +254,25 @@ export function ThemeEditor({ cssVars, onChange, className }: ThemeEditorProps) 
                     <span className="text-xs font-medium capitalize">{name}</span>
                   </Button>
                 ))}
+              </div>
+            </TabsContent>
+
+            <TabsContent value="background" className="mt-3 space-y-0">
+              <div className="space-y-3">
+                <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 mb-3">
+                  <p className="text-xs text-blue-800">
+                    Choose a background for your site. Premium backgrounds unlock advanced animations.
+                  </p>
+                </div>
+                {onBackgroundChange ? (
+                  <BackgroundPicker
+                    value={backgroundKey}
+                    onChange={onBackgroundChange}
+                    isPremiumUser={isPremiumUser}
+                  />
+                ) : (
+                  <p className="text-xs text-gray-500">Background picker not available</p>
+                )}
               </div>
             </TabsContent>
 

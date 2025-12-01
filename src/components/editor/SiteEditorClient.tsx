@@ -43,7 +43,9 @@ import {
   ArrowLeft,
   Settings,
   Palette,
-  Layout
+  Layout,
+  Menu,
+  X
 } from "lucide-react"
 import { Block } from "@/types"
 import { BLOCK_REGISTRY, getAllBlockTypes, generateDefaultProps } from "@/components/blocks/registry"
@@ -76,6 +78,7 @@ export function SiteEditorClient({
   const [activePanel, setActivePanel] = useState<"blocks" | "theme" | "link-config">("blocks")
   const [isInitializing, setIsInitializing] = useState(true)
   const [isSheetOpen, setIsSheetOpen] = useState(false)
+  const [sidebarOpen, setSidebarOpen] = useState(true)
 
   // Template metadata
   const [templateName, setTemplateName] = useState("")
@@ -92,6 +95,9 @@ export function SiteEditorClient({
     '--card-background': '#FFFFFF',
     '--secondary-color': '#64748B'
   })
+
+  // Background key from registry
+  const [backgroundKey, setBackgroundKey] = useState<string>('gradient-soft-clouds')
 
   const sensors = useSensors(
     useSensor(PointerSensor),
@@ -133,6 +139,11 @@ export function SiteEditorClient({
           // Set CSS variables from tokens
           if (initialTemplate.defaults?.tokens) {
             setCssVars(initialTemplate.defaults.tokens)
+          }
+
+          // Set background key from template
+          if (initialTemplate.defaults?.backgroundKey) {
+            setBackgroundKey(initialTemplate.defaults.backgroundKey)
           }
         }
       } else if (mode === 'create') {
@@ -316,6 +327,7 @@ export function SiteEditorClient({
             description: 'Connect with me professionally'
           },
           tokens: cssVars,
+          backgroundKey: backgroundKey, // Add background key
           blockProps: blocks.reduce((acc, block) => {
             if (!acc[block.type]) {
               acc[block.type] = block.props;
@@ -396,24 +408,35 @@ export function SiteEditorClient({
     <div className="h-screen flex flex-col bg-slate-50">
       {/* Professional Header */}
       <header className="bg-white border-b border-gray-200 shadow-sm">
-        <div className="flex items-center justify-between h-16 px-6">
-          <div className="flex items-center space-x-4">
-            <Link href="/admin/templates">
+        <div className="flex items-center justify-between h-14 sm:h-16 px-3 sm:px-6">
+          <div className="flex items-center space-x-2 sm:space-x-4">
+            {/* Mobile Sidebar Toggle */}
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => setSidebarOpen(!sidebarOpen)}
+              className="lg:hidden p-2"
+            >
+              {sidebarOpen ? <X className="h-4 w-4" /> : <Menu className="h-4 w-4" />}
+            </Button>
+
+            <Link href="/admin/templates" className="hidden sm:block">
               <Button variant="ghost" size="sm" className="text-gray-600 hover:text-gray-900">
-                <ArrowLeft className="h-4 w-4 mr-2" />
-                Templates
+                <ArrowLeft className="h-4 w-4 sm:mr-2" />
+                <span className="hidden sm:inline">Templates</span>
               </Button>
             </Link>
-            <div className="h-6 w-px bg-gray-300" />
+            <div className="h-6 w-px bg-gray-300 hidden sm:block" />
             <div>
-              <h1 className="text-lg font-semibold text-gray-900">
-                {mode === 'create' ? 'Create Template' : 'Edit Template'}
+              <h1 className="text-sm sm:text-lg font-semibold text-gray-900">
+                {mode === 'create' ? 'Create' : 'Edit'}
+                <span className="hidden sm:inline"> Template</span>
               </h1>
             </div>
           </div>
 
-          <div className="flex items-center space-x-3">
-            <div className="flex items-center bg-gray-100 rounded-lg p-1">
+          <div className="flex items-center space-x-1 sm:space-x-3">
+            <div className="hidden md:flex items-center bg-gray-100 rounded-lg p-1">
               <Button
                 size="sm"
                 variant={activePanel === "blocks" ? "default" : "ghost"}
@@ -421,7 +444,7 @@ export function SiteEditorClient({
                 className="h-7"
               >
                 <Layout className="h-3 w-3 mr-1" />
-                Blocks
+                <span className="hidden lg:inline">Blocks</span>
               </Button>
               <Button
                 size="sm"
@@ -430,16 +453,17 @@ export function SiteEditorClient({
                 className="h-7"
               >
                 <Palette className="h-3 w-3 mr-1" />
-                Theme
+                <span className="hidden lg:inline">Theme</span>
               </Button>
             </div>
             <Button
               variant="outline"
               onClick={() => setShowPreview(!showPreview)}
               size="sm"
+              className="hidden xl:flex"
             >
               <Eye className="h-4 w-4 mr-2" />
-              Preview
+              <span className="hidden lg:inline">Preview</span>
             </Button>
             <Button
               onClick={handleSaveTemplate}
@@ -447,21 +471,21 @@ export function SiteEditorClient({
               size="sm"
               className="bg-blue-600 hover:bg-blue-700 text-white"
             >
-              <Save className="h-4 w-4 mr-2" />
-              {saving ? 'Saving...' : 'Save Template'}
+              <Save className="h-3 w-3 sm:h-4 sm:w-4 sm:mr-2" />
+              <span className="hidden sm:inline">{saving ? 'Saving...' : 'Save'}</span>
             </Button>
           </div>
         </div>
 
         {/* Template Metadata Bar */}
-        <div className="bg-gray-50 border-t border-gray-200 px-6 py-3">
-          <div className="flex items-center space-x-6">
+        <div className="bg-gray-50 border-t border-gray-200 px-3 sm:px-6 py-2 sm:py-3">
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-4 lg:gap-6">
             <div className="flex-1">
               <Input
                 value={templateName}
                 onChange={(e) => setTemplateName(e.target.value)}
                 placeholder="Template name"
-                className="h-8 text-sm bg-white border-gray-300"
+                className="h-8 sm:h-9 text-sm bg-white border-gray-300"
               />
             </div>
             <div className="flex-1">
@@ -469,14 +493,14 @@ export function SiteEditorClient({
                 value={templateDescription}
                 onChange={(e) => setTemplateDescription(e.target.value)}
                 placeholder="Description"
-                className="h-8 text-sm bg-white border-gray-300"
+                className="h-8 sm:h-9 text-sm bg-white border-gray-300"
               />
             </div>
-            <div className="w-32">
+            <div className="w-full sm:w-32">
               <select
                 value={templateCategory}
                 onChange={(e) => setTemplateCategory(e.target.value as any)}
-                className="h-8 w-full text-sm bg-white border border-gray-300 rounded-md px-2"
+                className="h-8 sm:h-9 w-full text-sm bg-white border border-gray-300 rounded-md px-2"
               >
                 <option value="free">Free</option>
                 <option value="premium">Premium</option>
@@ -488,10 +512,10 @@ export function SiteEditorClient({
       </header>
 
       {/* Main Editor */}
-      <div className="flex-1 flex overflow-hidden">
+      <div className="flex-1 flex overflow-hidden relative">
 
         {/* Dynamic Sidebar */}
-        <div className="w-108 bg-white border-r border-gray-200 flex flex-col overflow-hidden">
+        <div className={`${sidebarOpen ? 'translate-x-0' : '-translate-x-full'} lg:translate-x-0 transition-transform duration-300 absolute lg:relative z-20 w-72 sm:w-80 lg:w-96 bg-white border-r border-gray-200 flex flex-col overflow-hidden h-full`}>
           {activePanel === "blocks" ? (
             <>
               <div className="p-4 border-b border-gray-200 flex-shrink-0">
@@ -511,6 +535,9 @@ export function SiteEditorClient({
               <ThemeEditor
                 cssVars={cssVars}
                 onChange={setCssVars}
+                backgroundKey={backgroundKey}
+                onBackgroundChange={setBackgroundKey}
+                isPremiumUser={user?.plan !== 'FREE'}
                 className="border-0 shadow-none h-full"
               />
             </div>
@@ -537,39 +564,39 @@ export function SiteEditorClient({
 
         {/* Canvas Area */}
         <div className="flex-1 flex flex-col bg-white">
-          <div className="flex items-center justify-between px-6 py-3 border-b border-gray-200">
-            <div className="flex items-center space-x-3">
-              <h2 className="text-sm font-medium text-gray-900">Canvas</h2>
-              <div className="text-xs text-gray-500">
+          <div className="flex items-center justify-between px-3 sm:px-6 py-2 sm:py-3 border-b border-gray-200">
+            <div className="flex items-center space-x-2 sm:space-x-3">
+              <h2 className="text-xs sm:text-sm font-medium text-gray-900">Canvas</h2>
+              <div className="text-[10px] sm:text-xs text-gray-500">
                 {blocks.length} {blocks.length === 1 ? 'block' : 'blocks'}
               </div>
             </div>
 
             {/* Viewport Controls */}
-            <div className="flex items-center space-x-1 bg-gray-100 rounded-lg p-1">
+            <div className="flex items-center space-x-1 bg-gray-100 rounded-lg p-0.5 sm:p-1">
               <Button
                 size="sm"
                 variant={viewport === "mobile" ? "default" : "ghost"}
                 onClick={() => setViewport("mobile")}
-                className="h-7 w-7 p-0"
+                className="h-6 w-6 sm:h-7 sm:w-7 p-0"
               >
-                <Smartphone className="h-3 w-3" />
+                <Smartphone className="h-2.5 w-2.5 sm:h-3 sm:w-3" />
               </Button>
               <Button
                 size="sm"
                 variant={viewport === "tablet" ? "default" : "ghost"}
                 onClick={() => setViewport("tablet")}
-                className="h-7 w-7 p-0"
+                className="h-6 w-6 sm:h-7 sm:w-7 p-0"
               >
-                <Tablet className="h-3 w-3" />
+                <Tablet className="h-2.5 w-2.5 sm:h-3 sm:w-3" />
               </Button>
               <Button
                 size="sm"
                 variant={viewport === "desktop" ? "default" : "ghost"}
                 onClick={() => setViewport("desktop")}
-                className="h-7 w-7 p-0"
+                className="h-6 w-6 sm:h-7 sm:w-7 p-0"
               >
-                <Monitor className="h-3 w-3" />
+                <Monitor className="h-2.5 w-2.5 sm:h-3 sm:w-3" />
               </Button>
             </div>
           </div>
@@ -590,7 +617,7 @@ export function SiteEditorClient({
         </div>
 
         {/* Preview Panel */}
-        <div className="w-106 bg-white border-l border-gray-200 flex flex-col">
+        <div className="hidden xl:flex xl:w-96 2xl:w-[28rem] bg-white border-l border-gray-200 flex-col">
           <div className="p-4 border-b border-gray-200">
             <div className="flex items-center justify-between">
               <h2 className="text-sm font-medium text-gray-900">Preview</h2>
@@ -632,7 +659,8 @@ export function SiteEditorClient({
                           meta: {
                             title: templateName || 'Template Preview',
                             description: templateDescription || 'Template preview',
-                            theme: cssVars
+                            theme: cssVars,
+                            backgroundKey: backgroundKey
                           }
                         }}
                         isPreview={true}
@@ -692,7 +720,8 @@ export function SiteEditorClient({
                   meta: {
                     title: templateName || 'Template Preview',
                     description: templateDescription || 'Template preview',
-                    theme: cssVars
+                    theme: cssVars,
+                    backgroundKey: backgroundKey
                   }
                 }}
                 isPreview={true}

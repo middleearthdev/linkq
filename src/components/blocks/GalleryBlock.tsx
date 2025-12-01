@@ -26,12 +26,11 @@ export function GalleryBlock({ props, className, isEditing = false, isLocked = f
   const {
     items = [],
     layout = 'grid',
-    columns = 3,
+    columns = 'small',
     aspectRatio = 'square',
     imageFilter = 'none',
     showCaptions = true,
-    spacing = 'md',
-    rounded = 'md',
+    rounded = true,
   } = props
 
   const [currentSlide, setCurrentSlide] = useState(0)
@@ -78,32 +77,13 @@ export function GalleryBlock({ props, className, isEditing = false, isLocked = f
     return null
   }
 
-  // Spacing classes
-  const spacingClasses = {
-    none: 'gap-0',
-    sm: 'gap-2',
-    md: 'gap-4',
-    lg: 'gap-6',
-  }
+  // Rounded class based on boolean
+  const roundedClass = rounded ? 'rounded-lg' : 'rounded-none'
 
-  // Rounded classes
-  const roundedClasses = {
-    none: 'rounded-none',
-    sm: 'rounded-sm',
-    md: 'rounded-md',
-    lg: 'rounded-lg',
-    xl: 'rounded-xl',
-  }
-
-  // Grid columns
-  const gridCols = {
-    1: 'grid-cols-1',
-    2: 'grid-cols-2',
-    3: 'grid-cols-3',
-    4: 'grid-cols-4',
-    5: 'grid-cols-5',
-    6: 'grid-cols-6',
-  }
+  // Grid columns - same as ProductCatalog
+  const gridColsClass = columns === 'small'
+    ? 'grid-cols-2 sm:grid-cols-3'
+    : 'grid-cols-1 sm:grid-cols-2'
 
   // Aspect ratio classes
   const aspectRatioClasses = {
@@ -140,9 +120,8 @@ export function GalleryBlock({ props, className, isEditing = false, isLocked = f
         {/* Grid Layout */}
         {layout === 'grid' && (
           <div className={cn(
-            'grid',
-            gridCols[columns as keyof typeof gridCols] || 'grid-cols-3',
-            spacingClasses[spacing],
+            'grid gap-3',
+            gridColsClass,
             'gallery-grid'
           )}>
             {items.map((item, index) => (
@@ -153,7 +132,7 @@ export function GalleryBlock({ props, className, isEditing = false, isLocked = f
                   isEditing={isEditing}
                   aspectRatioClass={aspectRatioClasses[aspectRatio]}
                   filterStyle={filterStyles[imageFilter]}
-                  roundedClass={roundedClasses[rounded]}
+                  roundedClass={roundedClass}
                   showCaption={showCaptions}
                 />
               </PhotoView>
@@ -199,7 +178,7 @@ export function GalleryBlock({ props, className, isEditing = false, isLocked = f
                         isEditing={isEditing}
                         aspectRatioClass={aspectRatioClasses[aspectRatio]}
                         filterStyle={filterStyles[imageFilter]}
-                        roundedClass={roundedClasses[rounded]}
+                        roundedClass={roundedClass}
                         showCaption={showCaptions}
                       />
                     </PhotoView>
@@ -326,7 +305,7 @@ export function GalleryBlockEditor({
     onChange({ ...props, layout })
   }
 
-  const handleColumnsChange = (columns: number) => {
+  const handleColumnsChange = (columns: 'small' | 'medium') => {
     onChange({ ...props, columns })
   }
 
@@ -338,11 +317,7 @@ export function GalleryBlockEditor({
     onChange({ ...props, imageFilter })
   }
 
-  const handleSpacingChange = (spacing: any) => {
-    onChange({ ...props, spacing })
-  }
-
-  const handleRoundedChange = (rounded: any) => {
+  const handleRoundedChange = (rounded: boolean) => {
     onChange({ ...props, rounded })
   }
 
@@ -393,17 +368,21 @@ export function GalleryBlockEditor({
       {props.layout === 'grid' && (
         <div>
           <label className="block text-sm font-medium mb-2">Columns</label>
-          <div className="flex gap-2">
-            {[2, 3, 4, 5, 6].map((cols) => (
-              <Button
-                key={cols}
-                variant={props.columns === cols ? 'default' : 'outline'}
-                size="sm"
-                onClick={() => handleColumnsChange(cols)}
-              >
-                {cols}
-              </Button>
-            ))}
+          <div className="grid grid-cols-2 gap-2">
+            <Button
+              variant={props.columns === 'small' ? 'default' : 'outline'}
+              size="sm"
+              onClick={() => handleColumnsChange('small')}
+            >
+              Small (3/2 cols)
+            </Button>
+            <Button
+              variant={props.columns === 'medium' ? 'default' : 'outline'}
+              size="sm"
+              onClick={() => handleColumnsChange('medium')}
+            >
+              Medium (2/1 cols)
+            </Button>
           </div>
         </div>
       )}
@@ -444,40 +423,18 @@ export function GalleryBlockEditor({
         </div>
       </div>
 
-      {/* Spacing */}
-      <div>
-        <label className="block text-sm font-medium mb-2">Spacing</label>
-        <div className="flex gap-2">
-          {(['none', 'sm', 'md', 'lg'] as const).map((space) => (
-            <Button
-              key={space}
-              variant={props.spacing === space ? 'default' : 'outline'}
-              size="sm"
-              onClick={() => handleSpacingChange(space)}
-              className="capitalize flex-1"
-            >
-              {space}
-            </Button>
-          ))}
-        </div>
-      </div>
-
-      {/* Rounded */}
-      <div>
-        <label className="block text-sm font-medium mb-2">Corner Radius</label>
-        <div className="flex gap-2">
-          {(['none', 'sm', 'md', 'lg', 'xl'] as const).map((round) => (
-            <Button
-              key={round}
-              variant={props.rounded === round ? 'default' : 'outline'}
-              size="sm"
-              onClick={() => handleRoundedChange(round)}
-              className="capitalize flex-1"
-            >
-              {round}
-            </Button>
-          ))}
-        </div>
+      {/* Rounded Corners Toggle */}
+      <div className="flex items-center gap-2">
+        <input
+          type="checkbox"
+          id="rounded"
+          checked={props.rounded ?? true}
+          onChange={(e) => handleRoundedChange(e.target.checked)}
+          className="rounded"
+        />
+        <label htmlFor="rounded" className="text-sm font-medium">
+          Rounded Corners
+        </label>
       </div>
 
       {/* Show Captions Toggle */}

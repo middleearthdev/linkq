@@ -89,9 +89,12 @@ export const BioBlockPropsSchema = z.object({
   bio: z.string().optional(),
   avatar: z.string().optional(),
   showAvatar: z.boolean().default(true),
-  avatarSize: z.enum(['sm', 'md', 'lg', 'xl', 'xxl']).default('lg'),
-  avatarStyle: z.enum(['circle', 'rounded-frame', 'square', 'blob', 'hexagon', 'star', 'diamond', 'wave', 'flower', 'badge', 'polaroid', 'vintage']).default('circle'),
+  // Avatar size - only 3 sizes actually implemented
+  avatarSize: z.enum(['sm', 'md', 'lg']).default('lg'),
+  // Avatar style - only 6 styles actually implemented
+  avatarStyle: z.enum(['circle', 'rounded-frame', 'square', 'wave', 'polaroid', 'vintage']).default('circle'),
   textAlign: z.enum(['left', 'center', 'right']).default('center'),
+  // Name typography - 10 styles implemented
   nameStyle: z.enum(['default', 'large-elegant', 'compact', 'modern-minimal', 'bold-impact', 'script-handwritten', 'tech-mono', 'gradient-text', 'neon-glow', 'vintage-serif']).default('default'),
   spacing: z.enum(['tight', 'normal', 'wide']).default('normal'),
   bioStyle: z.enum(['default', 'large', 'small', 'quote', 'modern']).default('default'),
@@ -142,13 +145,8 @@ export const SocialIconsBlockPropsSchema = z.object({
     'round',
     'square',
     'minimal',
-    'neon',
-    'glassmorphism',
-    'neumorphic',
     'floating',
-    'rotating',
-    'pulse',
-    'bounce'
+    'pulse'
   ]).default('round'),
   size: z.enum(['sm', 'md', 'lg']).default('md'),
   colorMode: z.enum(['brand', 'monochrome', 'custom']).default('brand'),
@@ -180,21 +178,18 @@ export const GalleryBlockPropsSchema = z.object({
     caption: z.string().optional(),
   })),
   layout: z.enum(['grid', 'carousel']).default('grid'),
-  columns: z.number().min(1).max(6).default(3),
+  columns: z.enum(['small', 'medium']).default('small'),
   aspectRatio: z.enum(['square', 'landscape', 'portrait', 'widescreen', 'original']).default('square'),
   imageFilter: z.enum(['none', 'grayscale', 'sepia', 'vintage', 'dramatic', 'warm', 'cool', 'noir']).default('none'),
   showCaptions: z.boolean().default(true),
-  spacing: z.enum(['none', 'sm', 'md', 'lg']).default('md'),
-  rounded: z.enum(['none', 'sm', 'md', 'lg', 'xl']).default('md'),
+  rounded: z.boolean().default(true),
 })
 
 export const DividerBlockPropsSchema = z.object({
-  style: z.enum(['solid', 'dashed', 'dotted', 'double', 'gradient', 'gradient-rainbow', 'gradient-sunset', 'gradient-ocean']).default('solid'),
+  style: z.enum(['solid', 'dashed', 'dotted', 'double']).default('solid'),
   thickness: z.number().min(1).max(10).default(1),
   color: z.string().default('#e5e7eb'),
-  spacing: z.enum(['none', 'sm', 'md', 'lg', 'xl']).default('md'),
-  width: z.enum(['25', '50', '75', '100']).default('100'),
-  alignment: z.enum(['left', 'center', 'right']).default('center'),
+  spacing: z.enum(['none', 'sm', 'md', 'lg']).default('md'),
   icon: z.enum(['none', 'sparkles', 'circle', 'square', 'star', 'heart', 'zap']).default('none'),
   animated: z.boolean().default(false),
 })
@@ -219,6 +214,135 @@ export const FooterBlockPropsSchema = z.object({
   borderTop: z.boolean().default(false),
 })
 
+// Indonesia-Specific Blocks (NEW)
+export const WhatsAppBusinessBlockPropsSchema = z.object({
+  phoneNumber: z.string(),
+  message: z.string().optional(),
+  buttonText: z.string().default('Chat via WhatsApp'),
+  businessName: z.string().optional(),
+  fabPosition: z.enum(['bottom-right', 'bottom-left']).default('bottom-right'),
+  enablePulse: z.boolean().default(true),
+})
+
+export const DeliveryPlatformBlockPropsSchema = z.object({
+  platforms: z.object({
+    gofood: z.object({
+      url: z.string(),
+      merchantName: z.string(),
+      badge: z.enum(['official', 'featured']).optional(),
+    }).optional(),
+    grabfood: z.object({
+      url: z.string(),
+      restaurantId: z.string(),
+      rating: z.number().optional(),
+    }).optional(),
+    shopeefood: z.object({
+      url: z.string(),
+      shopId: z.string(),
+      promoText: z.string().optional(),
+    }).optional(),
+  }),
+  layout: z.enum(['buttons', 'grid', 'carousel']).default('buttons'),
+  showRatings: z.boolean().default(true),
+  showPromos: z.boolean().default(true),
+  primaryPlatform: z.enum(['gofood', 'grabfood', 'shopeefood']).optional(),
+})
+
+export const MarketplaceBlockPropsSchema = z.object({
+  stores: z.object({
+    tokopedia: z.object({
+      storeUrl: z.string(),
+      storeName: z.string(),
+      badge: z.enum(['official', 'power-merchant']).optional(),
+      rating: z.number().optional(),
+      reviewCount: z.number().optional(),
+    }).optional(),
+    shopee: z.object({
+      storeUrl: z.string(),
+      shopId: z.string(),
+      badge: z.enum(['star-seller', 'shopee-mall']).optional(),
+      followers: z.number().optional(),
+    }).optional(),
+    tiktokshop: z.object({
+      storeUrl: z.string(),
+      username: z.string(),
+      verified: z.boolean().optional(),
+      followers: z.number().optional(),
+    }).optional(),
+  }),
+  featuredProducts: z.array(z.object({
+    name: z.string(),
+    price: z.number(),
+    image: z.string(),
+    marketplace: z.enum(['tokopedia', 'shopee', 'tiktokshop']),
+    productUrl: z.string(),
+  })).optional().default([]),
+  layout: z.enum(['store-links', 'product-grid', 'mixed']).default('store-links'),
+  showBadges: z.boolean().default(true),
+  showRatings: z.boolean().default(true),
+})
+
+export const LocationBlockPropsSchema = z.object({
+  googleMapsUrl: z.string(),
+  address: z.string(),
+  phone: z.string().optional(),
+  openingHours: z.array(z.object({
+    day: z.string(),
+    hours: z.string(),
+    isOpen: z.boolean().optional(),
+  })).optional(),
+  locationName: z.string(),
+  showDirectionsButton: z.boolean().default(true),
+  mapHeight: z.number().default(300),
+  showCurrentStatus: z.boolean().default(true),
+})
+
+export const QRISPaymentBlockPropsSchema = z.object({
+  qrisImage: z.string(),
+  merchantName: z.string(),
+  paymentMethods: z.array(z.string()).default(['Gopay', 'OVO', 'Dana', 'ShopeePay']),
+  presetAmounts: z.array(z.number()).optional(),
+  allowCustomAmount: z.boolean().default(false),
+  instructions: z.string().optional(),
+  showPaymentLogos: z.boolean().default(true),
+})
+
+// Product Catalog Block Schema
+export const ProductCatalogBlockPropsSchema = z.object({
+  items: z.array(z.object({
+    id: z.string(),
+    name: z.string(),
+    image: z.string(),
+    price: z.number(),
+    originalPrice: z.number().optional(),
+    description: z.string().optional(),
+    category: z.string().optional(),
+    stock: z.enum(['available', 'low', 'out']).default('available'),
+    stockCount: z.number().optional(),
+    whatsappMessage: z.string().optional(),
+    variants: z.array(z.object({
+      name: z.string(),
+      options: z.array(z.string()),
+    })).optional(),
+    badges: z.array(z.string()).optional(),
+    rating: z.number().min(0).max(5).optional(),
+    reviewCount: z.number().optional(),
+  })),
+  style: z.enum(['instagram-card', 'modern-minimal', 'compact-grid', 'instagram-shop']).default('instagram-card'),
+  columns: z.union([z.literal(2), z.literal(3), z.literal(4)]).default(2),
+  showSearch: z.boolean().default(true),
+  showCategories: z.boolean().default(true),
+  categoryFilter: z.array(z.string()).optional(),
+  showPriceRange: z.boolean().default(false),
+  priceRange: z.tuple([z.number(), z.number()]).optional(),
+  spacing: z.enum(['none', 'sm', 'md', 'lg']).default('md'),
+  rounded: z.enum(['none', 'sm', 'md', 'lg', 'xl']).default('lg'),
+  showStockIndicator: z.boolean().default(true),
+  showRating: z.boolean().default(false),
+  whatsappNumber: z.string().optional(),
+  ctaText: z.string().default('Order Sekarang'),
+})
+
 export type BioBlockProps = z.infer<typeof BioBlockPropsSchema>
 export type LinkListBlockProps = z.infer<typeof LinkListBlockPropsSchema>
 export type SocialIconsBlockProps = z.infer<typeof SocialIconsBlockPropsSchema>
@@ -226,6 +350,12 @@ export type CTABlockProps = z.infer<typeof CTABlockPropsSchema>
 export type GalleryBlockProps = z.infer<typeof GalleryBlockPropsSchema>
 export type DividerBlockProps = z.infer<typeof DividerBlockPropsSchema>
 export type FooterBlockProps = z.infer<typeof FooterBlockPropsSchema>
+export type WhatsAppBusinessBlockProps = z.infer<typeof WhatsAppBusinessBlockPropsSchema>
+export type DeliveryPlatformBlockProps = z.infer<typeof DeliveryPlatformBlockPropsSchema>
+export type MarketplaceBlockProps = z.infer<typeof MarketplaceBlockPropsSchema>
+export type LocationBlockProps = z.infer<typeof LocationBlockPropsSchema>
+export type QRISPaymentBlockProps = z.infer<typeof QRISPaymentBlockPropsSchema>
+export type ProductCatalogBlockProps = z.infer<typeof ProductCatalogBlockPropsSchema>
 
 // ====================================
 // USER SITE DATA
@@ -271,6 +401,10 @@ export interface SiteData {
   customDomain?: string
   customCss?: string
   removeBranding: boolean
+  // Background configuration (NEW)
+  backgroundType?: string          // Key from background registry
+  backgroundCustom?: any           // Custom background config
+  backgroundImage?: string         // Uploaded background image URL
   template: {
     name: string
     slug: string

@@ -21,8 +21,6 @@ export function DividerBlock({ props, className, isEditing = false }: DividerBlo
     thickness = 1,
     color = '#e5e7eb',
     spacing = 'md',
-    width = '100',
-    alignment = 'center',
     icon = 'none',
     animated = false,
   } = props
@@ -33,7 +31,6 @@ export function DividerBlock({ props, className, isEditing = false }: DividerBlo
     sm: 'my-4',
     md: 'my-8',
     lg: 'my-12',
-    xl: 'my-16',
   }
 
   // Style mapping
@@ -42,21 +39,6 @@ export function DividerBlock({ props, className, isEditing = false }: DividerBlo
     dashed: 'border-dashed',
     dotted: 'border-dotted',
     double: 'border-double',
-  }
-
-  // Width mapping
-  const widthMap = {
-    '25': 'w-1/4',
-    '50': 'w-1/2',
-    '75': 'w-3/4',
-    '100': 'w-full',
-  }
-
-  // Alignment mapping
-  const alignmentMap = {
-    left: 'mr-auto',
-    center: 'mx-auto',
-    right: 'ml-auto',
   }
 
   // Icon components
@@ -70,34 +52,6 @@ export function DividerBlock({ props, className, isEditing = false }: DividerBlo
     zap: <Zap className="w-5 h-5" />,
   }
 
-  // Gradient styles
-  const gradientStyles = {
-    gradient: 'linear-gradient(90deg, transparent, currentColor, transparent)',
-    'gradient-rainbow': 'linear-gradient(90deg, #ff0080, #ff8c00, #40e0d0, #ff0080)',
-    'gradient-sunset': 'linear-gradient(90deg, #ff6b6b, #feca57, #ee5a6f)',
-    'gradient-ocean': 'linear-gradient(90deg, #667eea, #764ba2, #f093fb)',
-  }
-
-  // Render gradient divider
-  if (style.startsWith('gradient')) {
-    return (
-      <div className={cn(spacingMap[spacing], className, 'divider-block')}>
-        <div
-          className={cn(
-            widthMap[width],
-            alignmentMap[alignment],
-            'h-0.5 rounded-full',
-            animated && 'animate-pulse'
-          )}
-          style={{
-            background: gradientStyles[style as keyof typeof gradientStyles],
-            height: `${thickness}px`,
-          }}
-        />
-      </div>
-    )
-  }
-
   // Render icon divider
   if (icon !== 'none') {
     return (
@@ -105,8 +59,7 @@ export function DividerBlock({ props, className, isEditing = false }: DividerBlo
         className={cn(
           spacingMap[spacing],
           className,
-          'divider-block flex items-center gap-4',
-          alignmentMap[alignment]
+          'divider-block flex items-center gap-4 w-full'
         )}
       >
         <hr
@@ -138,10 +91,8 @@ export function DividerBlock({ props, className, isEditing = false }: DividerBlo
     <div className={cn(spacingMap[spacing], className, 'divider-block')}>
       <hr
         className={cn(
-          'border-t',
+          'border-t w-full',
           styleClasses[style as keyof typeof styleClasses],
-          widthMap[width],
-          alignmentMap[alignment],
           animated && 'animate-pulse',
           isEditing && 'outline-dashed outline-2 outline-blue-400 outline-offset-2'
         )}
@@ -179,10 +130,6 @@ export function DividerBlockEditor({
             { value: 'dashed', label: 'Dashed' },
             { value: 'dotted', label: 'Dotted' },
             { value: 'double', label: 'Double' },
-            { value: 'gradient', label: 'Gradient' },
-            { value: 'gradient-rainbow', label: 'Rainbow' },
-            { value: 'gradient-sunset', label: 'Sunset' },
-            { value: 'gradient-ocean', label: 'Ocean' },
           ] as const).map(({ value, label }) => (
             <Button
               key={value}
@@ -275,47 +222,11 @@ export function DividerBlockEditor({
         </div>
       </div>
 
-      {/* Width Selector */}
-      <div>
-        <label className="block text-sm font-medium mb-2">Width</label>
-        <div className="grid grid-cols-4 gap-2">
-          {(['25', '50', '75', '100'] as const).map((width) => (
-            <Button
-              key={width}
-              variant={props.width === width ? 'default' : 'outline'}
-              size="sm"
-              onClick={() => handleChange('width', width)}
-              className="text-xs h-9"
-            >
-              {width}%
-            </Button>
-          ))}
-        </div>
-      </div>
-
-      {/* Alignment Selector */}
-      <div>
-        <label className="block text-sm font-medium mb-2">Alignment</label>
-        <div className="grid grid-cols-3 gap-2">
-          {(['left', 'center', 'right'] as const).map((align) => (
-            <Button
-              key={align}
-              variant={props.alignment === align ? 'default' : 'outline'}
-              size="sm"
-              onClick={() => handleChange('alignment', align)}
-              className="capitalize h-9"
-            >
-              {align}
-            </Button>
-          ))}
-        </div>
-      </div>
-
       {/* Spacing Selector */}
       <div>
         <label className="block text-sm font-medium mb-2">Spacing (Vertical)</label>
-        <div className="grid grid-cols-5 gap-2">
-          {(['none', 'sm', 'md', 'lg', 'xl'] as const).map((space) => (
+        <div className="grid grid-cols-4 gap-2">
+          {(['none', 'sm', 'md', 'lg'] as const).map((space) => (
             <Button
               key={space}
               variant={props.spacing === space ? 'default' : 'outline'}

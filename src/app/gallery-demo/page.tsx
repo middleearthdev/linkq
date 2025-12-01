@@ -5,6 +5,9 @@ import { GalleryBlock } from '@/components/blocks/GalleryBlock'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { GalleryBlockProps } from '@/types'
+import { Smartphone, Tablet } from 'lucide-react'
+
+type DeviceType = 'mobile' | 'tablet'
 
 export default function GalleryDemoPage() {
   // Sample gallery items with placeholder images
@@ -65,20 +68,22 @@ export default function GalleryDemoPage() {
     },
   ]
 
-  const [selectedLayout, setSelectedLayout] = useState<any>('grid')
-  const [selectedColumns, setSelectedColumns] = useState(3)
+  const [selectedLayout, setSelectedLayout] = useState<'grid' | 'carousel'>('grid')
+  const [selectedColumns, setSelectedColumns] = useState<'small' | 'medium'>('small')
   const [selectedAspectRatio, setSelectedAspectRatio] = useState<any>('square')
   const [selectedImageFilter, setSelectedImageFilter] = useState<any>('none')
-  const [selectedSpacing, setSelectedSpacing] = useState<any>('md')
-  const [selectedRounded, setSelectedRounded] = useState<any>('md')
+  const [selectedRounded, setSelectedRounded] = useState(true)
   const [showCaptions, setShowCaptions] = useState(true)
+  const [deviceType, setDeviceType] = useState<DeviceType>('mobile')
+
+  const deviceFrameClass = {
+    mobile: 'max-w-[375px] mx-auto',
+    tablet: 'max-w-2xl mx-auto'
+  }
 
   const layouts: Array<GalleryBlockProps['layout']> = ['grid', 'carousel']
-  const columns = [1, 2, 3, 4, 5, 6]
   const aspectRatios: Array<GalleryBlockProps['aspectRatio']> = ['square', 'landscape', 'portrait', 'widescreen', 'original']
   const imageFilters: Array<GalleryBlockProps['imageFilter']> = ['none', 'grayscale', 'sepia', 'vintage', 'dramatic', 'warm', 'cool', 'noir']
-  const spacings: Array<GalleryBlockProps['spacing']> = ['none', 'sm', 'md', 'lg']
-  const roundedOptions: Array<GalleryBlockProps['rounded']> = ['none', 'sm', 'md', 'lg', 'xl']
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-50 via-pink-50 to-orange-50 py-12 px-4">
@@ -121,17 +126,21 @@ export default function GalleryDemoPage() {
             {selectedLayout !== 'carousel' && (
               <div>
                 <label className="block text-sm font-semibold mb-3 text-gray-700">Columns</label>
-                <div className="grid grid-cols-6 gap-2">
-                  {columns.map((col) => (
-                    <Button
-                      key={col}
-                      variant={selectedColumns === col ? 'default' : 'outline'}
-                      size="sm"
-                      onClick={() => setSelectedColumns(col)}
-                    >
-                      {col}
-                    </Button>
-                  ))}
+                <div className="grid grid-cols-2 gap-2">
+                  <Button
+                    variant={selectedColumns === 'small' ? 'default' : 'outline'}
+                    size="sm"
+                    onClick={() => setSelectedColumns('small')}
+                  >
+                    Small (3/2 cols)
+                  </Button>
+                  <Button
+                    variant={selectedColumns === 'medium' ? 'default' : 'outline'}
+                    size="sm"
+                    onClick={() => setSelectedColumns('medium')}
+                  >
+                    Medium (2/1 cols)
+                  </Button>
                 </div>
               </div>
             )}
@@ -172,70 +181,105 @@ export default function GalleryDemoPage() {
               </div>
             </div>
 
-            {/* Spacing & Rounded */}
-            <div className="grid md:grid-cols-2 gap-6">
-              <div>
-                <label className="block text-sm font-semibold mb-3 text-gray-700">Spacing</label>
-                <div className="grid grid-cols-4 gap-2">
-                  {spacings.map((spacing) => (
-                    <Button
-                      key={spacing}
-                      variant={selectedSpacing === spacing ? 'default' : 'outline'}
-                      size="sm"
-                      onClick={() => setSelectedSpacing(spacing)}
-                      className="capitalize"
-                    >
-                      {spacing}
-                    </Button>
-                  ))}
-                </div>
+            {/* Toggles */}
+            <div className="flex flex-wrap gap-6">
+              {/* Rounded Corners Toggle */}
+              <div className="flex items-center gap-3">
+                <input
+                  type="checkbox"
+                  id="rounded"
+                  checked={selectedRounded}
+                  onChange={(e) => setSelectedRounded(e.target.checked)}
+                  className="rounded cursor-pointer"
+                />
+                <label htmlFor="rounded" className="text-sm font-semibold text-gray-700 cursor-pointer">
+                  Rounded Corners
+                </label>
               </div>
 
-              <div>
-                <label className="block text-sm font-semibold mb-3 text-gray-700">Rounded Corners</label>
-                <div className="grid grid-cols-5 gap-2">
-                  {roundedOptions.map((rounded) => (
-                    <Button
-                      key={rounded}
-                      variant={selectedRounded === rounded ? 'default' : 'outline'}
-                      size="sm"
-                      onClick={() => setSelectedRounded(rounded)}
-                      className="capitalize"
-                    >
-                      {rounded}
-                    </Button>
-                  ))}
-                </div>
+              {/* Show Captions Toggle */}
+              <div className="flex items-center gap-3">
+                <input
+                  type="checkbox"
+                  id="captions"
+                  checked={showCaptions}
+                  onChange={(e) => setShowCaptions(e.target.checked)}
+                  className="rounded cursor-pointer"
+                />
+                <label htmlFor="captions" className="text-sm font-semibold text-gray-700 cursor-pointer">
+                  Show Captions
+                </label>
               </div>
             </div>
 
-            {/* Show Captions Toggle */}
-            <div className="flex items-center gap-3">
-              <label className="text-sm font-semibold text-gray-700">Show Captions</label>
-              <Button
-                variant={showCaptions ? 'default' : 'outline'}
-                size="sm"
-                onClick={() => setShowCaptions(!showCaptions)}
-              >
-                {showCaptions ? 'ON' : 'OFF'}
-              </Button>
+            {/* Device Preview Toggle */}
+            <div className="p-4 bg-gradient-to-r from-purple-50 to-pink-50 rounded-lg border-2 border-purple-200">
+              <label className="block text-sm font-semibold text-gray-700 mb-3">
+                Device Preview
+              </label>
+              <div className="flex gap-2">
+                <Button
+                  onClick={() => setDeviceType('mobile')}
+                  variant={deviceType === 'mobile' ? 'default' : 'outline'}
+                  className="flex-1 gap-2"
+                >
+                  <Smartphone className="w-4 h-4" />
+                  <span>Mobile</span>
+                  <span className="text-xs opacity-70">(375px)</span>
+                </Button>
+                <Button
+                  onClick={() => setDeviceType('tablet')}
+                  variant={deviceType === 'tablet' ? 'default' : 'outline'}
+                  className="flex-1 gap-2"
+                >
+                  <Tablet className="w-4 h-4" />
+                  <span>Tablet</span>
+                  <span className="text-xs opacity-70">(672px)</span>
+                </Button>
+              </div>
             </div>
           </div>
 
-          {/* Live Preview */}
-          <div className="bg-gradient-to-br from-gray-50 to-gray-100 rounded-xl p-8 border-2 border-dashed border-gray-300">
-            <GalleryBlock
-              props={{
-                items: sampleImages,
-                layout: selectedLayout,
-                columns: selectedColumns,
-                aspectRatio: selectedAspectRatio,
-                imageFilter: selectedImageFilter,
-                showCaptions: showCaptions,
-                spacing: selectedSpacing,
-                rounded: selectedRounded,
-              }}
-            />
+          {/* Device Frame Preview */}
+          <div className="text-center mb-4">
+            <div className="inline-flex items-center gap-2 bg-gray-100 px-4 py-2 rounded-full text-sm font-medium">
+              {deviceType === 'mobile' ? (
+                <>
+                  <Smartphone className="w-4 h-4" />
+                  <span>Mobile Preview</span>
+                </>
+              ) : (
+                <>
+                  <Tablet className="w-4 h-4" />
+                  <span>Tablet Preview</span>
+                </>
+              )}
+            </div>
+          </div>
+
+          <div className={deviceFrameClass[deviceType]}>
+            <div className="bg-white rounded-2xl shadow-2xl overflow-hidden border-8 border-gray-800">
+              <div className="bg-gray-900 h-6 flex items-center justify-center">
+                <div className="w-20 h-4 bg-gray-800 rounded-full"></div>
+              </div>
+              <div className={`bg-gradient-to-br from-gray-50 to-gray-100 relative overflow-y-auto ${
+                deviceType === 'mobile' ? 'h-[667px]' : 'h-[600px]'
+              }`}>
+                <div className="p-4">
+                  <GalleryBlock
+                    props={{
+                      items: sampleImages,
+                      layout: selectedLayout,
+                      columns: selectedColumns,
+                      aspectRatio: selectedAspectRatio,
+                      imageFilter: selectedImageFilter,
+                      showCaptions: showCaptions,
+                      rounded: selectedRounded,
+                    }}
+                  />
+                </div>
+              </div>
+            </div>
           </div>
         </Card>
 
@@ -252,12 +296,11 @@ export default function GalleryDemoPage() {
                   props={{
                     items: sampleImages.slice(0, 6),
                     layout: layout,
-                    columns: 3,
+                    columns: 'small',
                     aspectRatio: 'square',
                     imageFilter: 'none',
                     showCaptions: false,
-                    spacing: 'md',
-                    rounded: 'md',
+                    rounded: true,
                   }}
                 />
               </Card>
@@ -278,12 +321,11 @@ export default function GalleryDemoPage() {
                   props={{
                     items: sampleImages.slice(0, 4),
                     layout: 'grid',
-                    columns: 2,
+                    columns: 'medium',
                     aspectRatio: ratio,
                     imageFilter: 'none',
                     showCaptions: false,
-                    spacing: 'sm',
-                    rounded: 'md',
+                    rounded: true,
                   }}
                 />
               </Card>
@@ -304,38 +346,11 @@ export default function GalleryDemoPage() {
                   props={{
                     items: sampleImages.slice(0, 3),
                     layout: 'grid',
-                    columns: 1,
+                    columns: 'medium',
                     aspectRatio: 'landscape',
                     imageFilter: filter,
                     showCaptions: false,
-                    spacing: 'sm',
-                    rounded: 'md',
-                  }}
-                />
-              </Card>
-            ))}
-          </div>
-        </div>
-
-        {/* Spacing Comparison */}
-        <div className="space-y-6">
-          <h2 className="text-3xl font-bold text-center">Spacing Options</h2>
-          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
-            {spacings.map((spacing) => (
-              <Card key={spacing} className="p-6 bg-white/80 backdrop-blur-sm">
-                <h3 className="text-lg font-semibold mb-4 capitalize text-center text-gray-700">
-                  {spacing}
-                </h3>
-                <GalleryBlock
-                  props={{
-                    items: sampleImages.slice(0, 4),
-                    layout: 'grid',
-                    columns: 2,
-                    aspectRatio: 'square',
-                    imageFilter: 'none',
-                    showCaptions: false,
-                    spacing: spacing,
-                    rounded: 'md',
+                    rounded: true,
                   }}
                 />
               </Card>
@@ -345,27 +360,40 @@ export default function GalleryDemoPage() {
 
         {/* Rounded Corners Comparison */}
         <div className="space-y-6">
-          <h2 className="text-3xl font-bold text-center">Rounded Corners</h2>
-          <div className="grid md:grid-cols-3 lg:grid-cols-5 gap-6">
-            {roundedOptions.map((rounded) => (
-              <Card key={rounded} className="p-6 bg-white/80 backdrop-blur-sm">
-                <h3 className="text-lg font-semibold mb-4 capitalize text-center text-gray-700">
-                  {rounded}
-                </h3>
-                <GalleryBlock
-                  props={{
-                    items: sampleImages.slice(0, 3),
-                    layout: 'grid',
-                    columns: 1,
-                    aspectRatio: 'square',
-                    imageFilter: 'none',
-                    showCaptions: false,
-                    spacing: 'sm',
-                    rounded: rounded,
-                  }}
-                />
-              </Card>
-            ))}
+          <h2 className="text-3xl font-bold text-center">Rounded Corners Comparison</h2>
+          <div className="grid md:grid-cols-2 gap-6">
+            <Card className="p-6 bg-white/80 backdrop-blur-sm">
+              <h3 className="text-lg font-semibold mb-4 text-center text-gray-700">
+                Rounded (ON)
+              </h3>
+              <GalleryBlock
+                props={{
+                  items: sampleImages.slice(0, 4),
+                  layout: 'grid',
+                  columns: 'medium',
+                  aspectRatio: 'square',
+                  imageFilter: 'none',
+                  showCaptions: false,
+                  rounded: true,
+                }}
+              />
+            </Card>
+            <Card className="p-6 bg-white/80 backdrop-blur-sm">
+              <h3 className="text-lg font-semibold mb-4 text-center text-gray-700">
+                Rounded (OFF)
+              </h3>
+              <GalleryBlock
+                props={{
+                  items: sampleImages.slice(0, 4),
+                  layout: 'grid',
+                  columns: 'medium',
+                  aspectRatio: 'square',
+                  imageFilter: 'none',
+                  showCaptions: false,
+                  rounded: false,
+                }}
+              />
+            </Card>
           </div>
         </div>
 
@@ -378,12 +406,11 @@ export default function GalleryDemoPage() {
               props={{
                 items: sampleImages.slice(0, 6),
                 layout: 'grid',
-                columns: 3,
+                columns: 'small',
                 aspectRatio: 'square',
                 imageFilter: 'none',
                 showCaptions: true,
-                spacing: 'md',
-                rounded: 'lg',
+                rounded: true,
               }}
             />
           </div>
@@ -397,12 +424,11 @@ export default function GalleryDemoPage() {
             props={{
               items: sampleImages,
               layout: 'carousel',
-              columns: 3,
+              columns: 'small',
               aspectRatio: 'landscape',
               imageFilter: 'none',
               showCaptions: true,
-              spacing: 'md',
-              rounded: 'lg',
+              rounded: true,
             }}
           />
         </Card>

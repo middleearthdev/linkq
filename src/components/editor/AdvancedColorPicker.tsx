@@ -92,7 +92,19 @@ export function AdvancedColorPicker({ colors, onChange }: AdvancedColorPickerPro
           <div className="p-4 border rounded-lg bg-white shadow-lg">
             {isRgba ? (
               <RgbaColorPicker
-                color={value}
+                color={(() => {
+                  // Parse rgba string to RgbaColor object
+                  const match = value.match(/rgba?\((\d+),\s*(\d+),\s*(\d+)(?:,\s*([0-9.]+))?\)/)
+                  if (match) {
+                    return {
+                      r: parseInt(match[1]),
+                      g: parseInt(match[2]),
+                      b: parseInt(match[3]),
+                      a: match[4] ? parseFloat(match[4]) : 1
+                    }
+                  }
+                  return { r: 0, g: 0, b: 0, a: 0.1 }
+                })()}
                 onChange={(color) => {
                   const rgba = `rgba(${color.r}, ${color.g}, ${color.b}, ${color.a})`
                   updateColor(colorKey, rgba)

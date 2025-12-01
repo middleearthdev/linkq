@@ -6,10 +6,10 @@
 import { z } from 'zod'
 
 export type LinkListStyle =
-  | 'pill' | 'underline' | 'card' | 'modern' | 'modern-cream' | 'vintage'
-  | 'ticket' | 'brush' | 'neon' | 'origami' | 'glass' | 'pixel'
-  | 'hologram' | 'neomorphism' | 'bubble' | 'cyberpunk' | 'sketch'
-  | 'metallic' | 'wood' | 'neon-outline' | 'minimal-line' | 'elastic'
+  | 'pill' | 'vintage'
+  | 'ticket' | 'brush' | 'neon' | 'origami' | 'pixel'
+  | 'hologram' | 'bubble' | 'cyberpunk' | 'sketch'
+  | 'metallic' | 'neon-outline'
   | 'terminal'
   // Game-inspired styles (Round 1)
   | 'rpg-fantasy' | 'battle-royale' | 'casual-game' | 'jrpg-anime' | 'dark-souls'
@@ -133,50 +133,6 @@ export const STYLE_TEMPLATES: StyleTemplate[] = [
     category: 'basic',
     description: 'Classic rounded pill button style'
   },
-  {
-    id: 'card',
-    name: 'Card',
-    preview: 'rounded-lg border bg-white shadow-sm',
-    category: 'basic',
-    description: 'Clean card-style buttons with subtle shadows'
-  },
-  {
-    id: 'underline',
-    name: 'Underline',
-    preview: 'border-b-2 border-transparent hover:border-blue-500',
-    category: 'basic',
-    description: 'Minimal text links with animated underlines'
-  },
-
-  // Modern Styles
-  {
-    id: 'modern',
-    name: 'Modern',
-    preview: 'rounded-2xl bg-gradient-to-r from-blue-500 to-purple-600 text-white',
-    category: 'modern',
-    description: 'Sleek gradient buttons with rounded corners'
-  },
-  {
-    id: 'modern-cream',
-    name: 'Modern Cream',
-    preview: 'rounded-2xl bg-amber-50 border border-amber-200 text-amber-800',
-    category: 'modern',
-    description: 'Sophisticated cream-colored modern design'
-  },
-  {
-    id: 'glass',
-    name: 'Glass',
-    preview: 'rounded-2xl bg-white/10 backdrop-blur-md border border-white/20',
-    category: 'modern',
-    description: 'Glassmorphism effect with backdrop blur'
-  },
-  {
-    id: 'neomorphism',
-    name: 'Neomorphism',
-    preview: 'rounded-2xl bg-gray-100 shadow-[8px_8px_16px_rgba(0,0,0,0.15),-8px_-8px_16px_rgba(255,255,255,0.7)]',
-    category: 'modern',
-    description: 'Soft UI design with subtle shadows'
-  },
 
   // Creative Styles
   {
@@ -257,32 +213,11 @@ export const STYLE_TEMPLATES: StyleTemplate[] = [
     description: 'Shiny metallic surface effect'
   },
   {
-    id: 'wood',
-    name: 'Wood',
-    preview: 'bg-gradient-to-r from-amber-700 via-amber-600 to-amber-800 text-amber-100',
-    category: 'creative',
-    description: 'Natural wood grain texture'
-  },
-  {
     id: 'neon-outline',
     name: 'Neon Outline',
     preview: 'bg-transparent border-2 border-cyan-400 text-cyan-400',
     category: 'creative',
     description: 'Outlined neon glow effect'
-  },
-  {
-    id: 'minimal-line',
-    name: 'Minimal Line',
-    preview: 'bg-transparent border-b-2 border-gray-300 text-gray-600',
-    category: 'basic',
-    description: 'Ultra-minimal line design'
-  },
-  {
-    id: 'elastic',
-    name: 'Elastic',
-    preview: 'bg-gradient-to-r from-pink-400 to-purple-500 text-white rounded-full',
-    category: 'creative',
-    description: 'Bouncy elastic animation effect'
   },
   {
     id: 'terminal',
@@ -878,11 +813,10 @@ export const generateCustomStyle = (customColors?: CustomColors): React.CSSPrope
  */
 export const isFullyCustomizable = (styleId: LinkListStyle): boolean => {
   const fullyCustomizable: LinkListStyle[] = [
-    'pill', 'card', 'underline', 'modern', 'modern-cream',
-    'glass', 'neon', 'bubble', 'neomorphism', 'minimal-line',
+    'pill', 'neon', 'bubble',
     'vintage', 'cyberpunk', 'ticket', 'brush', 'origami',
     'pixel', 'hologram', 'sketch', 'metallic', 'neon-outline',
-    'elastic', 'terminal',
+    'terminal',
     // Game-inspired styles (Round 1)
     'rpg-fantasy', 'battle-royale', 'casual-game', 'jrpg-anime', 'dark-souls',
     // Game-inspired styles (Round 2)

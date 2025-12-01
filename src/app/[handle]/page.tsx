@@ -118,7 +118,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 
   // Get font information for preload
   const fontName = (siteData.data as any)?.meta?.font
-  const fontUrl = fontName && fontName !== 'system' 
+  const fontUrl = fontName && fontName !== 'system'
     ? `https://fonts.googleapis.com/css2?family=${fontName.replace(/\s+/g, '+')}:wght@300;400;500;600;700&display=swap`
     : null
 
@@ -224,7 +224,7 @@ export default async function PublicBioLinkPage({ params }: PageProps) {
 
   // Get font information for preload
   const fontName = (siteData.data as any)?.meta?.font
-  const fontUrl = fontName && fontName !== 'system' 
+  const fontUrl = fontName && fontName !== 'system'
     ? `https://fonts.googleapis.com/css2?family=${fontName.replace(/\s+/g, '+')}:wght@300;400;500;600;700&display=swap`
     : null
 
@@ -251,26 +251,26 @@ export default async function PublicBioLinkPage({ params }: PageProps) {
 
       {/* Preload critical resources */}
       {fontUrl && (
-        <link 
-          rel="preload" 
-          href={fontUrl} 
-          as="style" 
+        <link
+          rel="preload"
+          href={fontUrl}
+          as="style"
           crossOrigin="anonymous"
         />
       )}
       {userAvatar && (
-        <link 
-          rel="preload" 
-          href={userAvatar} 
-          as="image" 
+        <link
+          rel="preload"
+          href={userAvatar}
+          as="image"
           crossOrigin="anonymous"
         />
       )}
 
       {/* Load Google Font early */}
       {fontUrl && (
-        <link 
-          rel="stylesheet" 
+        <link
+          rel="stylesheet"
           href={fontUrl}
           crossOrigin="anonymous"
         />
@@ -281,8 +281,8 @@ export default async function PublicBioLinkPage({ params }: PageProps) {
         __html: `
           :root {
             ${Object.entries((siteData.data as any)?.meta?.theme || {})
-              .map(([key, value]) => `${key}: ${value};`)
-              .join('\n            ')}
+            .map(([key, value]) => `${key}: ${value};`)
+            .join('\n            ')}
           }
           .template-container {
             background: var(--background, linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%)) !important;
