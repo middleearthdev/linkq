@@ -12,13 +12,13 @@ export function DeviceSimulator({ siteData, className = '' }: DeviceSimulatorPro
 
   return (
     <div className={`h-full flex flex-col ${className}`}>
-      {/* Header */}
-      <div className="px-4 py-3 border-b border-border/50 bg-card/80 backdrop-blur-sm flex-shrink-0">
-        <div className="flex items-center gap-2 mb-2">
+      {/* Header - Minimal Spacing */}
+      <div className="px-4 py-1 border-b border-border/50 bg-card/80 backdrop-blur-sm flex-shrink-0 mb-0">
+        <div className="flex items-center gap-2">
           <div className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse" />
-          <h3 className="text-foreground dark:text-white font-semibold text-sm">Live Preview</h3>
+          <h3 className="text-foreground dark:text-white font-semibold text-xs">Live Preview</h3>
         </div>
-        <div className="flex items-center gap-2 px-2.5 py-1.5 rounded-lg bg-primary/5 border border-primary/20">
+        <div className="flex items-center gap-2 px-2 py-0.5 rounded-lg bg-primary/5 border border-primary/20 mt-0.5">
           <Smartphone className="h-3.5 w-3.5 text-primary" />
           <span className="text-xs font-medium text-primary">iPhone 14 Pro</span>
           <div className="ml-auto text-xs text-muted-foreground">393×852</div>
@@ -26,10 +26,10 @@ export function DeviceSimulator({ siteData, className = '' }: DeviceSimulatorPro
       </div>
 
       {/* Mobile Frame */}
-      <div className="flex-1 flex items-center justify-center p-6 bg-gradient-to-b from-card to-secondary/20 overflow-hidden">
+      <div className="flex-1 flex items-start justify-center -mt-16 pb-0 bg-gradient-to-b from-card to-secondary/20 overflow-hidden">
         <div className="relative scale-75">
           {/* Phone Shadow */}
-          <div className="absolute inset-0 bg-gradient-to-br from-primary/20 via-purple-500/20 to-pink-500/20 blur-2xl opacity-50 rounded-[3rem]" />
+          <div className="absolute inset-0 bg-gradient-to-br from-primary/20 via-purple-500/20 to-pink-500/20 blur-xl opacity-40 rounded-[3rem]" />
 
           {/* Phone Body */}
           <div className="relative bg-gradient-to-b from-gray-800 to-gray-900 dark:from-gray-900 dark:to-black rounded-[2.5rem] p-2 shadow-2xl">
@@ -46,7 +46,7 @@ export function DeviceSimulator({ siteData, className = '' }: DeviceSimulatorPro
                     <div className="w-1 h-4 bg-white rounded-full" />
                   </div>
                   <svg className="w-4 h-3 text-white" viewBox="0 0 24 24" fill="currentColor">
-                    <path d="M12 18c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm0-14C6.48 4 2 8.48 2 14h2c0-4.42 3.58-8 8-8s8 3.58 8 8h2c0-5.52-4.48-10-10-10zm0 4c-3.31 0-6 2.69-6 6h2c0-2.21 1.79-4 4-4s4 1.79 4 4h2c0-3.31-2.69-6-6-6z"/>
+                    <path d="M12 18c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm0-14C6.48 4 2 8.48 2 14h2c0-4.42 3.58-8 8-8s8 3.58 8 8h2c0-5.52-4.48-10-10-10zm0 4c-3.31 0-6 2.69-6 6h2c0-2.21 1.79-4 4-4s4 1.79 4 4h2c0-3.31-2.69-6-6-6z" />
                   </svg>
                   <div className="w-6 h-3 border-2 border-white rounded-sm relative">
                     <div className="absolute right-[-2px] top-[2px] w-1 h-2 bg-white rounded-r-sm" />
@@ -68,17 +68,6 @@ export function DeviceSimulator({ siteData, className = '' }: DeviceSimulatorPro
             {/* Home Indicator */}
             <div className="absolute bottom-2 left-1/2 -translate-x-1/2 w-32 h-1.5 bg-white/20 rounded-full" />
           </div>
-        </div>
-      </div>
-
-      {/* Footer Info */}
-      <div className="px-6 py-3 border-t border-border/50 bg-card/50 flex-shrink-0">
-        <div className="flex items-center justify-between text-xs text-muted-foreground">
-          <div className="flex items-center gap-2">
-            <div className="w-1.5 h-1.5 rounded-full bg-green-500" />
-            <span>Auto-updating</span>
-          </div>
-          <span>iPhone 14 Pro • 393×852</span>
         </div>
       </div>
     </div>

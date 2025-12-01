@@ -124,10 +124,19 @@ export function DynamicTemplateRenderer({
     console.log(BlockComponent, 'BlockComponent')
     console.log(block.type, 'block.type')
 
+    // Enhance props for specific block types in preview mode
+    const enhancedProps = { ...block.props }
+
+    // For product-catalog in preview mode (DeviceSimulator), force mobile viewport
+    if (block.type === 'product-catalog' && isPreview) {
+      enhancedProps.forceViewport = 'mobile'
+      enhancedProps.containModal = true // Contain modal within preview frame
+    }
+
     return (
       <BlockComponent
         key={block.id}
-        props={block.props}
+        props={enhancedProps}
         isEditing={false}
         className="block-item"
       />

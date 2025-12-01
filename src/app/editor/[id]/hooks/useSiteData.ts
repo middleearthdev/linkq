@@ -1,9 +1,10 @@
 /**
  * Custom Hook: useSiteData
  * Manages site data loading, saving, and publishing
+ * Features: Undo/redo, auto-save
  */
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef, useCallback } from 'react'
 import { useSession } from '@/lib/auth-client'
 
 interface SiteData {
@@ -39,12 +40,17 @@ interface UseSiteDataReturn {
   saving: boolean
   publishing: boolean
   error: string
+  canUndo: boolean
+  canRedo: boolean
   saveSite: () => Promise<void>
   publishSite: () => Promise<void>
   updateSiteData: (data: Partial<SiteData>) => void
   updateBlock: (blockId: string, newProps: any) => void
   addBlock: (blockType: string) => void
   deleteBlock: (blockId: string) => void
+  duplicateBlock: (blockId: string) => void
+  undo: () => void
+  redo: () => void
 }
 
 export function useSiteData(siteId: string): UseSiteDataReturn {
@@ -54,6 +60,12 @@ export function useSiteData(siteId: string): UseSiteDataReturn {
   const [saving, setSaving] = useState(false)
   const [publishing, setPublishing] = useState(false)
   const [error, setError] = useState('')
+
+  // Undo/Redo state
+  const historyRef = useRef<SiteData[]>([])
+  const historyIndexRef = useRef<number>(-1)
+  const [canUndo, setCanUndo] = useState(false)
+  const [canRedo, setCanRedo] = useState(false)
 
   // Load site data
   useEffect(() => {
@@ -147,10 +159,63 @@ export function useSiteData(siteId: string): UseSiteDataReturn {
     }
   }
 
-  // Update site data
+  // Add to history for undo/redo
+  const addToHistory = useCallback((newData: SiteData) => {
+    // Remove any future history when making a new change
+    historyRef.current = historyRef.current.slice(0, historyIndexRef.current + 1)
+
+    // Add new state to history
+    historyRef.current.push(JSON.parse(JSON.stringify(newData)))
+    historyIndexRef.current = historyRef.current.length - 1
+
+    // Limit history to 50 items
+    if (historyRef.current.length > 50) {
+      historyRef.current.shift()
+      historyIndexRef.current--
+    }
+
+    setCanUndo(historyIndexRef.current > 0)
+    setCanRedo(false)
+  }, [])
+
+  // Undo function
+  const undo = useCallback(() => {
+    if (historyIndexRef.current > 0) {
+      historyIndexRef.current--
+      const previousState = historyRef.current[historyIndexRef.current]
+      setSiteData(JSON.parse(JSON.stringify(previousState)))
+      setCanUndo(historyIndexRef.current > 0)
+      setCanRedo(true)
+
+      // Haptic feedback
+      if ('vibrate' in navigator) {
+        navigator.vibrate(30)
+      }
+    }
+  }, [])
+
+  // Redo function
+  const redo = useCallback(() => {
+    if (historyIndexRef.current < historyRef.current.length - 1) {
+      historyIndexRef.current++
+      const nextState = historyRef.current[historyIndexRef.current]
+      setSiteData(JSON.parse(JSON.stringify(nextState)))
+      setCanUndo(true)
+      setCanRedo(historyIndexRef.current < historyRef.current.length - 1)
+
+      // Haptic feedback
+      if ('vibrate' in navigator) {
+        navigator.vibrate(30)
+      }
+    }
+  }, [])
+
+  // Update site data with history tracking
   const updateSiteData = (data: Partial<SiteData>) => {
     if (!siteData) return
-    setSiteData({ ...siteData, ...data })
+    const newData = { ...siteData, ...data }
+    setSiteData(newData)
+    addToHistory(newData)
   }
 
   // Update block props
@@ -200,18 +265,86 @@ export function useSiteData(siteId: string): UseSiteDataReturn {
     })
   }
 
+  // Duplicate block
+  const duplicateBlock = (blockId: string) => {
+    if (!siteData) return
+
+    const blockToDuplicate = siteData.dataJson.blocks.find(block => block.id === blockId)
+    if (!blockToDuplicate) return
+
+    // Create a new block with duplicated props
+    const duplicatedBlock = {
+      id: `block-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+      type: blockToDuplicate.type,
+      props: JSON.parse(JSON.stringify(blockToDuplicate.props)) // Deep clone props
+    }
+
+    // Find the index of the original block
+    const originalIndex = siteData.dataJson.blocks.findIndex(block => block.id === blockId)
+
+    // Insert duplicated block right after the original
+    const newBlocks = [...siteData.dataJson.blocks]
+    newBlocks.splice(originalIndex + 1, 0, duplicatedBlock)
+
+    setSiteData({
+      ...siteData,
+      dataJson: {
+        ...siteData.dataJson,
+        blocks: newBlocks
+      }
+    })
+  }
+
+  // Initialize history when siteData is loaded
+  useEffect(() => {
+    if (siteData && historyRef.current.length === 0) {
+      historyRef.current = [JSON.parse(JSON.stringify(siteData))]
+      historyIndexRef.current = 0
+      setCanUndo(false)
+      setCanRedo(false)
+    }
+  }, [siteData])
+
+  // Keyboard shortcuts for undo/redo
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      const isCmdOrCtrl = e.metaKey || e.ctrlKey
+
+      // Cmd/Ctrl + Z = Undo
+      if (isCmdOrCtrl && e.key === 'z' && !e.shiftKey) {
+        e.preventDefault()
+        undo()
+      }
+
+      // Cmd/Ctrl + Shift + Z OR Cmd/Ctrl + Y = Redo
+      if (isCmdOrCtrl && ((e.key === 'z' && e.shiftKey) || e.key === 'y')) {
+        e.preventDefault()
+        redo()
+      }
+    }
+
+    window.addEventListener('keydown', handleKeyDown)
+    return () => window.removeEventListener('keydown', handleKeyDown)
+  }, [undo, redo])
+
+
   return {
     siteData,
     loading,
     saving,
     publishing,
     error,
+    canUndo,
+    canRedo,
     saveSite,
     publishSite,
     updateSiteData,
     updateBlock,
     addBlock,
-    deleteBlock
+    deleteBlock,
+    duplicateBlock,
+    undo,
+    redo
   }
 }
 
