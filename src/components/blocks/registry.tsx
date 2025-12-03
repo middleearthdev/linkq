@@ -4,13 +4,14 @@
  */
 
 import React from 'react'
-import { BlockSchema, BioBlockProps, LinkListBlockProps, SocialIconsBlockProps, CTABlockProps, GalleryBlockProps, DividerBlockProps, FooterBlockProps, WhatsAppBusinessBlockProps, DeliveryPlatformBlockProps, MarketplaceBlockProps, LocationBlockProps, QRISPaymentBlockProps, ProductCatalogBlockProps } from '@/types'
+import { BlockSchema, BioBlockProps, LinkListBlockProps, SocialIconsBlockProps, CTABlockProps, GalleryBlockProps, DividerBlockProps, TextBlockProps, FooterBlockProps, WhatsAppBusinessBlockProps, DeliveryPlatformBlockProps, MarketplaceBlockProps, LocationBlockProps, QRISPaymentBlockProps, ProductCatalogBlockProps } from '@/types'
 import { BioBlock } from './BioBlock'
 import { LinkListBlock } from './LinkListBlock'
 import { SocialIconsBlock } from './SocialIconsBlock'
 import { GalleryBlock } from './GalleryBlock'
 import { AnalyticsBlock } from './AnalyticsBlock'
 import { DividerBlock } from './DividerBlock'
+import { TextBlock } from './TextBlock'
 import { FooterBlock } from './FooterBlock'
 import { WhatsAppBusinessBlock } from './WhatsAppBusinessBlock'
 import { DeliveryPlatformBlock } from './DeliveryPlatformBlock'
@@ -30,6 +31,7 @@ export const BLOCK_COMPONENTS: Record<string, React.ComponentType<any>> = {
   'gallery': GalleryBlock,
   'analytics': AnalyticsBlock,
   'divider': DividerBlock,
+  'text': TextBlock,
   'footer': FooterBlock,
   'whatsapp-business': WhatsAppBusinessBlock,
   'delivery-platform': DeliveryPlatformBlock,
@@ -519,6 +521,69 @@ export const BLOCK_SCHEMAS: Record<BlockType, BlockSchema> = {
       alignment: 'center',
       icon: 'none',
       animated: false,
+    },
+    isPremium: false,
+  },
+
+  'text': {
+    type: 'text',
+    name: 'Text Block',
+    description: 'Simple text display with rich formatting options',
+    category: 'basic',
+    schema: {
+      type: 'object',
+      properties: {
+        content: {
+          type: 'string',
+          title: 'Content',
+          description: 'Your text content',
+          default: '',
+        },
+        align: {
+          type: 'string',
+          title: 'Text Alignment',
+          enum: ['left', 'center', 'right', 'justify'],
+          default: 'left',
+        },
+        size: {
+          type: 'string',
+          title: 'Font Size',
+          enum: ['xs', 'sm', 'base', 'lg', 'xl', '2xl', '3xl'],
+          default: 'base',
+        },
+        weight: {
+          type: 'string',
+          title: 'Font Weight',
+          enum: ['light', 'normal', 'medium', 'semibold', 'bold'],
+          default: 'normal',
+        },
+        color: {
+          type: 'string',
+          title: 'Text Color',
+          description: 'Custom text color (hex code)',
+        },
+        spacing: {
+          type: 'string',
+          title: 'Line Height',
+          enum: ['tight', 'normal', 'relaxed', 'loose'],
+          default: 'normal',
+        },
+        maxWidth: {
+          type: 'string',
+          title: 'Max Width',
+          enum: ['sm', 'md', 'lg', 'xl', '2xl', 'full'],
+          default: 'md',
+        },
+      },
+      required: ['content'],
+    },
+    defaultProps: {
+      content: 'Enter your text here...',
+      align: 'left',
+      size: 'base',
+      weight: 'normal',
+      spacing: 'normal',
+      maxWidth: 'md',
     },
     isPremium: false,
   },
@@ -1203,6 +1268,7 @@ export * from './SocialIconsBlock'
 export * from './GalleryBlock'
 export * from './AnalyticsBlock'
 export * from './DividerBlock'
+export * from './TextBlock'
 export * from './FooterBlock'
 export * from './WhatsAppBusinessBlock'
 export * from './DeliveryPlatformBlock'

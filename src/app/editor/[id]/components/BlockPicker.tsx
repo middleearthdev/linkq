@@ -9,6 +9,7 @@ import {
   Link2,
   Hash,
   Minus,
+  Type,
   FootprintsIcon,
   Image,
   BarChart3,
@@ -85,6 +86,15 @@ export function BlockPicker({ isOpen, onClose, onAddBlock }: BlockPickerProps) {
                 description="Horizontal separator"
                 color="gray"
                 onClick={() => handleAddBlock('divider')}
+              />
+
+              {/* Text Block */}
+              <BlockOption
+                icon={Type}
+                title="Text"
+                description="Simple text content"
+                color="purple"
+                onClick={() => handleAddBlock('text')}
               />
 
               {/* Footer Block */}

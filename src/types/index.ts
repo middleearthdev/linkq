@@ -194,6 +194,16 @@ export const DividerBlockPropsSchema = z.object({
   animated: z.boolean().default(false),
 })
 
+export const TextBlockPropsSchema = z.object({
+  content: z.string().default(''),
+  align: z.enum(['left', 'center', 'right', 'justify']).default('left'),
+  size: z.enum(['xs', 'sm', 'base', 'lg', 'xl', '2xl', '3xl']).default('base'),
+  weight: z.enum(['light', 'normal', 'medium', 'semibold', 'bold']).default('normal'),
+  color: z.string().optional(),
+  spacing: z.enum(['tight', 'normal', 'relaxed', 'loose']).default('normal'),
+  maxWidth: z.enum(['sm', 'md', 'lg', 'xl', '2xl', 'full']).default('md'),
+})
+
 export const FooterBlockPropsSchema = z.object({
   copyrightText: z.string().default('© 2024 Your Name'),
   layout: z.enum(['centered', 'minimal', 'stacked', 'split']).default('centered'),
@@ -349,6 +359,7 @@ export type SocialIconsBlockProps = z.infer<typeof SocialIconsBlockPropsSchema>
 export type CTABlockProps = z.infer<typeof CTABlockPropsSchema>
 export type GalleryBlockProps = z.infer<typeof GalleryBlockPropsSchema>
 export type DividerBlockProps = z.infer<typeof DividerBlockPropsSchema>
+export type TextBlockProps = z.infer<typeof TextBlockPropsSchema>
 export type FooterBlockProps = z.infer<typeof FooterBlockPropsSchema>
 export type WhatsAppBusinessBlockProps = z.infer<typeof WhatsAppBusinessBlockPropsSchema>
 export type DeliveryPlatformBlockProps = z.infer<typeof DeliveryPlatformBlockPropsSchema>

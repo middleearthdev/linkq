@@ -34,7 +34,7 @@ import { Button } from "@/components/ui/button"
 
 export default function EditorPage({ params }: { params: Promise<{ id: string }> }) {
   const resolvedParams = use(params)
-  const { isPending } = useSession()
+  const { data: session, isPending } = useSession()
 
   // UI State
   const [activeTab, setActiveTab] = useState<'edit' | 'design' | 'settings'>('edit')
@@ -280,6 +280,7 @@ export default function EditorPage({ params }: { params: Promise<{ id: string }>
                   blocks={siteData.dataJson.blocks}
                   handle={siteData.handle}
                   bioBlock={bioBlock}
+                  userPlan={(session?.user as any)?.plan || 'FREE'}
                   onToggleBioBlock={handleToggleBioBlock}
                   onToggleWhatsAppBlock={handleToggleWhatsAppBlock}
                   onAddBlock={() => setShowBlockPicker(true)}

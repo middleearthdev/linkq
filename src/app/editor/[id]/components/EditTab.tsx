@@ -7,7 +7,7 @@ import { useState, useEffect, useRef } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Checkbox } from "@/components/ui/checkbox"
-import { Plus, Trash2, GripVertical, Link2, Settings, Smartphone, Sparkles, Eye, EyeOff, Copy, ChevronDown, ChevronUp, Hash, ImageIcon, CheckSquare, Undo2, Redo2, Package, ShoppingBag, Edit3, Search, Grid2x2, Grid3x3, Share2 } from "lucide-react"
+import { Plus, Trash2, GripVertical, Link2, Settings, Smartphone, Sparkles, Eye, EyeOff, Copy, ChevronDown, ChevronUp, Hash, ImageIcon, CheckSquare, Undo2, Redo2, Package, ShoppingBag, Edit3, Search, Grid2x2, Grid3x3, Share2, MessageCircle, UtensilsCrossed, Store } from "lucide-react"
 import { getIconByName } from "./IconPicker"
 import { ImageIconSelector } from "./ImageIconSelector"
 
@@ -21,6 +21,7 @@ interface EditTabProps {
   blocks: Block[]
   handle: string
   bioBlock: Block | undefined
+  userPlan?: 'FREE' | 'STARTER' | 'PRO' // Subscription tier
   onToggleBioBlock: () => void
   onToggleWhatsAppBlock: () => void
   onAddBlock: () => void
@@ -329,10 +330,309 @@ function BioEditorDialog({
   )
 }
 
+// WhatsApp Business Card Component - Similar to Bio Block
+function WhatsAppBusinessCard({
+  whatsappBlock,
+  onToggleWhatsAppBlock,
+  onUpdateBlock
+}: {
+  whatsappBlock: Block | undefined
+  onToggleWhatsAppBlock: () => void
+  onUpdateBlock: (blockId: string, newProps: any) => void
+}) {
+  const [isEditorOpen, setIsEditorOpen] = useState(false)
+  const hasWhatsAppBlock = !!whatsappBlock
+
+  return (
+    <>
+      <div className="border-2 rounded-lg overflow-hidden bg-gradient-to-br from-green-500/5 to-emerald-500/5">
+        {/* Header */}
+        <div className="flex items-center justify-between p-3 bg-gradient-to-r from-green-500/10 to-emerald-500/10">
+          <div className="flex items-center gap-3 flex-1 min-w-0">
+            {/* WhatsApp Icon */}
+            <div className="w-10 h-10 rounded-full bg-green-500/20 border-2 border-green-500/30 flex items-center justify-center flex-shrink-0">
+              <MessageCircle className="h-5 w-5 text-green-500" />
+            </div>
+
+            <div className="flex-1 min-w-0">
+              <h4 className="text-sm font-semibold text-foreground dark:text-white">
+                WhatsApp Business
+              </h4>
+              <p className="text-xs text-muted-foreground truncate">
+                {hasWhatsAppBlock && whatsappBlock.props.phoneNumber
+                  ? whatsappBlock.props.phoneNumber
+                  : 'Floating chat button'}
+              </p>
+            </div>
+
+            {/* Edit Button */}
+            {hasWhatsAppBlock && (
+              <button
+                onClick={() => setIsEditorOpen(true)}
+                className="p-2 hover:bg-background/50 rounded-lg transition-all flex-shrink-0"
+                title="Edit WhatsApp"
+              >
+                <Edit3 className="h-4 w-4 text-green-500" />
+              </button>
+            )}
+          </div>
+
+          {/* Toggle Switch */}
+          <button
+            onClick={onToggleWhatsAppBlock}
+            className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors flex-shrink-0 ml-2 ${
+              hasWhatsAppBlock ? 'bg-primary' : 'bg-gray-300 dark:bg-gray-600'
+            }`}
+          >
+            <span
+              className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                hasWhatsAppBlock ? 'translate-x-6' : 'translate-x-1'
+              }`}
+            />
+          </button>
+        </div>
+
+        {/* Empty State Hint */}
+        {!hasWhatsAppBlock && (
+          <div className="p-3 border-t bg-card/30">
+            <p className="text-xs text-muted-foreground text-center">
+              Enable to add floating WhatsApp chat button
+            </p>
+          </div>
+        )}
+      </div>
+
+      {/* WhatsApp Editor Dialog */}
+      {isEditorOpen && hasWhatsAppBlock && whatsappBlock && (
+        <WhatsAppEditorDialog
+          whatsappBlock={whatsappBlock}
+          onUpdateBlock={onUpdateBlock}
+          onClose={() => setIsEditorOpen(false)}
+        />
+      )}
+    </>
+  )
+}
+
+// WhatsApp Editor Dialog - Fullscreen
+function WhatsAppEditorDialog({
+  whatsappBlock,
+  onUpdateBlock,
+  onClose
+}: {
+  whatsappBlock: Block
+  onUpdateBlock: (blockId: string, newProps: any) => void
+  onClose: () => void
+}) {
+  // Auto-format phone number untuk Indonesia
+  const formatPhoneNumber = (phone: string): string => {
+    // Remove all non-numeric characters
+    const cleaned = phone.replace(/\D/g, '')
+
+    // Handle empty input
+    if (!cleaned) return ''
+
+    // Auto-format berdasarkan pattern
+    if (cleaned.startsWith('08')) {
+      // 08xxx → +628xxx
+      return '+62' + cleaned.substring(1)
+    } else if (cleaned.startsWith('628')) {
+      // 628xxx → +628xxx
+      return '+' + cleaned
+    } else if (cleaned.startsWith('62')) {
+      // 62xxx → +62xxx
+      return '+' + cleaned
+    } else if (cleaned.startsWith('8')) {
+      // 8xxx → +628xxx
+      return '+62' + cleaned
+    }
+
+    // Return as is with + prefix if doesn't match pattern
+    return cleaned.startsWith('+') ? cleaned : '+' + cleaned
+  }
+
+  const updateField = (field: string, value: any) => {
+    // Auto-format phone number on blur
+    if (field === 'phoneNumber' && value) {
+      value = formatPhoneNumber(value)
+    }
+
+    onUpdateBlock(whatsappBlock.id, {
+      ...whatsappBlock.props,
+      [field]: value
+    })
+  }
+
+  // Keyboard shortcuts
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') onClose()
+      if ((e.metaKey || e.ctrlKey) && e.key === 's') {
+        e.preventDefault()
+        onClose()
+      }
+    }
+    window.addEventListener('keydown', handleKeyDown)
+    return () => window.removeEventListener('keydown', handleKeyDown)
+  }, [onClose])
+
+  return (
+    <div className="fixed inset-0 z-50 bg-background flex flex-col animate-in fade-in slide-in-from-bottom-4 duration-300">
+      {/* Header */}
+      <div className="flex-shrink-0 border-b bg-gradient-to-r from-green-500/5 via-emerald-500/5 to-teal-500/5">
+        <div className="px-4 py-3 flex items-center justify-between gap-3">
+          <div className="flex items-center gap-3 min-w-0 flex-1">
+            <div className="p-2 rounded-lg bg-gradient-to-br from-green-500 to-emerald-500 flex-shrink-0">
+              <MessageCircle className="h-5 w-5 text-white" />
+            </div>
+            <div className="min-w-0 flex-1">
+              <h2 className="font-bold text-base sm:text-lg truncate">WhatsApp Business</h2>
+              <p className="text-xs text-muted-foreground">
+                Configure your floating chat button
+              </p>
+            </div>
+          </div>
+
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={onClose}
+            className="h-9 w-9 p-0 flex-shrink-0"
+            title="Close (Esc)"
+          >
+            <Copy className="h-4 w-4 rotate-45" />
+          </Button>
+        </div>
+      </div>
+
+      {/* Content */}
+      <div className="flex-1 overflow-y-auto">
+        <div className="max-w-2xl mx-auto p-4 sm:p-6 space-y-6">
+          {/* Phone Number */}
+          <div className="space-y-2">
+            <label className="text-sm font-semibold text-muted-foreground">Phone Number</label>
+            <Input
+              value={whatsappBlock.props.phoneNumber || ''}
+              onChange={(e) => onUpdateBlock(whatsappBlock.id, { ...whatsappBlock.props, phoneNumber: e.target.value })}
+              onBlur={(e) => updateField('phoneNumber', e.target.value)}
+              placeholder="081234567890"
+              className="h-10"
+            />
+            <p className="text-xs text-muted-foreground">
+              Type 08xxx and it will auto-format to +628xxx when you finish typing
+            </p>
+          </div>
+
+          {/* Pre-filled Message */}
+          <div className="space-y-2">
+            <label className="text-sm font-semibold text-muted-foreground">Pre-filled Message (Optional)</label>
+            <textarea
+              value={whatsappBlock.props.message || ''}
+              onChange={(e) => updateField('message', e.target.value)}
+              placeholder="Hello! I have a question..."
+              className="w-full h-24 px-3 py-2 text-sm rounded-md border border-input bg-background resize-none focus:outline-none focus:ring-2 focus:ring-ring"
+            />
+            <p className="text-xs text-muted-foreground">
+              This message will be pre-filled when users click the button
+            </p>
+          </div>
+
+          {/* Button Text */}
+          <div className="space-y-2">
+            <label className="text-sm font-semibold text-muted-foreground">Button Text</label>
+            <Input
+              value={whatsappBlock.props.buttonText || 'Chat via WhatsApp'}
+              onChange={(e) => updateField('buttonText', e.target.value)}
+              placeholder="Chat via WhatsApp"
+              className="h-10"
+            />
+          </div>
+
+          {/* Business Name (Optional) */}
+          <div className="space-y-2">
+            <label className="text-sm font-semibold text-muted-foreground">Business Name (Optional)</label>
+            <Input
+              value={whatsappBlock.props.businessName || ''}
+              onChange={(e) => updateField('businessName', e.target.value)}
+              placeholder="Your Business"
+              className="h-10"
+            />
+            <p className="text-xs text-muted-foreground">
+              Shows as a badge above the button
+            </p>
+          </div>
+
+          {/* FAB Position */}
+          <div className="space-y-2">
+            <label className="text-sm font-semibold text-muted-foreground">Button Position</label>
+            <div className="grid grid-cols-2 gap-3">
+              <button
+                onClick={() => updateField('fabPosition', 'bottom-right')}
+                className={`p-3 rounded-lg border-2 transition-all ${
+                  whatsappBlock.props.fabPosition === 'bottom-right' || !whatsappBlock.props.fabPosition
+                    ? 'border-primary bg-primary/10'
+                    : 'border-border hover:border-border/80'
+                }`}
+              >
+                <div className="text-sm font-medium">Bottom Right</div>
+                <div className="text-xs text-muted-foreground mt-1">Default position</div>
+              </button>
+              <button
+                onClick={() => updateField('fabPosition', 'bottom-left')}
+                className={`p-3 rounded-lg border-2 transition-all ${
+                  whatsappBlock.props.fabPosition === 'bottom-left'
+                    ? 'border-primary bg-primary/10'
+                    : 'border-border hover:border-border/80'
+                }`}
+              >
+                <div className="text-sm font-medium">Bottom Left</div>
+                <div className="text-xs text-muted-foreground mt-1">Alternative position</div>
+              </button>
+            </div>
+          </div>
+
+          {/* Enable Pulse Animation */}
+          <div className="flex items-center justify-between p-3 rounded-lg bg-secondary/50 border">
+            <div>
+              <span className="text-sm font-medium">Pulse Animation</span>
+              <p className="text-xs text-muted-foreground">Animated ring to attract attention</p>
+            </div>
+            <button
+              onClick={() => updateField('enablePulse', !whatsappBlock.props.enablePulse)}
+              className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
+                whatsappBlock.props.enablePulse !== false ? 'bg-primary' : 'bg-gray-300'
+              }`}
+            >
+              <span
+                className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                  whatsappBlock.props.enablePulse !== false ? 'translate-x-6' : 'translate-x-1'
+                }`}
+              />
+            </button>
+          </div>
+        </div>
+      </div>
+
+      {/* Footer */}
+      <div className="flex-shrink-0 border-t bg-secondary/30 p-4">
+        <div className="max-w-2xl mx-auto flex items-center justify-between gap-3">
+          <p className="text-xs text-muted-foreground">
+            Press <kbd className="px-1.5 py-0.5 rounded bg-secondary text-xs">Esc</kbd> or <kbd className="px-1.5 py-0.5 rounded bg-secondary text-xs">⌘S</kbd> to close
+          </p>
+          <Button onClick={onClose} className="min-w-[100px]">
+            Done
+          </Button>
+        </div>
+      </div>
+    </div>
+  )
+}
+
 export function EditTab({
   blocks,
   handle,
   bioBlock,
+  userPlan = 'FREE',
   onToggleBioBlock,
   onToggleWhatsAppBlock,
   onAddBlock,
@@ -353,23 +653,25 @@ export function EditTab({
   onBlockTouchMove,
   onBlockTouchEnd
 }: EditTabProps) {
+  // Check if user can upload custom images (STARTER or PRO)
+  const canUploadImages = userPlan === 'STARTER' || userPlan === 'PRO'
 
-  // Local state for block visibility and collapse
-  const [hiddenBlocks, setHiddenBlocks] = useState<Set<string>>(new Set())
+  // Local state for block collapse and FAB
   const [collapsedBlocks, setCollapsedBlocks] = useState<Set<string>>(new Set())
   const [showFAB, setShowFAB] = useState(false)
   const addBlockButtonRef = useRef<HTMLDivElement>(null)
 
-  // Toggle block visibility
+  // Toggle block visibility - Now persists to database
   const toggleBlockVisibility = (blockId: string) => {
-    setHiddenBlocks(prev => {
-      const next = new Set(prev)
-      if (next.has(blockId)) {
-        next.delete(blockId)
-      } else {
-        next.add(blockId)
-      }
-      return next
+    const block = blocks.find(b => b.id === blockId)
+    if (!block) return
+
+    // Update block's isVisible property at block level (not in props)
+    // Note: We're using a workaround here by storing in props since onUpdateBlock only updates props
+    // Ideally, we'd need a separate handler for block-level properties
+    onUpdateBlock(blockId, {
+      ...block.props,
+      _isVisible: !(block.props._isVisible ?? true)
     })
   }
 
@@ -388,7 +690,6 @@ export function EditTab({
 
   // Filter blocks (exclude bio and whatsapp-business)
   const editableBlocks = blocks.filter(b => b.type !== 'bio' && b.type !== 'whatsapp-business')
-  const hasWhatsAppBlock = blocks.some(b => b.type === 'whatsapp-business')
 
   // Helper to get block item count
   const getBlockItemCount = (block: Block): number => {
@@ -559,28 +860,12 @@ export function EditTab({
           onUpdateBlock={onUpdateBlock}
         />
 
-        {/* WhatsApp Business Toggle */}
-        <div className="flex items-center justify-between p-3 rounded-lg bg-card dark:bg-[#2A3441] border border-border">
-          <div className="flex items-center gap-3">
-            <div className="p-2 rounded-lg bg-green-500/10">
-              <Smartphone className="h-4 w-4 text-green-500" />
-            </div>
-            <div>
-              <h4 className="text-sm font-semibold text-foreground dark:text-white">WhatsApp Business</h4>
-              <p className="text-xs text-muted-foreground">Floating chat button</p>
-            </div>
-          </div>
-          <button
-            onClick={onToggleWhatsAppBlock}
-            className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${hasWhatsAppBlock ? 'bg-primary' : 'bg-gray-300 dark:bg-gray-600'
-              }`}
-          >
-            <span
-              className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${hasWhatsAppBlock ? 'translate-x-6' : 'translate-x-1'
-                }`}
-            />
-          </button>
-        </div>
+        {/* WhatsApp Business Card */}
+        <WhatsAppBusinessCard
+          whatsappBlock={blocks.find(b => b.type === 'whatsapp-business')}
+          onToggleWhatsAppBlock={onToggleWhatsAppBlock}
+          onUpdateBlock={onUpdateBlock}
+        />
       </div>
 
       {/* All Blocks Section - Exclude Bio & WhatsApp */}
@@ -599,7 +884,7 @@ export function EditTab({
                   ? 'opacity-50 scale-95 border-border shadow-xl'
                   : dragOverBlockIndex === originalIndex
                     ? 'border-primary bg-primary/5 scale-105 shadow-lg'
-                    : hiddenBlocks.has(block.id)
+                    : block.props._isVisible === false
                       ? 'border-dashed border-border/50 bg-secondary/30 opacity-60'
                       : 'border-border bg-card dark:bg-[#2A3441] hover:border-border/80'
                   }`}
@@ -660,7 +945,7 @@ export function EditTab({
                     )}
 
                     {/* Hidden Badge - Compact on Mobile */}
-                    {hiddenBlocks.has(block.id) && (
+                    {block.props._isVisible === false && (
                       <div className="px-1.5 md:px-2 py-0.5 rounded-full bg-yellow-500/10 border border-yellow-500/20 flex-shrink-0">
                         <span className="text-[10px] md:text-xs font-medium text-yellow-600 dark:text-yellow-500">
                           Hidden
@@ -677,9 +962,9 @@ export function EditTab({
                       size="sm"
                       onClick={() => toggleBlockVisibility(block.id)}
                       className="h-7 w-7 md:h-8 md:w-8 p-0 text-muted-foreground hover:text-primary"
-                      title={hiddenBlocks.has(block.id) ? 'Show block' : 'Hide block'}
+                      title={block.props._isVisible === false ? 'Show block' : 'Hide block'}
                     >
-                      {hiddenBlocks.has(block.id) ? (
+                      {block.props._isVisible === false ? (
                         <EyeOff className="h-3.5 w-3.5 md:h-4 md:w-4" />
                       ) : (
                         <Eye className="h-3.5 w-3.5 md:h-4 md:w-4" />
@@ -720,6 +1005,7 @@ export function EditTab({
                       <LinkListEditor
                         block={block}
                         onUpdateBlock={onUpdateBlock}
+                        canUploadImages={canUploadImages}
                       />
                     )}
 
@@ -728,6 +1014,7 @@ export function EditTab({
                       <ProductCatalogBlockLink
                         block={block}
                         onUpdateBlock={onUpdateBlock}
+                        canUploadImages={canUploadImages}
                       />
                     )}
 
@@ -739,8 +1026,37 @@ export function EditTab({
                       />
                     )}
 
+                    {/* Delivery Platform Block Editor */}
+                    {block.type === 'delivery-platform' && (
+                      <DeliveryPlatformEditor
+                        block={block}
+                        onUpdateBlock={onUpdateBlock}
+                      />
+                    )}
+
+                    {/* Marketplace Block Editor */}
+                    {block.type === 'marketplace' && (
+                      <MarketplaceEditor
+                        block={block}
+                        onUpdateBlock={onUpdateBlock}
+                      />
+                    )}
+
+                    {/* Text Block Editor */}
+                    {block.type === 'text' && (
+                      <TextBlockEditor
+                        block={block}
+                        onUpdateBlock={onUpdateBlock}
+                      />
+                    )}
+
                     {/* Placeholder for other block types */}
-                    {block.type !== 'link-list' && block.type !== 'product-catalog' && block.type !== 'social-icons' && (
+                    {block.type !== 'link-list' &&
+                     block.type !== 'product-catalog' &&
+                     block.type !== 'social-icons' &&
+                     block.type !== 'delivery-platform' &&
+                     block.type !== 'marketplace' &&
+                     block.type !== 'text' && (
                       <div className="px-3 pb-3">
                         <p className="text-xs text-muted-foreground">
                           Edit via preview panel →
@@ -778,10 +1094,12 @@ export function EditTab({
 // Link List Editor Sub-component
 function LinkListEditor({
   block,
-  onUpdateBlock
+  onUpdateBlock,
+  canUploadImages = false
 }: {
   block: Block
   onUpdateBlock: (blockId: string, newProps: any) => void
+  canUploadImages?: boolean
 }) {
   const [draggedLinkIndex, setDraggedLinkIndex] = useState<number | null>(null)
   const [dragOverLinkIndex, setDragOverLinkIndex] = useState<number | null>(null)
@@ -1185,54 +1503,56 @@ function LinkListEditor({
             ? block.props.items[selectedLinkIndex]?.image
             : undefined
         }
-        isPremium={false} // TODO: Get from user subscription
+        isPremium={canUploadImages}
       />
     </div>
   )
 }
 
 // Product Image Selector Component
+// Product Image Selector - Uses Media Library
 function ProductImageSelector({
   isOpen,
   onClose,
   onSelectImage,
   currentImage,
-  isPremium
+  isPremium,
+  referenceId
 }: {
   isOpen: boolean
   onClose: () => void
   onSelectImage: (imageUrl: string) => void
   currentImage?: string
   isPremium: boolean
+  referenceId?: string
 }) {
-  const [mode, setMode] = useState<'upload' | 'url'>('url')
-  const [imageUrl, setImageUrl] = useState(currentImage || '')
-  const [uploading, setUploading] = useState(false)
-
   if (!isOpen) return null
+
+  // Use Media Library for STARTER/PRO users
+  if (isPremium) {
+    const MediaLibraryPicker = require('@/components/media/MediaLibraryPicker').MediaLibraryPicker
+
+    return (
+      <MediaLibraryPicker
+        isOpen={true}
+        onClose={onClose}
+        onSelect={onSelectImage}
+        category="product"
+        referenceId={referenceId}
+        currentImage={currentImage}
+        title="Select Product Image"
+      />
+    )
+  }
+
+  // FREE users can only use URL
+  const [imageUrl, setImageUrl] = useState(currentImage || '')
 
   const handleSubmit = () => {
     if (imageUrl.trim()) {
       onSelectImage(imageUrl.trim())
       onClose()
     }
-  }
-
-  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (!isPremium) {
-      alert('Image upload is a Pro feature. Please upgrade to Pro.')
-      return
-    }
-
-    const file = e.target.files?.[0]
-    if (!file) return
-
-    setUploading(true)
-    // TODO: Implement actual upload to cloud storage
-    // For now, create a local URL
-    const localUrl = URL.createObjectURL(file)
-    setImageUrl(localUrl)
-    setUploading(false)
   }
 
   return (
@@ -1246,101 +1566,37 @@ function ProductImageSelector({
           </Button>
         </div>
 
-        {/* Content */}
+        {/* Content - URL Only for FREE */}
         <div className="p-4 space-y-4">
-          {/* Mode Toggle */}
-          <div className="flex gap-2">
-            <Button
-              variant={mode === 'url' ? 'default' : 'outline'}
-              size="sm"
-              onClick={() => setMode('url')}
-              className="flex-1"
-            >
-              URL
-            </Button>
-            <Button
-              variant={mode === 'upload' ? 'default' : 'outline'}
-              size="sm"
-              onClick={() => setMode('upload')}
-              className="flex-1 relative"
-            >
-              Upload
-              {!isPremium && (
-                <span className="ml-1 text-xs bg-yellow-500 text-white px-1 rounded">PRO</span>
-              )}
-            </Button>
+          <div className="p-3 rounded-lg bg-blue-500/10 border border-blue-500/20 text-sm">
+            <p className="font-medium text-blue-700">💡 URL Mode (Free)</p>
+            <p className="text-xs text-blue-600 mt-1">
+              Upgrade to STARTER or PRO to upload and manage images
+            </p>
           </div>
 
-          {/* URL Mode */}
-          {mode === 'url' && (
-            <div className="space-y-3">
-              <div>
-                <label className="text-xs font-medium text-muted-foreground mb-1 block">
-                  Image URL
-                </label>
-                <Input
-                  value={imageUrl}
-                  onChange={(e) => setImageUrl(e.target.value)}
-                  placeholder="https://example.com/image.jpg"
-                  className="h-10"
-                />
-              </div>
+          <div>
+            <label className="text-xs font-medium text-muted-foreground mb-1 block">
+              Image URL
+            </label>
+            <Input
+              value={imageUrl}
+              onChange={(e) => setImageUrl(e.target.value)}
+              placeholder="https://example.com/product.jpg"
+              className="h-10"
+            />
+          </div>
 
-              {imageUrl && (
-                <div className="aspect-square rounded-lg overflow-hidden bg-secondary border">
-                  <img
-                    src={imageUrl}
-                    alt="Preview"
-                    className="w-full h-full object-cover"
-                    onError={(e) => {
-                      e.currentTarget.style.display = 'none'
-                    }}
-                  />
-                </div>
-              )}
-            </div>
-          )}
-
-          {/* Upload Mode */}
-          {mode === 'upload' && (
-            <div className="space-y-3">
-              {!isPremium && (
-                <div className="p-3 rounded-lg bg-yellow-500/10 border border-yellow-500/20 text-sm">
-                  <p className="font-medium text-yellow-700">Pro Feature</p>
-                  <p className="text-xs text-yellow-600 mt-1">
-                    Upgrade to Pro to upload images directly
-                  </p>
-                </div>
-              )}
-
-              <div className="border-2 border-dashed border-border rounded-lg p-8 text-center">
-                <input
-                  type="file"
-                  accept="image/*"
-                  onChange={handleFileUpload}
-                  disabled={!isPremium || uploading}
-                  className="hidden"
-                  id="image-upload"
-                />
-                <label
-                  htmlFor="image-upload"
-                  className={`cursor-pointer ${!isPremium ? 'opacity-50' : ''}`}
-                >
-                  <ImageIcon className="h-12 w-12 mx-auto mb-2 text-muted-foreground" />
-                  <p className="text-sm font-medium">
-                    {uploading ? 'Uploading...' : 'Click to upload'}
-                  </p>
-                  <p className="text-xs text-muted-foreground mt-1">
-                    PNG, JPG up to 5MB
-                  </p>
-                </label>
-              </div>
-
-              {imageUrl && (
-                <div className="aspect-square rounded-lg overflow-hidden bg-secondary border">
-                  <img src={imageUrl} alt="Preview" className="w-full h-full object-cover" />
-                </div>
-              )}
+          {imageUrl && (
+            <div className="aspect-square rounded-lg overflow-hidden bg-secondary border">
+              <img
+                src={imageUrl}
+                alt="Preview"
+                className="w-full h-full object-cover"
+                onError={(e) => {
+                  e.currentTarget.style.display = 'none'
+                }}
+              />
             </div>
           )}
         </div>
@@ -1353,7 +1609,7 @@ function ProductImageSelector({
           <Button
             onClick={handleSubmit}
             disabled={!imageUrl.trim()}
-            className="flex-1 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white"
+            className="flex-1"
           >
             Done
           </Button>
@@ -1488,10 +1744,12 @@ function ProductLayoutDialog({
 // Product Catalog Block Link - Opens Manager Dialog
 function ProductCatalogBlockLink({
   block,
-  onUpdateBlock
+  onUpdateBlock,
+  canUploadImages = false
 }: {
   block: Block
   onUpdateBlock: (blockId: string, newProps: any) => void
+  canUploadImages?: boolean
 }) {
   const [isManagerOpen, setIsManagerOpen] = useState(false)
   const [isLayoutDialogOpen, setIsLayoutDialogOpen] = useState(false)
@@ -1554,6 +1812,7 @@ function ProductCatalogBlockLink({
           block={block}
           onUpdateBlock={onUpdateBlock}
           onClose={() => setIsManagerOpen(false)}
+          canUploadImages={canUploadImages}
         />
       )}
     </>
@@ -1564,11 +1823,13 @@ function ProductCatalogBlockLink({
 function ProductCatalogManager({
   block,
   onUpdateBlock,
-  onClose
+  onClose,
+  canUploadImages = false
 }: {
   block: Block
   onUpdateBlock: (blockId: string, newProps: any) => void
   onClose: () => void
+  canUploadImages?: boolean
 }) {
   const [draggedProductIndex, setDraggedProductIndex] = useState<number | null>(null)
   const [dragOverProductIndex, setDragOverProductIndex] = useState<number | null>(null)
@@ -2345,7 +2606,8 @@ function ProductCatalogManager({
             }
           }}
           currentImage={block.props.items[selectedProductIndex]?.image}
-          isPremium={false} // TODO: Get from user subscription
+          isPremium={canUploadImages}
+          referenceId={`product-grid:${block.id}:item-${selectedProductIndex}:image`}
         />
       )}
 
@@ -2416,6 +2678,732 @@ function SocialIconsBlockLink({
         />
       )}
     </>
+  )
+}
+
+// Delivery Platform Editor Component - Card Link Style
+function DeliveryPlatformEditor({
+  block,
+  onUpdateBlock
+}: {
+  block: Block
+  onUpdateBlock: (blockId: string, newProps: any) => void
+}) {
+  const [isManagerOpen, setIsManagerOpen] = useState(false)
+  const platforms = block.props.platforms || {}
+  const activePlatformCount = Object.keys(platforms).filter(key => platforms[key]).length
+
+  return (
+    <>
+      <div className="px-3 pb-3">
+        <div className="p-4 rounded-lg bg-gradient-to-br from-green-500/10 via-emerald-500/10 to-teal-500/10 border-2 border-green-500/20">
+          <div className="flex items-center gap-3 mb-3">
+            <div className="p-2 rounded-lg bg-green-500/20">
+              <UtensilsCrossed className="h-5 w-5 text-green-600" />
+            </div>
+            <div className="flex-1">
+              <h3 className="font-semibold text-sm">Food Delivery</h3>
+              <p className="text-xs text-muted-foreground">
+                {activePlatformCount} {activePlatformCount === 1 ? 'platform' : 'platforms'} configured
+              </p>
+            </div>
+          </div>
+
+          <Button
+            onClick={() => setIsManagerOpen(true)}
+            className="w-full bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white"
+          >
+            <Edit3 className="h-4 w-4 mr-2" />
+            Manage Delivery Platforms
+          </Button>
+
+          {activePlatformCount === 0 && (
+            <p className="text-xs text-muted-foreground text-center mt-2">
+              Click to add your delivery platform links
+            </p>
+          )}
+        </div>
+      </div>
+
+      {/* Delivery Platform Manager Dialog */}
+      {isManagerOpen && (
+        <DeliveryPlatformManager
+          block={block}
+          onUpdateBlock={onUpdateBlock}
+          onClose={() => setIsManagerOpen(false)}
+        />
+      )}
+    </>
+  )
+}
+
+// Delivery Platform Manager Dialog - Fullscreen
+function DeliveryPlatformManager({
+  block,
+  onUpdateBlock,
+  onClose
+}: {
+  block: Block
+  onUpdateBlock: (blockId: string, newProps: any) => void
+  onClose: () => void
+}) {
+  const platforms = block.props.platforms || {}
+
+  const updatePlatform = (platformKey: string, field: string, value: any) => {
+    const currentPlatform = platforms[platformKey] || {}
+    onUpdateBlock(block.id, {
+      ...block.props,
+      platforms: {
+        ...platforms,
+        [platformKey]: {
+          ...currentPlatform,
+          [field]: value
+        }
+      }
+    })
+  }
+
+  const removePlatform = (platformKey: string) => {
+    const newPlatforms = { ...platforms }
+    delete newPlatforms[platformKey]
+    onUpdateBlock(block.id, {
+      ...block.props,
+      platforms: newPlatforms
+    })
+  }
+
+  const DELIVERY_PLATFORMS = [
+    { key: 'gofood', name: 'GoFood', icon: '🟢', color: 'bg-green-600' },
+    { key: 'grabfood', name: 'GrabFood', icon: '🍴', color: 'bg-emerald-600' },
+    { key: 'shopeefood', name: 'ShopeeFood', icon: '🍜', color: 'bg-orange-600' }
+  ]
+
+  // Keyboard shortcuts
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') onClose()
+      if ((e.metaKey || e.ctrlKey) && e.key === 's') {
+        e.preventDefault()
+        onClose()
+      }
+    }
+    window.addEventListener('keydown', handleKeyDown)
+    return () => window.removeEventListener('keydown', handleKeyDown)
+  }, [onClose])
+
+  return (
+    <div className="fixed inset-0 z-50 bg-background flex flex-col animate-in fade-in slide-in-from-bottom-4 duration-300">
+      {/* Header */}
+      <div className="flex-shrink-0 border-b bg-gradient-to-r from-green-500/5 via-emerald-500/5 to-teal-500/5">
+        <div className="px-4 py-3 flex items-center justify-between gap-3">
+          <div className="flex items-center gap-3 min-w-0 flex-1">
+            <div className="p-2 rounded-lg bg-gradient-to-br from-green-500 to-emerald-500 flex-shrink-0">
+              <UtensilsCrossed className="h-5 w-5 text-white" />
+            </div>
+            <div className="min-w-0 flex-1">
+              <h2 className="font-bold text-base sm:text-lg truncate">Food Delivery Platforms</h2>
+              <p className="text-xs text-muted-foreground">
+                Configure your delivery platform links
+              </p>
+            </div>
+          </div>
+
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={onClose}
+            className="h-9 w-9 p-0 flex-shrink-0"
+            title="Close (Esc)"
+          >
+            <Copy className="h-4 w-4 rotate-45" />
+          </Button>
+        </div>
+      </div>
+
+      {/* Content */}
+      <div className="flex-1 overflow-y-auto">
+        <div className="max-w-2xl mx-auto p-4 sm:p-6 space-y-6">
+
+        {/* Add Platform Buttons */}
+        <div className="space-y-2 mb-3">
+          {DELIVERY_PLATFORMS.map(platform => {
+            const isActive = !!platforms[platform.key]
+            return (
+              <div
+                key={platform.key}
+                className={`w-full p-3 rounded-lg border-2 transition-all flex items-center gap-3 ${
+                  isActive
+                    ? 'border-primary bg-primary/5'
+                    : 'border-border hover:border-primary/50 hover:bg-secondary/50 cursor-pointer'
+                }`}
+                onClick={() => {
+                  if (!isActive) {
+                    updatePlatform(platform.key, 'url', '')
+                  }
+                }}
+              >
+                <span className="text-2xl">{platform.icon}</span>
+                <div className="flex-1 text-left">
+                  <div className="font-semibold text-sm">{platform.name}</div>
+                  <div className="text-xs text-muted-foreground">
+                    {isActive ? 'Configured ✓' : 'Click to add'}
+                  </div>
+                </div>
+                {isActive && (
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation()
+                      removePlatform(platform.key)
+                    }}
+                    className="p-1 hover:bg-destructive/20 rounded text-destructive transition-colors"
+                    type="button"
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </button>
+                )}
+              </div>
+            )
+          })}
+        </div>
+
+        {/* Platform Configuration */}
+        {Object.keys(platforms).map(platformKey => {
+          const platform = DELIVERY_PLATFORMS.find(p => p.key === platformKey)
+          if (!platform || !platforms[platformKey]) return null
+
+          const config = platforms[platformKey]
+
+          return (
+            <div key={platformKey} className="p-3 rounded-lg bg-card border space-y-3 mb-2">
+              <div className="flex items-center gap-2 mb-2">
+                <span className="text-xl">{platform.icon}</span>
+                <h4 className="font-semibold text-sm">{platform.name}</h4>
+              </div>
+
+              <div className="space-y-2">
+                <label className="text-xs font-medium text-muted-foreground">Store/Menu URL</label>
+                <Input
+                  value={config.url || ''}
+                  onChange={(e) => updatePlatform(platformKey, 'url', e.target.value)}
+                  placeholder={`https://${platformKey}.com/your-store`}
+                  className="h-9 text-xs"
+                />
+              </div>
+
+              <div className="space-y-2">
+                <label className="text-xs font-medium text-muted-foreground">Merchant Name (Optional)</label>
+                <Input
+                  value={config.merchantName || ''}
+                  onChange={(e) => updatePlatform(platformKey, 'merchantName', e.target.value)}
+                  placeholder="Your Restaurant Name"
+                  className="h-9 text-xs"
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-2">
+                <div className="space-y-2">
+                  <label className="text-xs font-medium text-muted-foreground">Rating (Optional)</label>
+                  <Input
+                    type="number"
+                    step="0.1"
+                    min="0"
+                    max="5"
+                    value={config.rating || ''}
+                    onChange={(e) => updatePlatform(platformKey, 'rating', e.target.value)}
+                    placeholder="4.5"
+                    className="h-9 text-xs"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <label className="text-xs font-medium text-muted-foreground">Badge</label>
+                  <select
+                    value={config.badge || ''}
+                    onChange={(e) => updatePlatform(platformKey, 'badge', e.target.value)}
+                    className="w-full h-9 px-3 text-xs rounded-md border border-input bg-background"
+                  >
+                    <option value="">None</option>
+                    <option value="official">Official</option>
+                    <option value="featured">Featured</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+          )
+        })}
+
+        {Object.keys(platforms).length === 0 && (
+          <div className="text-center py-8">
+            <p className="text-sm text-muted-foreground">
+              No platforms added yet. Click a platform above to get started!
+            </p>
+          </div>
+        )}
+        </div>
+      </div>
+
+      {/* Footer */}
+      <div className="flex-shrink-0 border-t bg-secondary/30 p-4">
+        <div className="max-w-2xl mx-auto flex items-center justify-between gap-3">
+          <p className="text-xs text-muted-foreground">
+            Press <kbd className="px-1.5 py-0.5 rounded bg-secondary text-xs">Esc</kbd> or <kbd className="px-1.5 py-0.5 rounded bg-secondary text-xs">⌘S</kbd> to close
+          </p>
+          <Button onClick={onClose} className="min-w-[100px]">
+            Done
+          </Button>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+// Marketplace Editor Component - Card Link Style
+function MarketplaceEditor({
+  block,
+  onUpdateBlock
+}: {
+  block: Block
+  onUpdateBlock: (blockId: string, newProps: any) => void
+}) {
+  const [isManagerOpen, setIsManagerOpen] = useState(false)
+  const stores = block.props.stores || {}
+  const activeStoreCount = Object.keys(stores).filter(key => stores[key]).length
+
+  return (
+    <>
+      <div className="px-3 pb-3">
+        <div className="p-4 rounded-lg bg-gradient-to-br from-orange-500/10 via-red-500/10 to-pink-500/10 border-2 border-orange-500/20">
+          <div className="flex items-center gap-3 mb-3">
+            <div className="p-2 rounded-lg bg-orange-500/20">
+              <Store className="h-5 w-5 text-orange-600" />
+            </div>
+            <div className="flex-1">
+              <h3 className="font-semibold text-sm">E-commerce Stores</h3>
+              <p className="text-xs text-muted-foreground">
+                {activeStoreCount} {activeStoreCount === 1 ? 'store' : 'stores'} configured
+              </p>
+            </div>
+          </div>
+
+          <Button
+            onClick={() => setIsManagerOpen(true)}
+            className="w-full bg-gradient-to-r from-orange-600 to-red-600 hover:from-orange-700 hover:to-red-700 text-white"
+          >
+            <Edit3 className="h-4 w-4 mr-2" />
+            Manage E-commerce Stores
+          </Button>
+
+          {activeStoreCount === 0 && (
+            <p className="text-xs text-muted-foreground text-center mt-2">
+              Click to add your online store links
+            </p>
+          )}
+        </div>
+      </div>
+
+      {/* Marketplace Manager Dialog */}
+      {isManagerOpen && (
+        <MarketplaceManager
+          block={block}
+          onUpdateBlock={onUpdateBlock}
+          onClose={() => setIsManagerOpen(false)}
+        />
+      )}
+    </>
+  )
+}
+
+// Marketplace Manager Dialog - Fullscreen
+function MarketplaceManager({
+  block,
+  onUpdateBlock,
+  onClose
+}: {
+  block: Block
+  onUpdateBlock: (blockId: string, newProps: any) => void
+  onClose: () => void
+}) {
+  const stores = block.props.stores || {}
+
+  const updateStore = (storeKey: string, field: string, value: any) => {
+    const currentStore = stores[storeKey] || {}
+    onUpdateBlock(block.id, {
+      ...block.props,
+      stores: {
+        ...stores,
+        [storeKey]: {
+          ...currentStore,
+          [field]: value
+        }
+      }
+    })
+  }
+
+  const removeStore = (storeKey: string) => {
+    const newStores = { ...stores }
+    delete newStores[storeKey]
+    onUpdateBlock(block.id, {
+      ...block.props,
+      stores: newStores
+    })
+  }
+
+  const MARKETPLACES = [
+    { key: 'tokopedia', name: 'Tokopedia', icon: '🟢', color: 'bg-green-600' },
+    { key: 'shopee', name: 'Shopee', icon: '🛍️', color: 'bg-orange-600' },
+    { key: 'tiktokshop', name: 'TikTok Shop', icon: '🎵', color: 'bg-black' }
+  ]
+
+  // Keyboard shortcuts
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') onClose()
+      if ((e.metaKey || e.ctrlKey) && e.key === 's') {
+        e.preventDefault()
+        onClose()
+      }
+    }
+    window.addEventListener('keydown', handleKeyDown)
+    return () => window.removeEventListener('keydown', handleKeyDown)
+  }, [onClose])
+
+  return (
+    <div className="fixed inset-0 z-50 bg-background flex flex-col animate-in fade-in slide-in-from-bottom-4 duration-300">
+      {/* Header */}
+      <div className="flex-shrink-0 border-b bg-gradient-to-r from-orange-500/5 via-red-500/5 to-pink-500/5">
+        <div className="px-4 py-3 flex items-center justify-between gap-3">
+          <div className="flex items-center gap-3 min-w-0 flex-1">
+            <div className="p-2 rounded-lg bg-gradient-to-br from-orange-500 to-red-500 flex-shrink-0">
+              <Store className="h-5 w-5 text-white" />
+            </div>
+            <div className="min-w-0 flex-1">
+              <h2 className="font-bold text-base sm:text-lg truncate">E-commerce Stores</h2>
+              <p className="text-xs text-muted-foreground">
+                Configure your marketplace store links
+              </p>
+            </div>
+          </div>
+
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={onClose}
+            className="h-9 w-9 p-0 flex-shrink-0"
+            title="Close (Esc)"
+          >
+            <Copy className="h-4 w-4 rotate-45" />
+          </Button>
+        </div>
+      </div>
+
+      {/* Content */}
+      <div className="flex-1 overflow-y-auto">
+        <div className="max-w-2xl mx-auto p-4 sm:p-6 space-y-6">
+
+        {/* Add Store Buttons */}
+        <div className="space-y-2">
+          {MARKETPLACES.map(marketplace => {
+            const isActive = !!stores[marketplace.key]
+            return (
+              <div
+                key={marketplace.key}
+                className={`w-full p-3 rounded-lg border-2 transition-all flex items-center gap-3 ${
+                  isActive
+                    ? 'border-primary bg-primary/5'
+                    : 'border-border hover:border-primary/50 hover:bg-secondary/50 cursor-pointer'
+                }`}
+                onClick={() => {
+                  if (!isActive) {
+                    updateStore(marketplace.key, 'storeUrl', '')
+                  }
+                }}
+              >
+                <span className="text-2xl">{marketplace.icon}</span>
+                <div className="flex-1 text-left">
+                  <div className="font-semibold text-sm">{marketplace.name}</div>
+                  <div className="text-xs text-muted-foreground">
+                    {isActive ? 'Configured ✓' : 'Click to add'}
+                  </div>
+                </div>
+                {isActive && (
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation()
+                      removeStore(marketplace.key)
+                    }}
+                    className="p-1 hover:bg-destructive/20 rounded text-destructive transition-colors"
+                    type="button"
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </button>
+                )}
+              </div>
+            )
+          })}
+        </div>
+
+        {/* Store Configuration */}
+        {Object.keys(stores).map(storeKey => {
+          const marketplace = MARKETPLACES.find(m => m.key === storeKey)
+          if (!marketplace || !stores[storeKey]) return null
+
+          const config = stores[storeKey]
+
+          return (
+            <div key={storeKey} className="p-4 rounded-lg bg-card border space-y-4">
+              <div className="flex items-center gap-2 mb-2">
+                <span className="text-xl">{marketplace.icon}</span>
+                <h4 className="font-semibold text-sm">{marketplace.name}</h4>
+              </div>
+
+              <div className="space-y-2">
+                <label className="text-sm font-semibold text-muted-foreground">Store URL</label>
+                <Input
+                  value={config.storeUrl || ''}
+                  onChange={(e) => updateStore(storeKey, 'storeUrl', e.target.value)}
+                  placeholder={`https://${storeKey}.com/your-store`}
+                  className="h-10"
+                />
+              </div>
+
+              <div className="space-y-2">
+                <label className="text-sm font-semibold text-muted-foreground">Store Name (Optional)</label>
+                <Input
+                  value={config.storeName || ''}
+                  onChange={(e) => updateStore(storeKey, 'storeName', e.target.value)}
+                  placeholder="Your Shop Name"
+                  className="h-10"
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div className="space-y-2">
+                  <label className="text-sm font-semibold text-muted-foreground">Rating (Optional)</label>
+                  <Input
+                    type="number"
+                    step="0.1"
+                    min="0"
+                    max="5"
+                    value={config.rating || ''}
+                    onChange={(e) => updateStore(storeKey, 'rating', e.target.value)}
+                    placeholder="4.8"
+                    className="h-10"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <label className="text-sm font-semibold text-muted-foreground">Followers (Optional)</label>
+                  <Input
+                    value={config.followers || ''}
+                    onChange={(e) => updateStore(storeKey, 'followers', e.target.value)}
+                    placeholder="10K"
+                    className="h-10"
+                  />
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <label className="text-sm font-semibold text-muted-foreground">Badge</label>
+                <select
+                  value={config.badge || ''}
+                  onChange={(e) => updateStore(storeKey, 'badge', e.target.value)}
+                  className="w-full h-10 px-3 text-sm rounded-md border border-input bg-background"
+                >
+                  <option value="">None</option>
+                  {storeKey === 'tokopedia' && (
+                    <>
+                      <option value="official">Official Store</option>
+                      <option value="power-merchant">Power Merchant</option>
+                    </>
+                  )}
+                  {storeKey === 'shopee' && (
+                    <>
+                      <option value="star-seller">Star Seller</option>
+                      <option value="shopee-mall">Shopee Mall</option>
+                    </>
+                  )}
+                  {storeKey === 'tiktokshop' && (
+                    <option value="verified">Verified Seller</option>
+                  )}
+                </select>
+              </div>
+
+              <div className="space-y-2">
+                <label className="text-sm font-semibold text-muted-foreground">Review Count (Optional)</label>
+                <Input
+                  value={config.reviewCount || ''}
+                  onChange={(e) => updateStore(storeKey, 'reviewCount', e.target.value)}
+                  placeholder="500"
+                  className="h-10"
+                />
+              </div>
+            </div>
+          )
+        })}
+
+        {Object.keys(stores).length === 0 && (
+          <div className="text-center py-8">
+            <p className="text-sm text-muted-foreground">
+              No stores added yet. Click a marketplace above to get started!
+            </p>
+          </div>
+        )}
+        </div>
+      </div>
+
+      {/* Footer */}
+      <div className="flex-shrink-0 border-t bg-secondary/30 p-4">
+        <div className="max-w-2xl mx-auto flex items-center justify-between gap-3">
+          <p className="text-xs text-muted-foreground">
+            Press <kbd className="px-1.5 py-0.5 rounded bg-secondary text-xs">Esc</kbd> or <kbd className="px-1.5 py-0.5 rounded bg-secondary text-xs">⌘S</kbd> to close
+          </p>
+          <Button onClick={onClose} className="min-w-[100px]">
+            Done
+          </Button>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+// Text Block Editor Component
+function TextBlockEditor({
+  block,
+  onUpdateBlock
+}: {
+  block: Block
+  onUpdateBlock: (blockId: string, newProps: any) => void
+}) {
+  const updateField = (field: string, value: any) => {
+    onUpdateBlock(block.id, {
+      ...block.props,
+      [field]: value
+    })
+  }
+
+  return (
+    <div className="px-3 pb-3 space-y-3">
+      <div className="p-4 rounded-lg bg-gradient-to-br from-blue-500/10 via-purple-500/10 to-pink-500/10 border-2 border-blue-500/20">
+        {/* Content Textarea */}
+        <div className="space-y-2 mb-4">
+          <label className="text-sm font-semibold text-muted-foreground">Text Content</label>
+          <textarea
+            value={block.props.content || ''}
+            onChange={(e) => updateField('content', e.target.value)}
+            placeholder="Enter your text here..."
+            className="w-full h-32 px-3 py-2 text-sm rounded-md border border-input bg-background resize-y focus:outline-none focus:ring-2 focus:ring-ring"
+          />
+          <p className="text-xs text-muted-foreground">
+            Supports multi-line text
+          </p>
+        </div>
+
+        {/* Formatting Options */}
+        <div className="grid grid-cols-2 gap-3">
+          {/* Alignment */}
+          <div className="space-y-2">
+            <label className="text-xs font-medium text-muted-foreground">Alignment</label>
+            <select
+              value={block.props.align || 'left'}
+              onChange={(e) => updateField('align', e.target.value)}
+              className="w-full h-9 px-3 text-xs rounded-md border border-input bg-background"
+            >
+              <option value="left">Left</option>
+              <option value="center">Center</option>
+              <option value="right">Right</option>
+              <option value="justify">Justify</option>
+            </select>
+          </div>
+
+          {/* Size */}
+          <div className="space-y-2">
+            <label className="text-xs font-medium text-muted-foreground">Font Size</label>
+            <select
+              value={block.props.size || 'base'}
+              onChange={(e) => updateField('size', e.target.value)}
+              className="w-full h-9 px-3 text-xs rounded-md border border-input bg-background"
+            >
+              <option value="xs">Extra Small</option>
+              <option value="sm">Small</option>
+              <option value="base">Base</option>
+              <option value="lg">Large</option>
+              <option value="xl">Extra Large</option>
+              <option value="2xl">2X Large</option>
+              <option value="3xl">3X Large</option>
+            </select>
+          </div>
+
+          {/* Weight */}
+          <div className="space-y-2">
+            <label className="text-xs font-medium text-muted-foreground">Font Weight</label>
+            <select
+              value={block.props.weight || 'normal'}
+              onChange={(e) => updateField('weight', e.target.value)}
+              className="w-full h-9 px-3 text-xs rounded-md border border-input bg-background"
+            >
+              <option value="light">Light</option>
+              <option value="normal">Normal</option>
+              <option value="medium">Medium</option>
+              <option value="semibold">Semibold</option>
+              <option value="bold">Bold</option>
+            </select>
+          </div>
+
+          {/* Spacing */}
+          <div className="space-y-2">
+            <label className="text-xs font-medium text-muted-foreground">Line Height</label>
+            <select
+              value={block.props.spacing || 'normal'}
+              onChange={(e) => updateField('spacing', e.target.value)}
+              className="w-full h-9 px-3 text-xs rounded-md border border-input bg-background"
+            >
+              <option value="tight">Tight</option>
+              <option value="normal">Normal</option>
+              <option value="relaxed">Relaxed</option>
+              <option value="loose">Loose</option>
+            </select>
+          </div>
+        </div>
+
+        {/* Color and Max Width */}
+        <div className="grid grid-cols-2 gap-3 mt-3">
+          {/* Text Color */}
+          <div className="space-y-2">
+            <label className="text-xs font-medium text-muted-foreground">Text Color (Optional)</label>
+            <div className="flex gap-2">
+              <input
+                type="color"
+                value={block.props.color || '#000000'}
+                onChange={(e) => updateField('color', e.target.value)}
+                className="w-12 h-9 rounded border cursor-pointer"
+              />
+              <Input
+                type="text"
+                value={block.props.color || ''}
+                onChange={(e) => updateField('color', e.target.value)}
+                placeholder="Default"
+                className="h-9 text-xs"
+              />
+            </div>
+          </div>
+
+          {/* Max Width */}
+          <div className="space-y-2">
+            <label className="text-xs font-medium text-muted-foreground">Max Width</label>
+            <select
+              value={block.props.maxWidth || 'md'}
+              onChange={(e) => updateField('maxWidth', e.target.value)}
+              className="w-full h-9 px-3 text-xs rounded-md border border-input bg-background"
+            >
+              <option value="sm">Small (384px)</option>
+              <option value="md">Medium (448px)</option>
+              <option value="lg">Large (512px)</option>
+              <option value="xl">Extra Large (576px)</option>
+              <option value="2xl">2X Large (672px)</option>
+              <option value="full">Full Width</option>
+            </select>
+          </div>
+        </div>
+      </div>
+    </div>
   )
 }
 

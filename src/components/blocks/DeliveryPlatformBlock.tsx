@@ -115,7 +115,7 @@ export function DeliveryPlatformBlock({
   // Render grid layout
   if (layout === 'grid') {
     return (
-      <div className={cn('w-full max-w-md mx-auto', className)}>
+      <div className={cn('w-full max-w-md mx-auto py-6', className)}>
         {showPromos && (
           <div className="mb-4 text-center">
             <p className="text-sm font-semibold text-gray-700 dark:text-gray-300">
@@ -144,7 +144,7 @@ export function DeliveryPlatformBlock({
   // Render carousel layout
   if (layout === 'carousel') {
     return (
-      <div className={cn('w-full max-w-md mx-auto', className)}>
+      <div className={cn('w-full max-w-md mx-auto py-6', className)}>
         <div className="overflow-x-auto pb-4 scrollbar-hide">
           <div className="flex gap-3 min-w-max">
             {activePlatforms.map(([platform, config]) => {
@@ -184,7 +184,7 @@ export function DeliveryPlatformBlock({
 
   // Default: buttons layout
   return (
-    <div className={cn('w-full max-w-md mx-auto space-y-3', className)}>
+    <div className={cn('w-full max-w-md mx-auto space-y-3 py-6', className)}>
       {showPromos && (
         <div className="text-center mb-4">
           <p className="text-sm font-semibold text-gray-700 dark:text-gray-300">

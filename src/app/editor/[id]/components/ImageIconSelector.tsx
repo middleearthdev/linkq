@@ -62,51 +62,23 @@ export function ImageIconSelector({
     )
   }
 
-  // If in image mode (premium only)
+  // If in image mode (premium only) - Use Media Library
   if (mode === 'image') {
-    return (
-      <div className="fixed inset-0 z-50 flex items-end md:items-center justify-center bg-black/50 backdrop-blur-sm p-0 md:p-4">
-        <div className="relative w-full md:max-w-lg h-[60vh] md:h-auto bg-card dark:bg-[#2A3441] rounded-t-2xl md:rounded-xl shadow-2xl border border-border overflow-hidden">
-          {/* Header */}
-          <div className="sticky top-0 z-10 bg-card dark:bg-[#2A3441] border-b border-border p-3 md:p-4">
-            <div className="flex items-center justify-between">
-              <h2 className="text-base md:text-lg font-semibold text-foreground dark:text-white">
-                Upload Image
-              </h2>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => {
-                  handleReset()
-                  onClose()
-                }}
-                className="h-8 w-8 p-0"
-              >
-                <X className="h-4 w-4" />
-              </Button>
-            </div>
-          </div>
+    // Import MediaLibraryPicker dynamically to avoid circular deps
+    const MediaLibraryPicker = require('@/components/media/MediaLibraryPicker').MediaLibraryPicker
 
-          {/* Content */}
-          <div className="p-4 md:p-6">
-            <div className="text-center py-12">
-              <ImageIcon className="h-16 w-16 mx-auto mb-4 text-muted-foreground opacity-50" />
-              <p className="text-sm text-muted-foreground mb-6">
-                Image upload akan tersedia segera!
-              </p>
-              <Button
-                onClick={() => {
-                  handleReset()
-                  onClose()
-                }}
-                variant="outline"
-              >
-                Kembali
-              </Button>
-            </div>
-          </div>
-        </div>
-      </div>
+    return (
+      <MediaLibraryPicker
+        isOpen={true}
+        onClose={() => {
+          handleReset()
+          onClose()
+        }}
+        onSelect={handleImageSelect}
+        category="thumbnail"
+        currentImage={currentImage}
+        title="Select Image"
+      />
     )
   }
 

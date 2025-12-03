@@ -209,7 +209,9 @@ export function DynamicTemplateRenderer({
       <BackgroundRenderer backgroundKey={backgroundKey} className={`min-h-screen ${className}`}>
         <div className="relative container mx-auto px-4 py-8" style={{ zIndex: 2, ...getContainerStyle() }}>
           <div className="max-w-2xl mx-auto template-content">
-            {siteData.blocks.map(renderBlock)}
+            {siteData.blocks
+              .filter(block => block.props?._isVisible !== false)
+              .map(renderBlock)}
 
             {/* LinkQ Branding */}
             {!isPreview && (
@@ -253,7 +255,9 @@ export function DynamicTemplateRenderer({
 
       <div className="relative container mx-auto px-4 py-8" style={{ zIndex: 2 }}>
         <div className="max-w-2xl mx-auto template-content">
-          {siteData.blocks.map(renderBlock)}
+          {siteData.blocks
+            .filter(block => block.props?._isVisible !== false)
+            .map(renderBlock)}
 
           {/* LinkQ Branding */}
           {!isPreview && (

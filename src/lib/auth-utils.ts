@@ -64,15 +64,46 @@ export async function requireAdmin() {
   return user
 }
 
+// Subscription tier checks
+export type SubscriptionTier = 'FREE' | 'STARTER' | 'PRO'
+
+export function hasStarterOrPro(user: any): boolean {
+  return user?.plan === 'STARTER' || user?.plan === 'PRO'
+}
+
+export function hasPro(user: any): boolean {
+  return user?.plan === 'PRO'
+}
+
+export function canUploadCustomImages(user: any): boolean {
+  // STARTER and PRO users can upload custom images
+  return hasStarterOrPro(user)
+}
+
+export function canUseCustomDomain(user: any): boolean {
+  // Only PRO users can use custom domains
+  return hasPro(user)
+}
+
+export function canRemoveBranding(user: any): boolean {
+  // Only PRO users can remove branding
+  return hasPro(user)
+}
+
+export function canUseAdvancedAnalytics(user: any): boolean {
+  // Only PRO users can access advanced analytics
+  return hasPro(user)
+}
+
 // API route helpers
 export async function getSessionUser() {
   try {
     const session = await auth.api.getSession({
       headers: await import('next/headers').then(h => h.headers())
     })
-    
+
     if (!session?.user?.id) return null
-    
+
     return await db.user.findUnique({
       where: { id: session.user.id },
       select: {

@@ -71,7 +71,8 @@ model User {
   purchases     UserTemplatePurchase[]
   sessions      Session[]
   accounts      Account[]
-  
+  mediaLibrary  MediaLibrary[]
+
   @@map("users")
   @@index([email])
   @@index([plan])
@@ -438,8 +439,57 @@ model Webhook {
   
   // Relations
   site        UserSite @relation(fields: [siteId], references: [id], onDelete: Cascade)
-  
+
   @@map("webhooks")
   @@index([siteId])
   @@index([isActive])
+}
+
+// ====================================
+// MEDIA LIBRARY SYSTEM
+// ====================================
+
+model MediaLibrary {
+  id        String   @id @default(cuid())
+  userId    String   // Owner of the asset
+
+  // 🔑 FILE IDENTITY
+  hash      String   // SHA-256 hash (first 16 chars)
+  url       String   // CDN URL
+  filename  String   // Original filename
+
+  // 📏 FILE METADATA
+  size      Int      // Bytes
+  width     Int?     // Pixels
+  height    Int?     // Pixels
+  type      String   // MIME type (image/webp, etc)
+
+  // 🎨 OPTIONAL METADATA
+  title     String?  // User-defined name
+  altText   String?  // Accessibility text
+  tags      String[] @default([]) // ["logo", "product", etc]
+  category  String?  @default("general") // 'avatar', 'thumbnail', 'gallery', 'product'
+
+  // 📊 USAGE TRACKING (Critical!)
+  usageCount  Int      @default(0)     // Number of places using this
+  usedIn      String[] @default([])    // Array of reference IDs (format: "blockType:blockId:field")
+
+  // 🗑️ CLEANUP MANAGEMENT
+  markedForDeletion Boolean  @default(false)
+  deleteAfter       DateTime? // Grace period expiry (default 30 days after marking)
+
+  // ⏱️ TIMESTAMPS
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+  lastUsedAt DateTime?
+
+  // Relations
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, hash]) // Same user can't have duplicate
+  @@index([userId])
+  @@index([markedForDeletion, deleteAfter]) // For cleanup job
+  @@index([hash]) // For deduplication lookup
+  @@index([category]) // Filter by category
+  @@map("media_library")
 }

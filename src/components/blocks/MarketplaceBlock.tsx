@@ -174,7 +174,7 @@ export function MarketplaceBlock({
   // Store links layout
   if (layout === 'store-links') {
     return (
-      <div className={cn('w-full max-w-md mx-auto space-y-3', className)}>
+      <div className={cn('w-full max-w-md mx-auto space-y-3 py-6', className)}>
         <div className="text-center mb-4">
           <p className="text-sm font-semibold text-gray-700 dark:text-gray-300">
             🛒 Belanja di Official Store Kami
@@ -191,7 +191,7 @@ export function MarketplaceBlock({
   // Product grid layout
   if (layout === 'product-grid') {
     return (
-      <div className={cn('w-full max-w-2xl mx-auto space-y-4', className)}>
+      <div className={cn('w-full max-w-2xl mx-auto space-y-4 py-6', className)}>
         {activeStores.length > 0 && (
           <div className="flex gap-2 justify-center flex-wrap">
             {activeStores.map(([marketplace, config]) => {
@@ -233,7 +233,7 @@ export function MarketplaceBlock({
 
   // Mixed layout (stores + products)
   return (
-    <div className={cn('w-full max-w-2xl mx-auto space-y-6', className)}>
+    <div className={cn('w-full max-w-2xl mx-auto space-y-6 py-6', className)}>
       {/* Store buttons */}
       {activeStores.length > 0 && (
         <div className="space-y-3">

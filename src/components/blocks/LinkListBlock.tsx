@@ -9,6 +9,7 @@ import { LinkListBlockProps } from '@/types'
 import { cn, trackEvent } from '@/lib/utils'
 import { generateCustomStyle, isValidStyle, LinkListStyle } from '@/lib/link-list-styles'
 import { ExternalLink, Plus, Trash2 } from 'lucide-react'
+import { getIconByName } from '@/lib/icon-registry'
 
 interface LinkListBlockComponentProps {
   props: LinkListBlockProps
@@ -43,6 +44,29 @@ export function LinkListBlock({ props, className, isEditing = false }: LinkListB
     }
   }
 
+  // Helper to render icon or image
+  const renderIconOrImage = (item: any) => {
+    // Priority: custom image > icon
+    if (item.image) {
+      return (
+        <div className="w-6 h-6 sm:w-8 sm:h-8 rounded-md overflow-hidden flex-shrink-0">
+          <img
+            src={item.image}
+            alt={item.title}
+            className="w-full h-full object-cover"
+          />
+        </div>
+      )
+    }
+
+    if (item.icon) {
+      const IconComponent = getIconByName(item.icon)
+      return <IconComponent className="w-5 h-5 sm:w-6 sm:h-6" />
+    }
+
+    return null
+  }
+
   const renderLink = (item: any, index: number) => {
     const baseClasses = cn(
       'w-full flex items-center justify-center gap-2 sm:gap-3 transition-all duration-200',
@@ -52,18 +76,21 @@ export function LinkListBlock({ props, className, isEditing = false }: LinkListB
 
     const content = (
       <>
-        {item.thumbnail && (
+        {/* Custom uploaded image (STARTER/PRO feature) */}
+        {item.image && (
           <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-md sm:rounded-lg overflow-hidden flex-shrink-0 border border-gray-200">
             <img
-              src={item.thumbnail}
+              src={item.image}
               alt={item.title}
               className="w-full h-full object-cover"
             />
           </div>
         )}
-        {item.icon && (
-          <span className="text-base sm:text-lg">{item.icon}</span>
-        )}
+        {/* Icon (fallback or if no image) */}
+        {!item.image && item.icon && (() => {
+          const IconComponent = getIconByName(item.icon)
+          return <IconComponent className="w-5 h-5 sm:w-6 sm:h-6" />
+        })()}
         <span className="font-medium text-sm sm:text-base truncate">{item.title}</span>
         <ExternalLink className="w-3.5 h-3.5 sm:w-4 sm:h-4 opacity-70 flex-shrink-0" />
       </>
@@ -166,14 +193,7 @@ export function LinkListBlock({ props, className, isEditing = false }: LinkListB
 
           {/* Content */}
           <div className="relative z-10 flex items-center justify-center gap-2">
-            {item.icon && (
-              <span 
-                className="text-base"
-                style={{
-                  color: 'var(--custom-text-color)'
-                }}
-              >{item.icon}</span>
-            )}
+            {renderIconOrImage(item)}
             <span 
               className="font-semibold text-sm tracking-wide"
               style={{
@@ -345,14 +365,7 @@ export function LinkListBlock({ props, className, isEditing = false }: LinkListB
 
           {/* Content */}
           <div className="relative z-10 flex items-center justify-center gap-2">
-            {item.icon && (
-              <span 
-                className="text-base"
-                style={{
-                  color: 'var(--custom-text-color)'
-                }}
-              >{item.icon}</span>
-            )}
+            {renderIconOrImage(item)}
             <span 
               className="font-medium text-sm"
               style={{
@@ -637,14 +650,7 @@ export function LinkListBlock({ props, className, isEditing = false }: LinkListB
 
           {/* Content */}
           <div className="relative z-10 flex items-center justify-center gap-2">
-            {item.icon && (
-              <span 
-                className="text-base"
-                style={{
-                  color: 'var(--custom-text-color)'
-                }}
-              >{item.icon}</span>
-            )}
+            {renderIconOrImage(item)}
             <span 
               className="font-medium text-sm" 
               style={{ 
