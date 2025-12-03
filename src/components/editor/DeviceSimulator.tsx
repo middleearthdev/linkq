@@ -13,7 +13,7 @@ export function DeviceSimulator({ siteData, className = '' }: DeviceSimulatorPro
   return (
     <div className={`h-full flex flex-col ${className}`}>
       {/* Header - Minimal Spacing */}
-      <div className="px-4 py-1 border-b border-border/50 bg-card/80 backdrop-blur-sm flex-shrink-0 mb-0">
+      {/* <div className="px-4 py-1 border-b border-border/50 bg-card/80 backdrop-blur-sm flex-shrink-0 mb-0">
         <div className="flex items-center gap-2">
           <div className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse" />
           <h3 className="text-foreground dark:text-white font-semibold text-xs">Live Preview</h3>
@@ -23,7 +23,7 @@ export function DeviceSimulator({ siteData, className = '' }: DeviceSimulatorPro
           <span className="text-xs font-medium text-primary">iPhone 14 Pro</span>
           <div className="ml-auto text-xs text-muted-foreground">393×852</div>
         </div>
-      </div>
+      </div> */}
 
       {/* Mobile Frame */}
       <div className="flex-1 flex items-start justify-center -mt-16 pb-0 bg-gradient-to-b from-card to-secondary/20 overflow-hidden">

@@ -10,7 +10,7 @@
 
 "use client"
 
-import { use, useState } from "react"
+import { use, useState, useEffect } from "react"
 import { useSession } from "@/lib/auth-client"
 import Link from "next/link"
 import { SiteLoadingScreen } from "@/components/ui/cool-loading"
@@ -24,23 +24,33 @@ import { useDragDrop } from "./hooks/useDragDrop"
 // Components
 import { EditorHeader } from "./components/EditorHeader"
 import { EditorSidebar } from "./components/EditorSidebar"
-import { MobileTabs } from "./components/MobileTabs"
+import { BottomNavigation } from "./components/BottomNavigation"
 import { EditTab } from "./components/EditTab"
-import { DesignTab } from "./components/DesignTab"
+import { DesignTabEnhanced } from "./components/DesignTabEnhanced"
 import { SettingsTab } from "./components/SettingsTab"
 import { BlockPicker } from "./components/BlockPicker"
-import { MobilePreview } from "./components/MobilePreview"
 import { Button } from "@/components/ui/button"
+
+// Import enhancements CSS
+import "@/styles/editor-enhancements.css"
 
 export default function EditorPage({ params }: { params: Promise<{ id: string }> }) {
   const resolvedParams = use(params)
   const { data: session, isPending } = useSession()
 
-  // UI State
-  const [activeTab, setActiveTab] = useState<'edit' | 'design' | 'settings'>('edit')
-  const [showPreview, setShowPreview] = useState(false)
+  // UI State - Now includes 'preview' tab
+  const [activeTab, setActiveTab] = useState<'edit' | 'design' | 'preview' | 'settings'>('edit')
   const [showTemplatePicker, setShowTemplatePicker] = useState(false)
   const [showBlockPicker, setShowBlockPicker] = useState(false)
+  const [isMobile, setIsMobile] = useState(false)
+
+  // Detect mobile viewport
+  useEffect(() => {
+    const checkMobile = () => setIsMobile(window.innerWidth < 1024)
+    checkMobile()
+    window.addEventListener('resize', checkMobile)
+    return () => window.removeEventListener('resize', checkMobile)
+  }, [])
 
   // Site Data Management
   const {
@@ -203,7 +213,8 @@ export default function EditorPage({ params }: { params: Promise<{ id: string }>
     }
   }
 
-  const handleFontChange = (font: string) => {
+  const handleFontChange = (font: string | undefined) => {
+    if (!font) return
     updateSiteData({
       ...siteData,
       dataJson: {
@@ -229,26 +240,22 @@ export default function EditorPage({ params }: { params: Promise<{ id: string }>
 
       {/* Main Content Area */}
       <div className="flex-1 flex flex-col min-h-0">
-        {/* Mobile Header */}
+        {/* Mobile Header - Clean, No Tabs */}
         <EditorHeader
           variant="mobile"
           handle={siteData.handle}
           status={siteData.status as any}
           saving={saving}
           publishing={publishing}
-          showPreview={showPreview}
+          showPreview={activeTab === 'preview'}
           onSave={saveSite}
           onPublish={publishSite}
-          onTogglePreview={() => setShowPreview(!showPreview)}
+          onTogglePreview={() => setActiveTab(activeTab === 'preview' ? 'edit' : 'preview')}
+          canUndo={canUndo}
+          canRedo={canRedo}
+          onUndo={undo}
+          onRedo={redo}
         />
-
-        {/* Mobile Tabs */}
-        <div className="lg:hidden">
-          <MobileTabs
-            activeTab={activeTab}
-            onTabChange={setActiveTab}
-          />
-        </div>
 
         {/* Desktop Header */}
         <EditorHeader
@@ -257,24 +264,17 @@ export default function EditorPage({ params }: { params: Promise<{ id: string }>
           status={siteData.status as any}
           saving={saving}
           publishing={publishing}
-          showPreview={showPreview}
+          showPreview={false}
           onSave={saveSite}
           onPublish={publishSite}
-          onTogglePreview={() => setShowPreview(!showPreview)}
+          onTogglePreview={() => {}}
         />
 
         {/* Main Content - 2 Column Layout (Center + Preview) */}
         <main className="flex-1 flex flex-col lg:flex-row min-h-0">
-          {/* Mobile Preview Mode */}
-          <MobilePreview
-            isOpen={showPreview}
-            onClose={() => setShowPreview(false)}
-            siteData={siteData.dataJson}
-          />
-
           {/* Center Content Area - Scrollable */}
-          <div className="flex-1 min-h-0 overflow-y-auto scrollbar-thin lg:border-r lg:border-border">
-            <div className="p-4 lg:p-6 max-w-3xl mx-auto pb-20">
+          <div className={`flex-1 min-h-0 overflow-y-auto scrollbar-thin lg:border-r lg:border-border ${activeTab === 'preview' && isMobile ? 'hidden' : ''}`}>
+            <div className="p-4 lg:p-6 lg:pl-8 max-w-4xl pb-24 lg:pb-6">
               {activeTab === 'edit' && (
                 <EditTab
                   blocks={siteData.dataJson.blocks}
@@ -304,11 +304,12 @@ export default function EditorPage({ params }: { params: Promise<{ id: string }>
               )}
 
               {activeTab === 'design' && (
-                <DesignTab
+                <DesignTabEnhanced
                   templateName={siteData.templateVersion.template.name}
                   currentFont={siteData.dataJson.meta.font}
                   onFontChange={handleFontChange}
                   onOpenTemplatePicker={() => setShowTemplatePicker(true)}
+                  isMobile={isMobile}
                 />
               )}
 
@@ -316,12 +317,27 @@ export default function EditorPage({ params }: { params: Promise<{ id: string }>
             </div>
           </div>
 
-          {/* Preview Panel - Desktop Only */}
-          <DeviceSimulator
-            siteData={siteData.dataJson}
-            className="hidden lg:block lg:w-[420px] lg:flex-shrink-0 min-h-0"
-          />
+          {/* Preview Panel - Mobile (Full Screen) & Desktop (Sidebar) */}
+          {activeTab === 'preview' && isMobile ? (
+            <div className="flex-1 min-h-0 overflow-y-auto bg-secondary/20 flex items-center justify-center p-4">
+              <DeviceSimulator
+                siteData={siteData.dataJson}
+                className="w-full max-w-md"
+              />
+            </div>
+          ) : (
+            <DeviceSimulator
+              siteData={siteData.dataJson}
+              className="hidden lg:block lg:w-[420px] lg:flex-shrink-0 min-h-0"
+            />
+          )}
         </main>
+
+        {/* Bottom Navigation Bar - Mobile Only */}
+        <BottomNavigation
+          activeTab={activeTab}
+          onTabChange={setActiveTab}
+        />
       </div>
 
       {/* Template Picker Fullscreen */}

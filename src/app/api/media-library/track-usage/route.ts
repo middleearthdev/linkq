@@ -8,19 +8,19 @@
 
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
-import { getCurrentUser } from '@/lib/auth-client'
+import { getCurrentUser } from '@/lib/auth-utils'
 
 const GRACE_PERIOD_DAYS = 30
 
 export async function POST(req: NextRequest) {
   try {
     // 1. Authenticate user
-    const session = await getCurrentUser(req)
-    if (!session?.user?.id) {
+    const user = await getCurrentUser()
+    if (!user?.id) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    const userId = session.user.id
+    const userId = user.id
 
     // 2. Parse request body
     const body = await req.json()

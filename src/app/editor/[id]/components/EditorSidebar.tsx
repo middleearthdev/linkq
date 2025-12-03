@@ -5,15 +5,20 @@
 
 import { Button } from "@/components/ui/button"
 import { ThemeToggle } from "@/components/theme/ThemeToggle"
-import { ArrowLeft, Edit3, Palette, Settings } from "lucide-react"
+import {
+  ArrowLeft,
+  Edit3,
+  Palette,
+  Settings
+} from "lucide-react"
 import Link from "next/link"
 
 interface EditorSidebarProps {
   handle: string
   status: 'DRAFT' | 'PUBLISHED'
   linkCount: number
-  activeTab: 'edit' | 'design' | 'settings'
-  onTabChange: (tab: 'edit' | 'design' | 'settings') => void
+  activeTab: 'edit' | 'design' | 'settings' | 'preview'
+  onTabChange: (tab: 'edit' | 'design' | 'settings' | 'preview') => void
 }
 
 export function EditorSidebar({
@@ -46,8 +51,9 @@ export function EditorSidebar({
       </div>
 
       {/* Sidebar Menu with Enhanced Styling */}
-      <nav className="flex-1 p-4">
+      <nav className="flex-1 p-4 overflow-y-auto scrollbar-thin">
         <div className="space-y-2">
+          {/* Links Tab */}
           <button
             onClick={() => onTabChange('edit')}
             className={`w-full flex items-center gap-3 px-4 py-3 text-sm font-medium rounded-xl transition-all duration-200 ${
@@ -65,6 +71,7 @@ export function EditorSidebar({
             )}
           </button>
 
+          {/* Design Tab */}
           <button
             onClick={() => onTabChange('design')}
             className={`w-full flex items-center gap-3 px-4 py-3 text-sm font-medium rounded-xl transition-all duration-200 ${
@@ -82,6 +89,7 @@ export function EditorSidebar({
             )}
           </button>
 
+          {/* Settings Tab */}
           <button
             onClick={() => onTabChange('settings')}
             className={`w-full flex items-center gap-3 px-4 py-3 text-sm font-medium rounded-xl transition-all duration-200 ${
