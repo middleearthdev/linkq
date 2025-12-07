@@ -10,6 +10,8 @@ import { Checkbox } from "@/components/ui/checkbox"
 import { Plus, Trash2, GripVertical, Link2, Settings, Smartphone, Sparkles, Eye, EyeOff, Copy, ChevronDown, ChevronUp, Hash, ImageIcon, CheckSquare, Undo2, Redo2, Package, ShoppingBag, Edit3, Search, Grid2x2, Grid3x3, Share2, MessageCircle, UtensilsCrossed, Store } from "lucide-react"
 import { getIconByName } from "./IconPicker"
 import { ImageIconSelector } from "./ImageIconSelector"
+import WhatsAppEditorDialog from "./dialog/WhatsAppEditorDialog"
+import BioEditorDialog from "./dialog/BioEditorDialog"
 
 interface Block {
   id: string
@@ -103,14 +105,12 @@ function BioBlockCard({
           {/* Toggle Switch */}
           <button
             onClick={onToggleBioBlock}
-            className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors flex-shrink-0 ml-2 ${
-              hasBioBlock ? 'bg-primary' : 'bg-gray-300 dark:bg-gray-600'
-            }`}
+            className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors flex-shrink-0 ml-2 ${hasBioBlock ? 'bg-primary' : 'bg-gray-300 dark:bg-gray-600'
+              }`}
           >
             <span
-              className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
-                hasBioBlock ? 'translate-x-6' : 'translate-x-1'
-              }`}
+              className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${hasBioBlock ? 'translate-x-6' : 'translate-x-1'
+                }`}
             />
           </button>
         </div>
@@ -137,198 +137,7 @@ function BioBlockCard({
   )
 }
 
-// Bio Editor Dialog - Fullscreen
-function BioEditorDialog({
-  bioBlock,
-  onUpdateBlock,
-  onClose
-}: {
-  bioBlock: Block
-  onUpdateBlock: (blockId: string, newProps: any) => void
-  onClose: () => void
-}) {
-  const updateBioField = (field: string, value: any) => {
-    onUpdateBlock(bioBlock.id, {
-      ...bioBlock.props,
-      [field]: value
-    })
-  }
 
-  // Keyboard shortcuts
-  useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') onClose()
-      if ((e.metaKey || e.ctrlKey) && e.key === 's') {
-        e.preventDefault()
-        onClose()
-      }
-    }
-    window.addEventListener('keydown', handleKeyDown)
-    return () => window.removeEventListener('keydown', handleKeyDown)
-  }, [onClose])
-
-  return (
-    <div className="fixed inset-0 z-50 bg-background flex flex-col animate-in fade-in slide-in-from-bottom-4 duration-300">
-      {/* Header */}
-      <div className="flex-shrink-0 border-b bg-gradient-to-r from-blue-500/5 via-purple-500/5 to-pink-500/5">
-        <div className="px-4 py-3 flex items-center justify-between gap-3">
-          <div className="flex items-center gap-3 min-w-0 flex-1">
-            <div className="p-2 rounded-lg bg-gradient-to-br from-blue-500 to-purple-500 flex-shrink-0">
-              <Settings className="h-5 w-5 text-white" />
-            </div>
-            <div className="min-w-0 flex-1">
-              <h2 className="font-bold text-base sm:text-lg truncate">Bio Editor</h2>
-              <p className="text-xs text-muted-foreground">
-                Edit your profile information
-              </p>
-            </div>
-          </div>
-
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={onClose}
-            className="h-9 w-9 p-0 flex-shrink-0"
-            title="Close (Esc)"
-          >
-            <Copy className="h-4 w-4 rotate-45" />
-          </Button>
-        </div>
-      </div>
-
-      {/* Content */}
-      <div className="flex-1 overflow-y-auto">
-        <div className="max-w-2xl mx-auto p-4 sm:p-6 space-y-6">
-          {/* Avatar Section */}
-          <div className="space-y-4">
-            <h3 className="text-sm font-semibold text-muted-foreground">Profile Picture</h3>
-
-            {/* Avatar Preview */}
-            <div className="flex items-center gap-4">
-              <div className="w-20 h-20 rounded-full overflow-hidden border-4 border-blue-500/30 bg-gradient-to-br from-blue-500/20 to-purple-500/20 flex items-center justify-center flex-shrink-0">
-                {bioBlock.props.avatar ? (
-                  <img
-                    src={bioBlock.props.avatar}
-                    alt={bioBlock.props.name}
-                    className="w-full h-full object-cover"
-                  />
-                ) : (
-                  <Settings className="h-10 w-10 text-blue-500/50" />
-                )}
-              </div>
-              <div className="flex-1">
-                <Input
-                  value={bioBlock.props.avatar || ''}
-                  onChange={(e) => updateBioField('avatar', e.target.value)}
-                  placeholder="https://example.com/avatar.jpg"
-                  className="h-10"
-                />
-                <p className="text-[10px] text-muted-foreground mt-1.5">
-                  Paste your image URL (JPG, PNG, WebP)
-                </p>
-              </div>
-            </div>
-
-            {/* Show Avatar Toggle */}
-            <div className="flex items-center justify-between p-3 rounded-lg bg-secondary/50 border">
-              <div>
-                <span className="text-sm font-medium">Show Avatar</span>
-                <p className="text-xs text-muted-foreground">Display profile picture on your page</p>
-              </div>
-              <button
-                onClick={() => updateBioField('showAvatar', !bioBlock.props.showAvatar)}
-                className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
-                  bioBlock.props.showAvatar ? 'bg-primary' : 'bg-gray-300'
-                }`}
-              >
-                <span
-                  className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
-                    bioBlock.props.showAvatar ? 'translate-x-6' : 'translate-x-1'
-                  }`}
-                />
-              </button>
-            </div>
-          </div>
-
-          {/* Name Section */}
-          <div className="space-y-3">
-            <h3 className="text-sm font-semibold text-muted-foreground">Name</h3>
-            <Input
-              value={bioBlock.props.name || ''}
-              onChange={(e) => updateBioField('name', e.target.value)}
-              placeholder="Your Name"
-              className="h-11 text-base"
-            />
-          </div>
-
-          {/* Bio Section */}
-          <div className="space-y-3">
-            <div className="flex items-center justify-between">
-              <h3 className="text-sm font-semibold text-muted-foreground">Bio</h3>
-              <span className="text-xs text-muted-foreground">
-                {(bioBlock.props.description || '').length} / 160
-              </span>
-            </div>
-            <textarea
-              value={bioBlock.props.description || ''}
-              onChange={(e) => updateBioField('description', e.target.value)}
-              placeholder="Tell people about yourself..."
-              className="w-full h-32 px-4 py-3 text-sm rounded-lg border bg-background resize-none"
-              maxLength={160}
-            />
-            <p className="text-xs text-muted-foreground">
-              A short description about yourself (max 160 characters)
-            </p>
-          </div>
-
-          {/* Preview Card */}
-          <div className="space-y-3">
-            <h3 className="text-sm font-semibold text-muted-foreground">Preview</h3>
-            <div className="p-6 rounded-xl border-2 bg-gradient-to-br from-blue-500/5 to-purple-500/5">
-              <div className="flex flex-col items-center text-center space-y-3">
-                {bioBlock.props.showAvatar && (
-                  <div className="w-24 h-24 rounded-full overflow-hidden border-4 border-white shadow-lg">
-                    {bioBlock.props.avatar ? (
-                      <img
-                        src={bioBlock.props.avatar}
-                        alt={bioBlock.props.name}
-                        className="w-full h-full object-cover"
-                      />
-                    ) : (
-                      <div className="w-full h-full bg-gradient-to-br from-blue-500/20 to-purple-500/20 flex items-center justify-center">
-                        <Settings className="h-12 w-12 text-blue-500/50" />
-                      </div>
-                    )}
-                  </div>
-                )}
-                <div>
-                  <h4 className="text-xl font-bold">
-                    {bioBlock.props.name || 'Your Name'}
-                  </h4>
-                  <p className="text-sm text-muted-foreground mt-2">
-                    {bioBlock.props.description || 'Tell people about yourself'}
-                  </p>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Footer */}
-      <div className="flex-shrink-0 border-t bg-card p-4">
-        <div className="max-w-2xl mx-auto flex items-center justify-between gap-3">
-          <p className="text-xs text-muted-foreground">
-            Press <kbd className="px-1.5 py-0.5 rounded bg-secondary text-xs">Esc</kbd> or <kbd className="px-1.5 py-0.5 rounded bg-secondary text-xs">⌘S</kbd> to close
-          </p>
-          <Button onClick={onClose} className="min-w-[100px]">
-            Done
-          </Button>
-        </div>
-      </div>
-    </div>
-  )
-}
 
 // WhatsApp Business Card Component - Similar to Bio Block
 function WhatsAppBusinessCard({
@@ -380,14 +189,12 @@ function WhatsAppBusinessCard({
           {/* Toggle Switch */}
           <button
             onClick={onToggleWhatsAppBlock}
-            className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors flex-shrink-0 ml-2 ${
-              hasWhatsAppBlock ? 'bg-primary' : 'bg-gray-300 dark:bg-gray-600'
-            }`}
+            className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors flex-shrink-0 ml-2 ${hasWhatsAppBlock ? 'bg-primary' : 'bg-gray-300 dark:bg-gray-600'
+              }`}
           >
             <span
-              className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
-                hasWhatsAppBlock ? 'translate-x-6' : 'translate-x-1'
-              }`}
+              className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${hasWhatsAppBlock ? 'translate-x-6' : 'translate-x-1'
+                }`}
             />
           </button>
         </div>
@@ -414,219 +221,7 @@ function WhatsAppBusinessCard({
   )
 }
 
-// WhatsApp Editor Dialog - Fullscreen
-function WhatsAppEditorDialog({
-  whatsappBlock,
-  onUpdateBlock,
-  onClose
-}: {
-  whatsappBlock: Block
-  onUpdateBlock: (blockId: string, newProps: any) => void
-  onClose: () => void
-}) {
-  // Auto-format phone number untuk Indonesia
-  const formatPhoneNumber = (phone: string): string => {
-    // Remove all non-numeric characters
-    const cleaned = phone.replace(/\D/g, '')
 
-    // Handle empty input
-    if (!cleaned) return ''
-
-    // Auto-format berdasarkan pattern
-    if (cleaned.startsWith('08')) {
-      // 08xxx → +628xxx
-      return '+62' + cleaned.substring(1)
-    } else if (cleaned.startsWith('628')) {
-      // 628xxx → +628xxx
-      return '+' + cleaned
-    } else if (cleaned.startsWith('62')) {
-      // 62xxx → +62xxx
-      return '+' + cleaned
-    } else if (cleaned.startsWith('8')) {
-      // 8xxx → +628xxx
-      return '+62' + cleaned
-    }
-
-    // Return as is with + prefix if doesn't match pattern
-    return cleaned.startsWith('+') ? cleaned : '+' + cleaned
-  }
-
-  const updateField = (field: string, value: any) => {
-    // Auto-format phone number on blur
-    if (field === 'phoneNumber' && value) {
-      value = formatPhoneNumber(value)
-    }
-
-    onUpdateBlock(whatsappBlock.id, {
-      ...whatsappBlock.props,
-      [field]: value
-    })
-  }
-
-  // Keyboard shortcuts
-  useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') onClose()
-      if ((e.metaKey || e.ctrlKey) && e.key === 's') {
-        e.preventDefault()
-        onClose()
-      }
-    }
-    window.addEventListener('keydown', handleKeyDown)
-    return () => window.removeEventListener('keydown', handleKeyDown)
-  }, [onClose])
-
-  return (
-    <div className="fixed inset-0 z-50 bg-background flex flex-col animate-in fade-in slide-in-from-bottom-4 duration-300">
-      {/* Header */}
-      <div className="flex-shrink-0 border-b bg-gradient-to-r from-green-500/5 via-emerald-500/5 to-teal-500/5">
-        <div className="px-4 py-3 flex items-center justify-between gap-3">
-          <div className="flex items-center gap-3 min-w-0 flex-1">
-            <div className="p-2 rounded-lg bg-gradient-to-br from-green-500 to-emerald-500 flex-shrink-0">
-              <MessageCircle className="h-5 w-5 text-white" />
-            </div>
-            <div className="min-w-0 flex-1">
-              <h2 className="font-bold text-base sm:text-lg truncate">WhatsApp Business</h2>
-              <p className="text-xs text-muted-foreground">
-                Configure your floating chat button
-              </p>
-            </div>
-          </div>
-
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={onClose}
-            className="h-9 w-9 p-0 flex-shrink-0"
-            title="Close (Esc)"
-          >
-            <Copy className="h-4 w-4 rotate-45" />
-          </Button>
-        </div>
-      </div>
-
-      {/* Content */}
-      <div className="flex-1 overflow-y-auto">
-        <div className="max-w-2xl mx-auto p-4 sm:p-6 space-y-6">
-          {/* Phone Number */}
-          <div className="space-y-2">
-            <label className="text-sm font-semibold text-muted-foreground">Phone Number</label>
-            <Input
-              value={whatsappBlock.props.phoneNumber || ''}
-              onChange={(e) => onUpdateBlock(whatsappBlock.id, { ...whatsappBlock.props, phoneNumber: e.target.value })}
-              onBlur={(e) => updateField('phoneNumber', e.target.value)}
-              placeholder="081234567890"
-              className="h-10"
-            />
-            <p className="text-xs text-muted-foreground">
-              Type 08xxx and it will auto-format to +628xxx when you finish typing
-            </p>
-          </div>
-
-          {/* Pre-filled Message */}
-          <div className="space-y-2">
-            <label className="text-sm font-semibold text-muted-foreground">Pre-filled Message (Optional)</label>
-            <textarea
-              value={whatsappBlock.props.message || ''}
-              onChange={(e) => updateField('message', e.target.value)}
-              placeholder="Hello! I have a question..."
-              className="w-full h-24 px-3 py-2 text-sm rounded-md border border-input bg-background resize-none focus:outline-none focus:ring-2 focus:ring-ring"
-            />
-            <p className="text-xs text-muted-foreground">
-              This message will be pre-filled when users click the button
-            </p>
-          </div>
-
-          {/* Button Text */}
-          <div className="space-y-2">
-            <label className="text-sm font-semibold text-muted-foreground">Button Text</label>
-            <Input
-              value={whatsappBlock.props.buttonText || 'Chat via WhatsApp'}
-              onChange={(e) => updateField('buttonText', e.target.value)}
-              placeholder="Chat via WhatsApp"
-              className="h-10"
-            />
-          </div>
-
-          {/* Business Name (Optional) */}
-          <div className="space-y-2">
-            <label className="text-sm font-semibold text-muted-foreground">Business Name (Optional)</label>
-            <Input
-              value={whatsappBlock.props.businessName || ''}
-              onChange={(e) => updateField('businessName', e.target.value)}
-              placeholder="Your Business"
-              className="h-10"
-            />
-            <p className="text-xs text-muted-foreground">
-              Shows as a badge above the button
-            </p>
-          </div>
-
-          {/* FAB Position */}
-          <div className="space-y-2">
-            <label className="text-sm font-semibold text-muted-foreground">Button Position</label>
-            <div className="grid grid-cols-2 gap-3">
-              <button
-                onClick={() => updateField('fabPosition', 'bottom-right')}
-                className={`p-3 rounded-lg border-2 transition-all ${
-                  whatsappBlock.props.fabPosition === 'bottom-right' || !whatsappBlock.props.fabPosition
-                    ? 'border-primary bg-primary/10'
-                    : 'border-border hover:border-border/80'
-                }`}
-              >
-                <div className="text-sm font-medium">Bottom Right</div>
-                <div className="text-xs text-muted-foreground mt-1">Default position</div>
-              </button>
-              <button
-                onClick={() => updateField('fabPosition', 'bottom-left')}
-                className={`p-3 rounded-lg border-2 transition-all ${
-                  whatsappBlock.props.fabPosition === 'bottom-left'
-                    ? 'border-primary bg-primary/10'
-                    : 'border-border hover:border-border/80'
-                }`}
-              >
-                <div className="text-sm font-medium">Bottom Left</div>
-                <div className="text-xs text-muted-foreground mt-1">Alternative position</div>
-              </button>
-            </div>
-          </div>
-
-          {/* Enable Pulse Animation */}
-          <div className="flex items-center justify-between p-3 rounded-lg bg-secondary/50 border">
-            <div>
-              <span className="text-sm font-medium">Pulse Animation</span>
-              <p className="text-xs text-muted-foreground">Animated ring to attract attention</p>
-            </div>
-            <button
-              onClick={() => updateField('enablePulse', !whatsappBlock.props.enablePulse)}
-              className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
-                whatsappBlock.props.enablePulse !== false ? 'bg-primary' : 'bg-gray-300'
-              }`}
-            >
-              <span
-                className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
-                  whatsappBlock.props.enablePulse !== false ? 'translate-x-6' : 'translate-x-1'
-                }`}
-              />
-            </button>
-          </div>
-        </div>
-      </div>
-
-      {/* Footer */}
-      <div className="flex-shrink-0 border-t bg-secondary/30 p-4">
-        <div className="max-w-2xl mx-auto flex items-center justify-between gap-3">
-          <p className="text-xs text-muted-foreground">
-            Press <kbd className="px-1.5 py-0.5 rounded bg-secondary text-xs">Esc</kbd> or <kbd className="px-1.5 py-0.5 rounded bg-secondary text-xs">⌘S</kbd> to close
-          </p>
-          <Button onClick={onClose} className="min-w-[100px]">
-            Done
-          </Button>
-        </div>
-      </div>
-    </div>
-  )
-}
 
 export function EditTab({
   blocks,
@@ -846,27 +441,15 @@ export function EditTab({
         </Button>
       </div>
 
-      {/* Special Blocks Settings - Bio & WhatsApp */}
-      <div className="space-y-4 p-4 rounded-xl bg-gradient-to-br from-purple-500/10 to-pink-500/10 border-2 border-purple-500/30">
-        <div className="flex items-center gap-2 mb-3">
-          <Sparkles className="h-5 w-5 text-purple-500" />
-          <h3 className="text-sm font-semibold text-foreground dark:text-white">Special Features</h3>
-        </div>
-
-        {/* Bio Block Card */}
+      {/* Blocks Settings - Bio  */}
+      <div>
         <BioBlockCard
           bioBlock={bioBlock}
           onToggleBioBlock={onToggleBioBlock}
           onUpdateBlock={onUpdateBlock}
         />
-
-        {/* WhatsApp Business Card */}
-        <WhatsAppBusinessCard
-          whatsappBlock={blocks.find(b => b.type === 'whatsapp-business')}
-          onToggleWhatsAppBlock={onToggleWhatsAppBlock}
-          onUpdateBlock={onUpdateBlock}
-        />
       </div>
+
 
       {/* All Blocks Section - Exclude Bio & WhatsApp */}
       {editableBlocks.length > 0 ? (
@@ -1052,17 +635,17 @@ export function EditTab({
 
                     {/* Placeholder for other block types */}
                     {block.type !== 'link-list' &&
-                     block.type !== 'product-catalog' &&
-                     block.type !== 'social-icons' &&
-                     block.type !== 'delivery-platform' &&
-                     block.type !== 'marketplace' &&
-                     block.type !== 'text' && (
-                      <div className="px-3 pb-3">
-                        <p className="text-xs text-muted-foreground">
-                          Edit via preview panel →
-                        </p>
-                      </div>
-                    )}
+                      block.type !== 'product-catalog' &&
+                      block.type !== 'social-icons' &&
+                      block.type !== 'delivery-platform' &&
+                      block.type !== 'marketplace' &&
+                      block.type !== 'text' && (
+                        <div className="px-3 pb-3">
+                          <p className="text-xs text-muted-foreground">
+                            Edit via preview panel →
+                          </p>
+                        </div>
+                      )}
                   </>
                 )}
               </div>
@@ -1075,6 +658,21 @@ export function EditTab({
           <p>No blocks yet. Click "Add Block" to get started!</p>
         </div>
       )}
+
+      {/* Special Blocks Settings - Bio & WhatsApp */}
+      <div className="space-y-4 p-4 rounded-xl bg-gradient-to-br from-purple-500/10 to-pink-500/10 border-2 border-purple-500/30">
+        <div className="flex items-center gap-2 mb-3">
+          <Sparkles className="h-5 w-5 text-purple-500" />
+          <h3 className="text-sm font-semibold text-foreground dark:text-white">Special Features</h3>
+        </div>
+
+        {/* WhatsApp Business Card */}
+        <WhatsAppBusinessCard
+          whatsappBlock={blocks.find(b => b.type === 'whatsapp-business')}
+          onToggleWhatsAppBlock={onToggleWhatsAppBlock}
+          onUpdateBlock={onUpdateBlock}
+        />
+      </div>
 
       {/* Floating Action Button - Mobile Only */}
       <button
@@ -1652,19 +1250,16 @@ function ProductLayoutDialog({
           {/* Grid Option */}
           <button
             onClick={() => onSelectLayout('small')}
-            className={`w-full p-4 rounded-xl border-2 transition-all text-left ${
-              currentColumns === 'small'
-                ? 'border-purple-600 bg-purple-50 dark:bg-purple-950/30'
-                : 'border-border hover:border-purple-300 hover:bg-secondary/50'
-            }`}
+            className={`w-full p-4 rounded-xl border-2 transition-all text-left ${currentColumns === 'small'
+              ? 'border-purple-600 bg-purple-50 dark:bg-purple-950/30'
+              : 'border-border hover:border-purple-300 hover:bg-secondary/50'
+              }`}
           >
             <div className="flex items-start gap-4">
-              <div className={`p-3 rounded-lg ${
-                currentColumns === 'small' ? 'bg-purple-600' : 'bg-secondary'
-              }`}>
-                <Grid3x3 className={`h-6 w-6 ${
-                  currentColumns === 'small' ? 'text-white' : 'text-muted-foreground'
-                }`} />
+              <div className={`p-3 rounded-lg ${currentColumns === 'small' ? 'bg-purple-600' : 'bg-secondary'
+                }`}>
+                <Grid3x3 className={`h-6 w-6 ${currentColumns === 'small' ? 'text-white' : 'text-muted-foreground'
+                  }`} />
               </div>
               <div className="flex-1">
                 <h4 className="font-semibold text-base mb-1">Grid</h4>
@@ -1692,19 +1287,16 @@ function ProductLayoutDialog({
           {/* Large Option */}
           <button
             onClick={() => onSelectLayout('medium')}
-            className={`w-full p-4 rounded-xl border-2 transition-all text-left ${
-              currentColumns === 'medium'
-                ? 'border-purple-600 bg-purple-50 dark:bg-purple-950/30'
-                : 'border-border hover:border-purple-300 hover:bg-secondary/50'
-            }`}
+            className={`w-full p-4 rounded-xl border-2 transition-all text-left ${currentColumns === 'medium'
+              ? 'border-purple-600 bg-purple-50 dark:bg-purple-950/30'
+              : 'border-border hover:border-purple-300 hover:bg-secondary/50'
+              }`}
           >
             <div className="flex items-start gap-4">
-              <div className={`p-3 rounded-lg ${
-                currentColumns === 'medium' ? 'bg-purple-600' : 'bg-secondary'
-              }`}>
-                <Grid2x2 className={`h-6 w-6 ${
-                  currentColumns === 'medium' ? 'text-white' : 'text-muted-foreground'
-                }`} />
+              <div className={`p-3 rounded-lg ${currentColumns === 'medium' ? 'bg-purple-600' : 'bg-secondary'
+                }`}>
+                <Grid2x2 className={`h-6 w-6 ${currentColumns === 'medium' ? 'text-white' : 'text-muted-foreground'
+                  }`} />
               </div>
               <div className="flex-1">
                 <h4 className="font-semibold text-base mb-1">Large</h4>
@@ -2114,61 +1706,61 @@ function ProductCatalogManager({
         <div className="max-w-4xl mx-auto p-4 space-y-3">
           {/* Bulk Actions Header */}
           {block.props.items?.length > 1 && (
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 p-2.5 rounded-lg bg-gradient-to-r from-purple-500/10 to-pink-500/10 border border-purple-500/20">
-          <div className="flex items-center gap-1.5 md:gap-2 flex-wrap">
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => setBulkMode(!bulkMode)}
-              className="h-8 md:h-7 text-[11px] md:text-xs px-2 md:px-3"
-            >
-              <CheckSquare className={`h-3 w-3 md:h-3.5 md:w-3.5 mr-1 ${bulkMode ? 'text-primary' : ''}`} />
-              <span className="hidden sm:inline">{bulkMode ? 'Exit Bulk' : 'Bulk Select'}</span>
-              <span className="sm:hidden">{bulkMode ? 'Exit' : 'Select'}</span>
-            </Button>
-
-            {bulkMode && (
-              <>
-                <div className="h-4 w-px bg-border hidden sm:block" />
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 p-2.5 rounded-lg bg-gradient-to-r from-purple-500/10 to-pink-500/10 border border-purple-500/20">
+              <div className="flex items-center gap-1.5 md:gap-2 flex-wrap">
                 <Button
                   variant="ghost"
                   size="sm"
-                  onClick={selectAllProducts}
+                  onClick={() => setBulkMode(!bulkMode)}
                   className="h-8 md:h-7 text-[11px] md:text-xs px-2 md:px-3"
                 >
-                  All
+                  <CheckSquare className={`h-3 w-3 md:h-3.5 md:w-3.5 mr-1 ${bulkMode ? 'text-primary' : ''}`} />
+                  <span className="hidden sm:inline">{bulkMode ? 'Exit Bulk' : 'Bulk Select'}</span>
+                  <span className="sm:hidden">{bulkMode ? 'Exit' : 'Select'}</span>
                 </Button>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={deselectAllProducts}
-                  className="h-8 md:h-7 text-[11px] md:text-xs px-2 md:px-3"
-                >
-                  None
-                </Button>
-              </>
-            )}
-          </div>
 
-          {bulkMode && selectedProducts.size > 0 && (
-            <div className="flex items-center gap-2">
-              <span className="text-[11px] md:text-xs text-muted-foreground">
-                {selectedProducts.size} selected
-              </span>
-              <Button
-                variant="destructive"
-                size="sm"
-                onClick={deleteSelectedProducts}
-                className="h-8 md:h-7 text-[11px] md:text-xs px-2 md:px-3"
-              >
-                <Trash2 className="h-3 w-3 md:h-3.5 md:w-3.5 mr-1" />
-                <span className="hidden sm:inline">Delete Selected</span>
-                <span className="sm:hidden">Delete</span>
-              </Button>
+                {bulkMode && (
+                  <>
+                    <div className="h-4 w-px bg-border hidden sm:block" />
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={selectAllProducts}
+                      className="h-8 md:h-7 text-[11px] md:text-xs px-2 md:px-3"
+                    >
+                      All
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={deselectAllProducts}
+                      className="h-8 md:h-7 text-[11px] md:text-xs px-2 md:px-3"
+                    >
+                      None
+                    </Button>
+                  </>
+                )}
+              </div>
+
+              {bulkMode && selectedProducts.size > 0 && (
+                <div className="flex items-center gap-2">
+                  <span className="text-[11px] md:text-xs text-muted-foreground">
+                    {selectedProducts.size} selected
+                  </span>
+                  <Button
+                    variant="destructive"
+                    size="sm"
+                    onClick={deleteSelectedProducts}
+                    className="h-8 md:h-7 text-[11px] md:text-xs px-2 md:px-3"
+                  >
+                    <Trash2 className="h-3 w-3 md:h-3.5 md:w-3.5 mr-1" />
+                    <span className="hidden sm:inline">Delete Selected</span>
+                    <span className="sm:hidden">Delete</span>
+                  </Button>
+                </div>
+              )}
             </div>
           )}
-        </div>
-      )}
 
           {/* No Results Message */}
           {filteredProducts.length === 0 && searchQuery && (
@@ -2203,17 +1795,15 @@ function ProductCatalogManager({
                 } : undefined}
                 onTouchMove={!bulkMode ? (e) => handleProductTouchMove(e) : undefined}
                 onTouchEnd={!bulkMode ? handleProductTouchEnd : undefined}
-                className={`group flex flex-col gap-2 p-2.5 rounded-lg border transition-all ${
-                  bulkMode ? 'cursor-pointer' : ''
-                } ${
-                  draggedProductIndex === originalIndex
+                className={`group flex flex-col gap-2 p-2.5 rounded-lg border transition-all ${bulkMode ? 'cursor-pointer' : ''
+                  } ${draggedProductIndex === originalIndex
                     ? 'opacity-50 scale-[0.98] border-purple-500 bg-purple-50'
                     : dragOverProductIndex === originalIndex
                       ? 'border-purple-500 bg-purple-500/5 scale-[1.01]'
                       : selectedProducts.has(originalIndex)
                         ? 'border-purple-500 bg-purple-500/10'
                         : 'border-border bg-card hover:border-purple-200 hover:shadow-sm'
-                }`}
+                  }`}
                 onClick={bulkMode ? () => toggleProductSelection(originalIndex) : undefined}
               >
                 {/* Header Row: Checkbox/Drag + Image + Info + Actions */}
@@ -2273,13 +1863,12 @@ function ProductCatalogManager({
                         Rp {product.price?.toLocaleString('id-ID') || '0'}
                       </span>
                       <span className="text-[10px]">•</span>
-                      <span className={`text-[10px] font-medium ${
-                        product.stock === 'available' ? 'text-green-600' :
+                      <span className={`text-[10px] font-medium ${product.stock === 'available' ? 'text-green-600' :
                         product.stock === 'low' ? 'text-orange-600' :
-                        'text-red-600'
-                      }`}>
+                          'text-red-600'
+                        }`}>
                         {product.stock === 'available' ? '✓' :
-                         product.stock === 'low' ? '⚠' : '✗'}
+                          product.stock === 'low' ? '⚠' : '✗'}
                       </span>
                       {product.category && (
                         <>
@@ -2412,11 +2001,10 @@ function ProductCatalogManager({
                             newItems[originalIndex] = { ...product, stock: 'available' }
                             onUpdateBlock(block.id, { items: newItems })
                           }}
-                          className={`flex-1 h-7 rounded-md text-[10px] font-medium transition-all ${
-                            product.stock === 'available'
-                              ? 'bg-primary text-primary-foreground shadow-sm'
-                              : 'bg-secondary text-secondary-foreground border border-border hover:bg-secondary/80'
-                          }`}
+                          className={`flex-1 h-7 rounded-md text-[10px] font-medium transition-all ${product.stock === 'available'
+                            ? 'bg-primary text-primary-foreground shadow-sm'
+                            : 'bg-secondary text-secondary-foreground border border-border hover:bg-secondary/80'
+                            }`}
                         >
                           ✓ Stock
                         </button>
@@ -2428,11 +2016,10 @@ function ProductCatalogManager({
                             newItems[originalIndex] = { ...product, stock: 'low' }
                             onUpdateBlock(block.id, { items: newItems })
                           }}
-                          className={`flex-1 h-7 rounded-md text-[10px] font-medium transition-all ${
-                            product.stock === 'low'
-                              ? 'bg-primary text-primary-foreground shadow-sm'
-                              : 'bg-secondary text-secondary-foreground border border-border hover:bg-secondary/80'
-                          }`}
+                          className={`flex-1 h-7 rounded-md text-[10px] font-medium transition-all ${product.stock === 'low'
+                            ? 'bg-primary text-primary-foreground shadow-sm'
+                            : 'bg-secondary text-secondary-foreground border border-border hover:bg-secondary/80'
+                            }`}
                         >
                           ⚠ Low
                         </button>
@@ -2444,11 +2031,10 @@ function ProductCatalogManager({
                             newItems[originalIndex] = { ...product, stock: 'out' }
                             onUpdateBlock(block.id, { items: newItems })
                           }}
-                          className={`flex-1 h-7 rounded-md text-[10px] font-medium transition-all ${
-                            product.stock === 'out'
-                              ? 'bg-primary text-primary-foreground shadow-sm'
-                              : 'bg-secondary text-secondary-foreground border border-border hover:bg-secondary/80'
-                          }`}
+                          className={`flex-1 h-7 rounded-md text-[10px] font-medium transition-all ${product.stock === 'out'
+                            ? 'bg-primary text-primary-foreground shadow-sm'
+                            : 'bg-secondary text-secondary-foreground border border-border hover:bg-secondary/80'
+                            }`}
                         >
                           ✗ Out
                         </button>
@@ -2824,120 +2410,119 @@ function DeliveryPlatformManager({
       <div className="flex-1 overflow-y-auto">
         <div className="max-w-2xl mx-auto p-4 sm:p-6 space-y-6">
 
-        {/* Add Platform Buttons */}
-        <div className="space-y-2 mb-3">
-          {DELIVERY_PLATFORMS.map(platform => {
-            const isActive = !!platforms[platform.key]
-            return (
-              <div
-                key={platform.key}
-                className={`w-full p-3 rounded-lg border-2 transition-all flex items-center gap-3 ${
-                  isActive
+          {/* Add Platform Buttons */}
+          <div className="space-y-2 mb-3">
+            {DELIVERY_PLATFORMS.map(platform => {
+              const isActive = !!platforms[platform.key]
+              return (
+                <div
+                  key={platform.key}
+                  className={`w-full p-3 rounded-lg border-2 transition-all flex items-center gap-3 ${isActive
                     ? 'border-primary bg-primary/5'
                     : 'border-border hover:border-primary/50 hover:bg-secondary/50 cursor-pointer'
-                }`}
-                onClick={() => {
-                  if (!isActive) {
-                    updatePlatform(platform.key, 'url', '')
-                  }
-                }}
-              >
-                <span className="text-2xl">{platform.icon}</span>
-                <div className="flex-1 text-left">
-                  <div className="font-semibold text-sm">{platform.name}</div>
-                  <div className="text-xs text-muted-foreground">
-                    {isActive ? 'Configured ✓' : 'Click to add'}
+                    }`}
+                  onClick={() => {
+                    if (!isActive) {
+                      updatePlatform(platform.key, 'url', '')
+                    }
+                  }}
+                >
+                  <span className="text-2xl">{platform.icon}</span>
+                  <div className="flex-1 text-left">
+                    <div className="font-semibold text-sm">{platform.name}</div>
+                    <div className="text-xs text-muted-foreground">
+                      {isActive ? 'Configured ✓' : 'Click to add'}
+                    </div>
                   </div>
+                  {isActive && (
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        removePlatform(platform.key)
+                      }}
+                      className="p-1 hover:bg-destructive/20 rounded text-destructive transition-colors"
+                      type="button"
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </button>
+                  )}
                 </div>
-                {isActive && (
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation()
-                      removePlatform(platform.key)
-                    }}
-                    className="p-1 hover:bg-destructive/20 rounded text-destructive transition-colors"
-                    type="button"
-                  >
-                    <Trash2 className="h-4 w-4" />
-                  </button>
-                )}
-              </div>
-            )
-          })}
-        </div>
+              )
+            })}
+          </div>
 
-        {/* Platform Configuration */}
-        {Object.keys(platforms).map(platformKey => {
-          const platform = DELIVERY_PLATFORMS.find(p => p.key === platformKey)
-          if (!platform || !platforms[platformKey]) return null
+          {/* Platform Configuration */}
+          {Object.keys(platforms).map(platformKey => {
+            const platform = DELIVERY_PLATFORMS.find(p => p.key === platformKey)
+            if (!platform || !platforms[platformKey]) return null
 
-          const config = platforms[platformKey]
+            const config = platforms[platformKey]
 
-          return (
-            <div key={platformKey} className="p-3 rounded-lg bg-card border space-y-3 mb-2">
-              <div className="flex items-center gap-2 mb-2">
-                <span className="text-xl">{platform.icon}</span>
-                <h4 className="font-semibold text-sm">{platform.name}</h4>
-              </div>
+            return (
+              <div key={platformKey} className="p-3 rounded-lg bg-card border space-y-3 mb-2">
+                <div className="flex items-center gap-2 mb-2">
+                  <span className="text-xl">{platform.icon}</span>
+                  <h4 className="font-semibold text-sm">{platform.name}</h4>
+                </div>
 
-              <div className="space-y-2">
-                <label className="text-xs font-medium text-muted-foreground">Store/Menu URL</label>
-                <Input
-                  value={config.url || ''}
-                  onChange={(e) => updatePlatform(platformKey, 'url', e.target.value)}
-                  placeholder={`https://${platformKey}.com/your-store`}
-                  className="h-9 text-xs"
-                />
-              </div>
-
-              <div className="space-y-2">
-                <label className="text-xs font-medium text-muted-foreground">Merchant Name (Optional)</label>
-                <Input
-                  value={config.merchantName || ''}
-                  onChange={(e) => updatePlatform(platformKey, 'merchantName', e.target.value)}
-                  placeholder="Your Restaurant Name"
-                  className="h-9 text-xs"
-                />
-              </div>
-
-              <div className="grid grid-cols-2 gap-2">
                 <div className="space-y-2">
-                  <label className="text-xs font-medium text-muted-foreground">Rating (Optional)</label>
+                  <label className="text-xs font-medium text-muted-foreground">Store/Menu URL</label>
                   <Input
-                    type="number"
-                    step="0.1"
-                    min="0"
-                    max="5"
-                    value={config.rating || ''}
-                    onChange={(e) => updatePlatform(platformKey, 'rating', e.target.value)}
-                    placeholder="4.5"
+                    value={config.url || ''}
+                    onChange={(e) => updatePlatform(platformKey, 'url', e.target.value)}
+                    placeholder={`https://${platformKey}.com/your-store`}
                     className="h-9 text-xs"
                   />
                 </div>
+
                 <div className="space-y-2">
-                  <label className="text-xs font-medium text-muted-foreground">Badge</label>
-                  <select
-                    value={config.badge || ''}
-                    onChange={(e) => updatePlatform(platformKey, 'badge', e.target.value)}
-                    className="w-full h-9 px-3 text-xs rounded-md border border-input bg-background"
-                  >
-                    <option value="">None</option>
-                    <option value="official">Official</option>
-                    <option value="featured">Featured</option>
-                  </select>
+                  <label className="text-xs font-medium text-muted-foreground">Merchant Name (Optional)</label>
+                  <Input
+                    value={config.merchantName || ''}
+                    onChange={(e) => updatePlatform(platformKey, 'merchantName', e.target.value)}
+                    placeholder="Your Restaurant Name"
+                    className="h-9 text-xs"
+                  />
+                </div>
+
+                <div className="grid grid-cols-2 gap-2">
+                  <div className="space-y-2">
+                    <label className="text-xs font-medium text-muted-foreground">Rating (Optional)</label>
+                    <Input
+                      type="number"
+                      step="0.1"
+                      min="0"
+                      max="5"
+                      value={config.rating || ''}
+                      onChange={(e) => updatePlatform(platformKey, 'rating', e.target.value)}
+                      placeholder="4.5"
+                      className="h-9 text-xs"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-xs font-medium text-muted-foreground">Badge</label>
+                    <select
+                      value={config.badge || ''}
+                      onChange={(e) => updatePlatform(platformKey, 'badge', e.target.value)}
+                      className="w-full h-9 px-3 text-xs rounded-md border border-input bg-background"
+                    >
+                      <option value="">None</option>
+                      <option value="official">Official</option>
+                      <option value="featured">Featured</option>
+                    </select>
+                  </div>
                 </div>
               </div>
-            </div>
-          )
-        })}
+            )
+          })}
 
-        {Object.keys(platforms).length === 0 && (
-          <div className="text-center py-8">
-            <p className="text-sm text-muted-foreground">
-              No platforms added yet. Click a platform above to get started!
-            </p>
-          </div>
-        )}
+          {Object.keys(platforms).length === 0 && (
+            <div className="text-center py-8">
+              <p className="text-sm text-muted-foreground">
+                No platforms added yet. Click a platform above to get started!
+              </p>
+            </div>
+          )}
         </div>
       </div>
 
@@ -3099,153 +2684,152 @@ function MarketplaceManager({
       <div className="flex-1 overflow-y-auto">
         <div className="max-w-2xl mx-auto p-4 sm:p-6 space-y-6">
 
-        {/* Add Store Buttons */}
-        <div className="space-y-2">
-          {MARKETPLACES.map(marketplace => {
-            const isActive = !!stores[marketplace.key]
-            return (
-              <div
-                key={marketplace.key}
-                className={`w-full p-3 rounded-lg border-2 transition-all flex items-center gap-3 ${
-                  isActive
+          {/* Add Store Buttons */}
+          <div className="space-y-2">
+            {MARKETPLACES.map(marketplace => {
+              const isActive = !!stores[marketplace.key]
+              return (
+                <div
+                  key={marketplace.key}
+                  className={`w-full p-3 rounded-lg border-2 transition-all flex items-center gap-3 ${isActive
                     ? 'border-primary bg-primary/5'
                     : 'border-border hover:border-primary/50 hover:bg-secondary/50 cursor-pointer'
-                }`}
-                onClick={() => {
-                  if (!isActive) {
-                    updateStore(marketplace.key, 'storeUrl', '')
-                  }
-                }}
-              >
-                <span className="text-2xl">{marketplace.icon}</span>
-                <div className="flex-1 text-left">
-                  <div className="font-semibold text-sm">{marketplace.name}</div>
-                  <div className="text-xs text-muted-foreground">
-                    {isActive ? 'Configured ✓' : 'Click to add'}
+                    }`}
+                  onClick={() => {
+                    if (!isActive) {
+                      updateStore(marketplace.key, 'storeUrl', '')
+                    }
+                  }}
+                >
+                  <span className="text-2xl">{marketplace.icon}</span>
+                  <div className="flex-1 text-left">
+                    <div className="font-semibold text-sm">{marketplace.name}</div>
+                    <div className="text-xs text-muted-foreground">
+                      {isActive ? 'Configured ✓' : 'Click to add'}
+                    </div>
+                  </div>
+                  {isActive && (
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        removeStore(marketplace.key)
+                      }}
+                      className="p-1 hover:bg-destructive/20 rounded text-destructive transition-colors"
+                      type="button"
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </button>
+                  )}
+                </div>
+              )
+            })}
+          </div>
+
+          {/* Store Configuration */}
+          {Object.keys(stores).map(storeKey => {
+            const marketplace = MARKETPLACES.find(m => m.key === storeKey)
+            if (!marketplace || !stores[storeKey]) return null
+
+            const config = stores[storeKey]
+
+            return (
+              <div key={storeKey} className="p-4 rounded-lg bg-card border space-y-4">
+                <div className="flex items-center gap-2 mb-2">
+                  <span className="text-xl">{marketplace.icon}</span>
+                  <h4 className="font-semibold text-sm">{marketplace.name}</h4>
+                </div>
+
+                <div className="space-y-2">
+                  <label className="text-sm font-semibold text-muted-foreground">Store URL</label>
+                  <Input
+                    value={config.storeUrl || ''}
+                    onChange={(e) => updateStore(storeKey, 'storeUrl', e.target.value)}
+                    placeholder={`https://${storeKey}.com/your-store`}
+                    className="h-10"
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <label className="text-sm font-semibold text-muted-foreground">Store Name (Optional)</label>
+                  <Input
+                    value={config.storeName || ''}
+                    onChange={(e) => updateStore(storeKey, 'storeName', e.target.value)}
+                    placeholder="Your Shop Name"
+                    className="h-10"
+                  />
+                </div>
+
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="space-y-2">
+                    <label className="text-sm font-semibold text-muted-foreground">Rating (Optional)</label>
+                    <Input
+                      type="number"
+                      step="0.1"
+                      min="0"
+                      max="5"
+                      value={config.rating || ''}
+                      onChange={(e) => updateStore(storeKey, 'rating', e.target.value)}
+                      placeholder="4.8"
+                      className="h-10"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-sm font-semibold text-muted-foreground">Followers (Optional)</label>
+                    <Input
+                      value={config.followers || ''}
+                      onChange={(e) => updateStore(storeKey, 'followers', e.target.value)}
+                      placeholder="10K"
+                      className="h-10"
+                    />
                   </div>
                 </div>
-                {isActive && (
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation()
-                      removeStore(marketplace.key)
-                    }}
-                    className="p-1 hover:bg-destructive/20 rounded text-destructive transition-colors"
-                    type="button"
+
+                <div className="space-y-2">
+                  <label className="text-sm font-semibold text-muted-foreground">Badge</label>
+                  <select
+                    value={config.badge || ''}
+                    onChange={(e) => updateStore(storeKey, 'badge', e.target.value)}
+                    className="w-full h-10 px-3 text-sm rounded-md border border-input bg-background"
                   >
-                    <Trash2 className="h-4 w-4" />
-                  </button>
-                )}
+                    <option value="">None</option>
+                    {storeKey === 'tokopedia' && (
+                      <>
+                        <option value="official">Official Store</option>
+                        <option value="power-merchant">Power Merchant</option>
+                      </>
+                    )}
+                    {storeKey === 'shopee' && (
+                      <>
+                        <option value="star-seller">Star Seller</option>
+                        <option value="shopee-mall">Shopee Mall</option>
+                      </>
+                    )}
+                    {storeKey === 'tiktokshop' && (
+                      <option value="verified">Verified Seller</option>
+                    )}
+                  </select>
+                </div>
+
+                <div className="space-y-2">
+                  <label className="text-sm font-semibold text-muted-foreground">Review Count (Optional)</label>
+                  <Input
+                    value={config.reviewCount || ''}
+                    onChange={(e) => updateStore(storeKey, 'reviewCount', e.target.value)}
+                    placeholder="500"
+                    className="h-10"
+                  />
+                </div>
               </div>
             )
           })}
-        </div>
 
-        {/* Store Configuration */}
-        {Object.keys(stores).map(storeKey => {
-          const marketplace = MARKETPLACES.find(m => m.key === storeKey)
-          if (!marketplace || !stores[storeKey]) return null
-
-          const config = stores[storeKey]
-
-          return (
-            <div key={storeKey} className="p-4 rounded-lg bg-card border space-y-4">
-              <div className="flex items-center gap-2 mb-2">
-                <span className="text-xl">{marketplace.icon}</span>
-                <h4 className="font-semibold text-sm">{marketplace.name}</h4>
-              </div>
-
-              <div className="space-y-2">
-                <label className="text-sm font-semibold text-muted-foreground">Store URL</label>
-                <Input
-                  value={config.storeUrl || ''}
-                  onChange={(e) => updateStore(storeKey, 'storeUrl', e.target.value)}
-                  placeholder={`https://${storeKey}.com/your-store`}
-                  className="h-10"
-                />
-              </div>
-
-              <div className="space-y-2">
-                <label className="text-sm font-semibold text-muted-foreground">Store Name (Optional)</label>
-                <Input
-                  value={config.storeName || ''}
-                  onChange={(e) => updateStore(storeKey, 'storeName', e.target.value)}
-                  placeholder="Your Shop Name"
-                  className="h-10"
-                />
-              </div>
-
-              <div className="grid grid-cols-2 gap-3">
-                <div className="space-y-2">
-                  <label className="text-sm font-semibold text-muted-foreground">Rating (Optional)</label>
-                  <Input
-                    type="number"
-                    step="0.1"
-                    min="0"
-                    max="5"
-                    value={config.rating || ''}
-                    onChange={(e) => updateStore(storeKey, 'rating', e.target.value)}
-                    placeholder="4.8"
-                    className="h-10"
-                  />
-                </div>
-                <div className="space-y-2">
-                  <label className="text-sm font-semibold text-muted-foreground">Followers (Optional)</label>
-                  <Input
-                    value={config.followers || ''}
-                    onChange={(e) => updateStore(storeKey, 'followers', e.target.value)}
-                    placeholder="10K"
-                    className="h-10"
-                  />
-                </div>
-              </div>
-
-              <div className="space-y-2">
-                <label className="text-sm font-semibold text-muted-foreground">Badge</label>
-                <select
-                  value={config.badge || ''}
-                  onChange={(e) => updateStore(storeKey, 'badge', e.target.value)}
-                  className="w-full h-10 px-3 text-sm rounded-md border border-input bg-background"
-                >
-                  <option value="">None</option>
-                  {storeKey === 'tokopedia' && (
-                    <>
-                      <option value="official">Official Store</option>
-                      <option value="power-merchant">Power Merchant</option>
-                    </>
-                  )}
-                  {storeKey === 'shopee' && (
-                    <>
-                      <option value="star-seller">Star Seller</option>
-                      <option value="shopee-mall">Shopee Mall</option>
-                    </>
-                  )}
-                  {storeKey === 'tiktokshop' && (
-                    <option value="verified">Verified Seller</option>
-                  )}
-                </select>
-              </div>
-
-              <div className="space-y-2">
-                <label className="text-sm font-semibold text-muted-foreground">Review Count (Optional)</label>
-                <Input
-                  value={config.reviewCount || ''}
-                  onChange={(e) => updateStore(storeKey, 'reviewCount', e.target.value)}
-                  placeholder="500"
-                  className="h-10"
-                />
-              </div>
+          {Object.keys(stores).length === 0 && (
+            <div className="text-center py-8">
+              <p className="text-sm text-muted-foreground">
+                No stores added yet. Click a marketplace above to get started!
+              </p>
             </div>
-          )
-        })}
-
-        {Object.keys(stores).length === 0 && (
-          <div className="text-center py-8">
-            <p className="text-sm text-muted-foreground">
-              No stores added yet. Click a marketplace above to get started!
-            </p>
-          </div>
-        )}
+          )}
         </div>
       </div>
 
@@ -3614,11 +3198,10 @@ function SocialIconsManager({
                     key={platform.key}
                     onClick={() => !isAdded && addPlatform(platform.key)}
                     disabled={isAdded}
-                    className={`p-3 rounded-lg border-2 transition-all text-left ${
-                      isAdded
-                        ? 'opacity-50 cursor-not-allowed bg-secondary/50'
-                        : 'hover:border-primary hover:bg-primary/5 active:scale-95'
-                    }`}
+                    className={`p-3 rounded-lg border-2 transition-all text-left ${isAdded
+                      ? 'opacity-50 cursor-not-allowed bg-secondary/50'
+                      : 'hover:border-primary hover:bg-primary/5 active:scale-95'
+                      }`}
                   >
                     <div className="flex items-center gap-2">
                       <span className="text-2xl">{platform.icon}</span>
