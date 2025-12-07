@@ -44,6 +44,9 @@ export default function EditorPage({ params }: { params: Promise<{ id: string }>
   const [showBlockPicker, setShowBlockPicker] = useState(false)
   const [isMobile, setIsMobile] = useState(false)
 
+  // Store deleted bio block to preserve customization
+  const [deletedBioBlock, setDeletedBioBlock] = useState<any>(null)
+
   // Detect mobile viewport
   useEffect(() => {
     const checkMobile = () => setIsMobile(window.innerWidth < 1024)
@@ -104,6 +107,9 @@ export default function EditorPage({ params }: { params: Promise<{ id: string }>
   const handleToggleBioBlock = () => {
     const bioBlock = siteData.dataJson.blocks.find((b: any) => b.type === 'bio')
     if (bioBlock) {
+      // Store bio block before removing (to preserve customization)
+      setDeletedBioBlock(bioBlock)
+
       // Remove bio block
       const newBlocks = siteData.dataJson.blocks.filter((b: any) => b.type !== 'bio')
       updateSiteData({
@@ -114,28 +120,36 @@ export default function EditorPage({ params }: { params: Promise<{ id: string }>
         }
       })
     } else {
-      // Add bio block at the beginning
-      const newBioBlock = {
+      // Restore previously deleted bio block OR create new one
+      const bioToAdd = deletedBioBlock || {
         id: `block-bio-${Date.now()}`,
         type: 'bio',
         props: {
           name: 'Your Name',
-          description: 'Add your bio here',
+          bio: 'Add your bio here',  // Fixed: 'bio' not 'description'
           avatar: '',
           showAvatar: true,
           avatarSize: 'lg',
           avatarStyle: 'circle',
           textAlign: 'center',
-          nameStyle: 'default'
+          nameStyle: 'default',
+          spacing: 'normal',
+          bioStyle: 'default'
         }
       }
+
       updateSiteData({
         ...siteData,
         dataJson: {
           ...siteData.dataJson,
-          blocks: [newBioBlock, ...siteData.dataJson.blocks]
+          blocks: [bioToAdd, ...siteData.dataJson.blocks]
         }
       })
+
+      // Clear deletedBioBlock after restoring
+      if (deletedBioBlock) {
+        setDeletedBioBlock(null)
+      }
     }
   }
 
