@@ -77,7 +77,7 @@ export function TextBlock({ props, className, isEditing = false }: TextBlockComp
   return (
     <div
       className={cn(
-        'w-full py-4',
+        'w-full py-2',
         align === 'center' && 'flex justify-center',
         align === 'right' && 'flex justify-end',
         className
@@ -95,7 +95,7 @@ export function TextBlock({ props, className, isEditing = false }: TextBlockComp
           !content && isEditing && 'text-gray-400 italic'
         )}
         style={{
-          color: color || 'inherit',
+          color: 'var(--page-text-color, inherit)',
         }}
       >
         {content || (isEditing ? 'Enter your text here...' : '')}

@@ -24,83 +24,220 @@ interface FontPickerProps {
 }
 
 const POPULAR_FONTS = [
-  { 
+  // System Default
+  {
     name: 'Default',
     value: undefined,
     family: 'system-ui, -apple-system, sans-serif',
     category: 'System'
   },
-  { 
+
+  // Sans Serif - Modern & Clean
+  {
     name: 'Inter',
     value: 'Inter',
     family: '"Inter", sans-serif',
     category: 'Sans Serif'
   },
-  { 
+  {
     name: 'Poppins',
     value: 'Poppins',
     family: '"Poppins", sans-serif',
     category: 'Sans Serif'
   },
-  { 
+  {
     name: 'Roboto',
     value: 'Roboto',
     family: '"Roboto", sans-serif',
     category: 'Sans Serif'
   },
-  { 
+  {
     name: 'Montserrat',
     value: 'Montserrat',
     family: '"Montserrat", sans-serif',
     category: 'Sans Serif'
   },
-  { 
+  {
     name: 'Open Sans',
     value: 'Open Sans',
     family: '"Open Sans", sans-serif',
     category: 'Sans Serif'
   },
-  { 
+  {
     name: 'Lato',
     value: 'Lato',
     family: '"Lato", sans-serif',
     category: 'Sans Serif'
   },
-  { 
+  {
     name: 'Nunito',
     value: 'Nunito',
     family: '"Nunito", sans-serif',
     category: 'Sans Serif'
   },
-  { 
+  {
     name: 'Source Sans Pro',
     value: 'Source Sans Pro',
     family: '"Source Sans Pro", sans-serif',
     category: 'Sans Serif'
   },
-  { 
+  {
+    name: 'Raleway',
+    value: 'Raleway',
+    family: '"Raleway", sans-serif',
+    category: 'Sans Serif'
+  },
+  {
+    name: 'Work Sans',
+    value: 'Work Sans',
+    family: '"Work Sans", sans-serif',
+    category: 'Sans Serif'
+  },
+  {
+    name: 'DM Sans',
+    value: 'DM Sans',
+    family: '"DM Sans", sans-serif',
+    category: 'Sans Serif'
+  },
+  {
+    name: 'Manrope',
+    value: 'Manrope',
+    family: '"Manrope", sans-serif',
+    category: 'Sans Serif'
+  },
+
+  // Serif - Elegant & Classic
+  {
     name: 'Playfair Display',
     value: 'Playfair Display',
     family: '"Playfair Display", serif',
     category: 'Serif'
   },
-  { 
+  {
     name: 'Merriweather',
     value: 'Merriweather',
     family: '"Merriweather", serif',
     category: 'Serif'
   },
-  { 
+  {
+    name: 'Lora',
+    value: 'Lora',
+    family: '"Lora", serif',
+    category: 'Serif'
+  },
+  {
+    name: 'Crimson Text',
+    value: 'Crimson Text',
+    family: '"Crimson Text", serif',
+    category: 'Serif'
+  },
+  {
+    name: 'EB Garamond',
+    value: 'EB Garamond',
+    family: '"EB Garamond", serif',
+    category: 'Serif'
+  },
+  {
+    name: 'Cormorant',
+    value: 'Cormorant',
+    family: '"Cormorant", serif',
+    category: 'Serif'
+  },
+
+  // Monospace - Code & Tech
+  {
     name: 'JetBrains Mono',
     value: 'JetBrains Mono',
     family: '"JetBrains Mono", monospace',
     category: 'Monospace'
   },
-  { 
-    name: 'Cursive',
-    value: 'Cursive',
-    family: 'cursive',
-    category: 'Cursive'
+  {
+    name: 'Fira Code',
+    value: 'Fira Code',
+    family: '"Fira Code", monospace',
+    category: 'Monospace'
+  },
+  {
+    name: 'Source Code Pro',
+    value: 'Source Code Pro',
+    family: '"Source Code Pro", monospace',
+    category: 'Monospace'
+  },
+  {
+    name: 'IBM Plex Mono',
+    value: 'IBM Plex Mono',
+    family: '"IBM Plex Mono", monospace',
+    category: 'Monospace'
+  },
+  {
+    name: 'Space Mono',
+    value: 'Space Mono',
+    family: '"Space Mono", monospace',
+    category: 'Monospace'
+  },
+
+  // Handwriting & Script
+  {
+    name: 'Dancing Script',
+    value: 'Dancing Script',
+    family: '"Dancing Script", cursive',
+    category: 'Handwriting'
+  },
+  {
+    name: 'Pacifico',
+    value: 'Pacifico',
+    family: '"Pacifico", cursive',
+    category: 'Handwriting'
+  },
+  {
+    name: 'Caveat',
+    value: 'Caveat',
+    family: '"Caveat", cursive',
+    category: 'Handwriting'
+  },
+  {
+    name: 'Satisfy',
+    value: 'Satisfy',
+    family: '"Satisfy", cursive',
+    category: 'Handwriting'
+  },
+  {
+    name: 'Great Vibes',
+    value: 'Great Vibes',
+    family: '"Great Vibes", cursive',
+    category: 'Handwriting'
+  },
+
+  // Display - Bold & Unique
+  {
+    name: 'Bebas Neue',
+    value: 'Bebas Neue',
+    family: '"Bebas Neue", display',
+    category: 'Display'
+  },
+  {
+    name: 'Righteous',
+    value: 'Righteous',
+    family: '"Righteous", display',
+    category: 'Display'
+  },
+  {
+    name: 'Fredoka',
+    value: 'Fredoka',
+    family: '"Fredoka", display',
+    category: 'Display'
+  },
+  {
+    name: 'Bungee',
+    value: 'Bungee',
+    family: '"Bungee", display',
+    category: 'Display'
+  },
+  {
+    name: 'Archivo Black',
+    value: 'Archivo Black',
+    family: '"Archivo Black", display',
+    category: 'Display'
   }
 ]
 

@@ -3,8 +3,11 @@
  * Displays user's profile picture, name, and bio text
  */
 
+'use client'
+
+import { useState } from 'react'
 import Image from 'next/image'
-import { AvatarUpload } from '@/components/ui/avatar-upload'
+import { AvatarUploader } from '@/app/editor/[id]/components/AvatarUploader'
 import { Button } from '@/components/ui/button'
 import { BioBlockProps } from '@/types'
 import { cn } from '@/lib/utils'
@@ -80,7 +83,7 @@ export function BioBlock({ props, className, isEditing = false }: BioBlockCompon
   // Regular layout for all avatar styles
   return (
     <div className={cn(
-      'flex flex-col items-center p-6',
+      'flex flex-col items-center py-6',
       textAlign === 'center' && 'text-center',
       textAlign === 'left' && 'text-left items-start',
       textAlign === 'right' && 'text-right items-end',
@@ -128,7 +131,7 @@ export function BioBlock({ props, className, isEditing = false }: BioBlockCompon
       )}>
         <h1 className={cn(
           nameStyles[nameStyle as keyof typeof nameStyles],
-          'text-[var(--text-color)] leading-tight',
+          'text-[var(--title-color,var(--text-color))] leading-tight',
           'bio-name', // CSS class for template styling
           isEditing && 'outline-dashed outline-2 outline-blue-400 outline-offset-2'
         )}>
@@ -138,7 +141,7 @@ export function BioBlock({ props, className, isEditing = false }: BioBlockCompon
         {bio && (
           <p className={cn(
             bioStyles[bioStyle as keyof typeof bioStyles],
-            'text-[var(--text-secondary)] max-w-md mx-auto leading-relaxed tracking-wide',
+            'text-[var(--page-text-color,var(--text-secondary))] max-w-md mx-auto leading-relaxed tracking-wide',
             textAlign === 'left' && 'mx-0',
             textAlign === 'right' && 'ml-auto mr-0',
             bioStyle === 'quote' && textAlign === 'center' && 'mx-auto',
@@ -163,6 +166,8 @@ export function BioBlockEditor({
   onChange: (props: BioBlockProps) => void
   className?: string
 }) {
+  const [showAvatarPicker, setShowAvatarPicker] = useState(false)
+
   const handleChange = (field: keyof BioBlockProps, value: any) => {
     onChange({ ...props, [field]: value })
   }
@@ -199,16 +204,35 @@ export function BioBlockEditor({
         />
       </div>
 
-      {/* Avatar Upload */}
+      {/* Avatar Upload - New Advanced Picker */}
       <div>
         <label className="block text-sm font-medium mb-3">Profile Picture</label>
-        <AvatarUpload
+        {/* Avatar Preview */}
+        <div className="flex items-center gap-4 mb-3">
+          {props.avatar && (
+            <div className="w-16 h-16 rounded-full overflow-hidden border-2 border-border">
+              <img src={props.avatar} alt="Avatar" className="w-full h-full object-cover" />
+            </div>
+          )}
+          <Button
+            type="button"
+            variant="outline"
+            onClick={() => setShowAvatarPicker(true)}
+            className="flex-1"
+          >
+            {props.avatar ? 'Change Picture' : 'Choose Picture'}
+          </Button>
+        </div>
+      </div>
+
+      {/* Avatar Picker Modal */}
+      {showAvatarPicker && (
+        <AvatarUploader
           currentAvatar={props.avatar}
           onAvatarChange={(url) => handleChange('avatar', url)}
-          size="lg"
-          className="mb-3"
+          onClose={() => setShowAvatarPicker(false)}
         />
-      </div>
+      )}
 
       {/* Show Avatar Toggle */}
       <div className="flex items-center space-x-2">

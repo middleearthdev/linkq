@@ -6,13 +6,11 @@
 import { z } from 'zod'
 
 export type LinkListStyle =
-  | 'pill' | 'vintage'
-  | 'ticket' | 'brush' | 'neon' | 'origami' | 'pixel'
-  | 'hologram' | 'bubble' | 'cyberpunk' | 'sketch'
-  | 'metallic' | 'neon-outline'
-  | 'terminal'
+  | 'pill' | 'neon' | 'pixel'
+  | 'hologram' | 'bubble' | 'cyberpunk'
+  | 'metallic' | 'terminal'
   // Game-inspired styles (Round 1)
-  | 'rpg-fantasy' | 'battle-royale' | 'casual-game' | 'jrpg-anime' | 'dark-souls'
+  | 'rpg-fantasy' | 'battle-royale' | 'jrpg-anime' | 'dark-souls'
   // Game-inspired styles (Round 2)
   | 'arcade-retro' | 'racing-speed' | 'horror-glitch' | 'fighting-combo' | 'card-holo'
   // Game-inspired styles (Round 3)
@@ -136,13 +134,6 @@ export const STYLE_TEMPLATES: StyleTemplate[] = [
 
   // Creative Styles
   {
-    id: 'vintage',
-    name: 'Vintage',
-    preview: 'border-2 border-amber-800 bg-amber-50 text-amber-800',
-    category: 'creative',
-    description: 'Classic vintage design with double borders'
-  },
-  {
     id: 'neon',
     name: 'Neon',
     preview: 'rounded-lg bg-black border-2 border-pink-500 text-pink-400 shadow-[0_0_20px_rgba(236,72,153,0.3)]',
@@ -155,27 +146,6 @@ export const STYLE_TEMPLATES: StyleTemplate[] = [
     preview: 'bg-black border border-cyan-400 text-cyan-400 font-mono',
     category: 'creative',
     description: 'Futuristic cyberpunk aesthetic with scan lines'
-  },
-  {
-    id: 'ticket',
-    name: 'Ticket',
-    preview: 'bg-amber-800 text-white relative overflow-hidden',
-    category: 'creative',
-    description: 'Fun ticket-style with perforated edges'
-  },
-  {
-    id: 'brush',
-    name: 'Brush',
-    preview: 'bg-emerald-200 text-emerald-900',
-    category: 'creative',
-    description: 'Artistic brush stroke effect'
-  },
-  {
-    id: 'origami',
-    name: 'Origami',
-    preview: 'bg-gradient-to-br from-blue-50 to-blue-100 text-blue-700',
-    category: 'creative',
-    description: 'Paper-folded origami design'
   },
   {
     id: 'pixel',
@@ -199,25 +169,11 @@ export const STYLE_TEMPLATES: StyleTemplate[] = [
     description: 'Playful bubble design with highlights'
   },
   {
-    id: 'sketch',
-    name: 'Sketch',
-    preview: 'bg-white border-2 border-gray-800 text-gray-800',
-    category: 'creative',
-    description: 'Hand-drawn sketch aesthetic'
-  },
-  {
     id: 'metallic',
     name: 'Metallic',
     preview: 'bg-gradient-to-b from-gray-300 via-gray-400 to-gray-500 text-gray-800',
     category: 'creative',
     description: 'Shiny metallic surface effect'
-  },
-  {
-    id: 'neon-outline',
-    name: 'Neon Outline',
-    preview: 'bg-transparent border-2 border-cyan-400 text-cyan-400',
-    category: 'creative',
-    description: 'Outlined neon glow effect'
   },
   {
     id: 'terminal',
@@ -241,13 +197,6 @@ export const STYLE_TEMPLATES: StyleTemplate[] = [
     preview: 'bg-gradient-to-r from-slate-800 to-slate-900 border-l-4 border-cyan-400 text-white',
     category: 'game',
     description: 'Modern tactical shooter style with accent stripe'
-  },
-  {
-    id: 'casual-game',
-    name: 'Casual Game',
-    preview: 'bg-gradient-to-br from-pink-400 via-purple-400 to-blue-400 text-white rounded-3xl shadow-xl',
-    category: 'game',
-    description: 'Colorful, playful mobile game style with vibrant gradients'
   },
   {
     id: 'jrpg-anime',
@@ -814,11 +763,11 @@ export const generateCustomStyle = (customColors?: CustomColors): React.CSSPrope
 export const isFullyCustomizable = (styleId: LinkListStyle): boolean => {
   const fullyCustomizable: LinkListStyle[] = [
     'pill', 'neon', 'bubble',
-    'vintage', 'cyberpunk', 'ticket', 'brush', 'origami',
-    'pixel', 'hologram', 'sketch', 'metallic', 'neon-outline',
+    'cyberpunk',
+    'pixel', 'hologram', 'metallic',
     'terminal',
     // Game-inspired styles (Round 1)
-    'rpg-fantasy', 'battle-royale', 'casual-game', 'jrpg-anime', 'dark-souls',
+    'rpg-fantasy', 'battle-royale', 'jrpg-anime', 'dark-souls',
     // Game-inspired styles (Round 2)
     'arcade-retro', 'racing-speed', 'horror-glitch', 'fighting-combo', 'card-holo',
     // Game-inspired styles (Round 3)

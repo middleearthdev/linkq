@@ -1,7 +1,8 @@
 "use client"
 
+import { useMemo } from 'react'
 import { Smartphone } from 'lucide-react'
-import { DynamicTemplateRenderer } from '@/components/DynamicTemplateRenderer'
+import { DynamicTemplateRenderer, generateWallpaperStyle } from '@/components/DynamicTemplateRenderer'
 
 interface DeviceSimulatorProps {
   siteData: any
@@ -9,6 +10,15 @@ interface DeviceSimulatorProps {
 }
 
 export function DeviceSimulator({ siteData, className = '' }: DeviceSimulatorProps) {
+  // Generate wallpaper background style for scroll container
+  const scrollContainerStyle = useMemo(() => {
+    if (siteData?.meta?.wallpaper) {
+      return {
+        background: generateWallpaperStyle(siteData.meta.wallpaper)
+      }
+    }
+    return {}
+  }, [siteData?.meta?.wallpaper])
 
   return (
     <div className={`h-full flex flex-col ${className}`}>
@@ -56,7 +66,10 @@ export function DeviceSimulator({ siteData, className = '' }: DeviceSimulatorPro
               </div>
 
               {/* Content */}
-              <div className="h-[794px] overflow-y-auto scrollbar-thin">
+              <div
+                className="h-[794px] overflow-y-auto scrollbar-thin"
+                style={scrollContainerStyle}
+              >
                 <DynamicTemplateRenderer
                   siteData={siteData}
                   isPreview={true}

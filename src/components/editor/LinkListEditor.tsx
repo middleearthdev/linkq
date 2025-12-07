@@ -237,13 +237,6 @@ const getStyleColorRequirements = (styleId: string) => {
         { key: 'text', label: 'Text Color', description: 'Neon text color', category: 'basic' }
       ]
     },
-    'neon-outline': {
-      colors: [
-        { key: 'primary', label: 'Outline Color', description: 'Neon outline color', category: 'basic' },
-        { key: 'glow', label: 'Glow Effect', description: 'Outline glow color', category: 'effect' },
-        { key: 'text', label: 'Text Color', description: 'Outline text color', category: 'basic' }
-      ]
-    },
     'cyberpunk': {
       colors: [
         { key: 'primary', label: 'Cyber Color', description: 'Main cyberpunk color', category: 'basic' },
@@ -272,48 +265,13 @@ const getStyleColorRequirements = (styleId: string) => {
       ],
       gradientDirection: true
     },
-    
+
     // Artistic styles
-    'vintage': {
-      colors: [
-        { key: 'primary', label: 'Vintage Brown', description: 'Main vintage color', category: 'basic' },
-        { key: 'secondary', label: 'Paper Background', description: 'Vintage paper color', category: 'basic' },
-        { key: 'text', label: 'Text Color', description: 'Vintage text color', category: 'basic' }
-      ]
-    },
-    'sketch': {
-      colors: [
-        { key: 'primary', label: 'Sketch Line', description: 'Sketch border color', category: 'basic' },
-        { key: 'background', label: 'Paper Color', description: 'Sketch paper background', category: 'basic' },
-        { key: 'text', label: 'Text Color', description: 'Sketch text color', category: 'basic' }
-      ]
-    },
-    'brush': {
-      colors: [
-        { key: 'primary', label: 'Brush Color', description: 'Main brush stroke color', category: 'basic' },
-        { key: 'text', label: 'Text Color', description: 'Brush text color', category: 'basic' }
-      ]
-    },
-    'origami': {
-      colors: [
-        { key: 'primary', label: 'Paper Color', description: 'Main paper color', category: 'basic' },
-        { key: 'secondary', label: 'Paper Shade', description: 'Paper shadow color', category: 'gradient' },
-        { key: 'text', label: 'Text Color', description: 'Paper text color', category: 'basic' }
-      ],
-      gradientDirection: true
-    },
     'pixel': {
       colors: [
         { key: 'primary', label: 'Pixel Color', description: 'Main pixel color', category: 'basic' },
         { key: 'secondary', label: 'Pixel Shadow', description: 'Pixel shadow color', category: 'basic' },
         { key: 'text', label: 'Text Color', description: 'Pixel text color', category: 'basic' }
-      ]
-    },
-    'ticket': {
-      colors: [
-        { key: 'primary', label: 'Ticket Color', description: 'Main ticket color', category: 'basic' },
-        { key: 'background', label: 'Notch Color', description: 'Ticket notch color', category: 'basic' },
-        { key: 'text', label: 'Text Color', description: 'Ticket text color', category: 'basic' }
       ]
     }
   }
@@ -420,26 +378,6 @@ const getStyleDefaultColors = (styleId: string) => {
       highlightColor: '#e5e7eb',
       gradientDirection: 'to bottom'
     },
-    'neon-outline': {
-      primaryColor: '#06b6d4',
-      secondaryColor: '#0891b2',
-      textColor: '#06b6d4',
-      tertiaryColor: '#67e8f9',
-      quaternaryColor: '#22d3ee',
-      glowColor: '#06b6d4',
-      highlightColor: '#a5f3fc',
-      gradientDirection: 'to right'
-    },
-    'origami': {
-      primaryColor: '#3b82f6',
-      secondaryColor: '#1d4ed8',
-      textColor: '#1d4ed8',
-      tertiaryColor: '#60a5fa',
-      quaternaryColor: '#2563eb',
-      glowColor: '#3b82f6',
-      highlightColor: '#dbeafe',
-      gradientDirection: 'to bottom right'
-    },
     'pixel': {
       primaryColor: '#4ade80',
       secondaryColor: '#16a34a',
@@ -448,26 +386,6 @@ const getStyleDefaultColors = (styleId: string) => {
       quaternaryColor: '#059669',
       glowColor: '#4ade80',
       highlightColor: '#bbf7d0',
-      gradientDirection: 'to right'
-    },
-    'sketch': {
-      primaryColor: '#1f2937',
-      secondaryColor: '#374151',
-      textColor: '#1f2937',
-      tertiaryColor: '#4b5563',
-      quaternaryColor: '#6b7280',
-      glowColor: '#1f2937',
-      highlightColor: '#ffffff',
-      gradientDirection: 'to right'
-    },
-    'brush': {
-      primaryColor: '#064e3b',
-      secondaryColor: '#065f46',
-      textColor: '#064e3b',
-      tertiaryColor: '#047857',
-      quaternaryColor: '#059669',
-      glowColor: '#064e3b',
-      highlightColor: '#a7f3d0',
       gradientDirection: 'to right'
     }
   }
