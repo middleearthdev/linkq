@@ -26,7 +26,7 @@ export function GalleryBlock({ props, className, isEditing = false, isLocked = f
   const {
     items = [],
     layout = 'grid',
-    columns = 'small',
+    columns = '2-cols',
     aspectRatio = 'square',
     imageFilter = 'none',
     showCaptions = true,
@@ -80,18 +80,14 @@ export function GalleryBlock({ props, className, isEditing = false, isLocked = f
   // Rounded class based on boolean
   const roundedClass = rounded ? 'rounded-lg' : 'rounded-none'
 
-  // Grid columns - same as ProductCatalog
-  const gridColsClass = columns === 'small'
-    ? 'grid-cols-2 sm:grid-cols-3'
-    : 'grid-cols-1 sm:grid-cols-2'
+  // Grid columns - Always 2 columns for all devices
+  const gridColsClass = 'grid-cols-2'
 
-  // Aspect ratio classes
+  // Aspect ratio classes - Simplified like Linktree
   const aspectRatioClasses = {
     square: 'aspect-square',
+    portrait: 'aspect-[4/5]',
     landscape: 'aspect-video',
-    portrait: 'aspect-[9/16]',
-    widescreen: 'aspect-[21/9]',
-    original: 'aspect-auto',
   }
 
   // Image filters
@@ -108,7 +104,7 @@ export function GalleryBlock({ props, className, isEditing = false, isLocked = f
 
   return (
     <div className={cn(
-      'w-full p-6',
+      'w-full px-4 py-3',
       'gallery-block',
       className
     )}>
@@ -120,7 +116,7 @@ export function GalleryBlock({ props, className, isEditing = false, isLocked = f
         {/* Grid Layout */}
         {layout === 'grid' && (
           <div className={cn(
-            'grid gap-3',
+            'grid gap-1',
             gridColsClass,
             'gallery-grid'
           )}>
@@ -239,55 +235,54 @@ function GalleryItem({
   roundedClass,
 }: GalleryItemProps) {
   return (
-    <Card
+    <div
       className={cn(
-        'cursor-pointer overflow-hidden transition-all duration-200',
+        'cursor-pointer overflow-hidden transition-all duration-200 relative',
         'gallery-item',
         // Active state for mobile touch feedback
-        'active:opacity-90 active:scale-[0.98]',
+        'active:opacity-90',
         isEditing && 'outline-dashed outline-2 outline-blue-400 outline-offset-2',
-        roundedClass
+        roundedClass,
+        aspectRatioClass
       )}
       onClick={onClick}
     >
-      <div className={cn('relative', aspectRatioClass)}>
-        {item.type === 'image' ? (
+      {item.type === 'image' ? (
+        <Image
+          src={item.thumbnail || item.url}
+          alt={item.caption || 'Gallery image'}
+          fill
+          className="object-cover w-full h-full"
+          style={{ filter: filterStyle }}
+          sizes="(max-width: 768px) 50vw, 33vw"
+          loading="lazy"
+        />
+      ) : (
+        <div className="relative w-full h-full bg-black">
           <Image
-            src={item.thumbnail || item.url}
-            alt={item.caption || 'Gallery image'}
+            src={item.thumbnail || '/video-placeholder.jpg'}
+            alt={item.caption || 'Video thumbnail'}
             fill
-            className="object-cover"
+            className="object-cover w-full h-full"
             style={{ filter: filterStyle }}
             sizes="(max-width: 768px) 50vw, 33vw"
             loading="lazy"
           />
-        ) : (
-          <div className="relative w-full h-full bg-black">
-            <Image
-              src={item.thumbnail || '/video-placeholder.jpg'}
-              alt={item.caption || 'Video thumbnail'}
-              fill
-              className="object-cover"
-              style={{ filter: filterStyle }}
-              sizes="(max-width: 768px) 50vw, 33vw"
-              loading="lazy"
-            />
-            <div className="absolute inset-0 flex items-center justify-center">
-              <div className="w-16 h-16 bg-white/90 rounded-full flex items-center justify-center">
-                <Play className="w-8 h-8 text-gray-800 ml-1" fill="currentColor" />
-              </div>
+          <div className="absolute inset-0 flex items-center justify-center">
+            <div className="w-16 h-16 bg-white/90 rounded-full flex items-center justify-center">
+              <Play className="w-8 h-8 text-gray-800 ml-1" fill="currentColor" />
             </div>
           </div>
-        )}
+        </div>
+      )}
 
-        {/* Caption */}
-        {item.caption && showCaption && (
-          <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent text-white p-3">
-            <p className="text-sm font-medium line-clamp-2">{item.caption}</p>
-          </div>
-        )}
-      </div>
-    </Card>
+      {/* Caption */}
+      {item.caption && showCaption && (
+        <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent text-white p-3">
+          <p className="text-sm font-medium line-clamp-2">{item.caption}</p>
+        </div>
+      )}
+    </div>
   )
 }
 

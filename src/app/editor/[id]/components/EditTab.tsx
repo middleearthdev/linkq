@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
-import { Plus, Trash2, GripVertical, Link2, Settings, Smartphone, Sparkles, Eye, EyeOff, Copy, ChevronDown, ChevronUp, Hash, ImageIcon, CheckSquare, Undo2, Redo2, Package, ShoppingBag, Edit3, Search, Grid2x2, Grid3x3, Share2, MessageCircle, UtensilsCrossed, Store } from "lucide-react"
+import { Plus, Trash2, GripVertical, Link2, Settings, Smartphone, Sparkles, Eye, EyeOff, Copy, ChevronDown, ChevronUp, Hash, ImageIcon, CheckSquare, Undo2, Redo2, Package, ShoppingBag, Edit3, Search, Grid2x2, Grid3x3, Share2, MessageCircle, UtensilsCrossed, Store, Minus } from "lucide-react"
 import { getIconByName } from "./IconPicker"
 import { ImageIconSelector } from "./ImageIconSelector"
 import WhatsAppEditorDialog from "./dialog/WhatsAppEditorDialog"
@@ -18,6 +18,8 @@ import MarketplaceEditorDialog from "./dialog/MarketplaceEditorDialog"
 import DeliveryPlatformManagerDialog from "./dialog/DeliveryPlatformManagerDialog"
 import SocialIconsManagerDialog from "./dialog/SocialIconsManagerDialog"
 import ProductLayoutSelectorDialog from "./dialog/ProductLayoutSelectorDialog"
+import DividerCustomizerDialog from "./dialog/DividerCustomizerDialog"
+import GalleryManagerDialog from "./dialog/GalleryManagerDialog"
 import { TextBlockEditor } from "./editors/TextBlockEditor"
 
 interface Block {
@@ -644,13 +646,32 @@ export function EditTab({
                       />
                     )}
 
+                    {/* Divider Block - Link to Customizer */}
+                    {block.type === 'divider' && (
+                      <DividerBlockLink
+                        block={block}
+                        onUpdateBlock={onUpdateBlock}
+                      />
+                    )}
+
+                    {/* Gallery Block - Link to Manager */}
+                    {block.type === 'gallery' && (
+                      <GalleryBlockLink
+                        block={block}
+                        onUpdateBlock={onUpdateBlock}
+                        canUploadImages={canUploadImages}
+                      />
+                    )}
+
                     {/* Placeholder for other block types */}
                     {block.type !== 'link-list' &&
                       block.type !== 'product-catalog' &&
                       block.type !== 'social-icons' &&
                       block.type !== 'delivery-platform' &&
                       block.type !== 'marketplace' &&
-                      block.type !== 'text' && (
+                      block.type !== 'text' &&
+                      block.type !== 'divider' &&
+                      block.type !== 'gallery' && (
                         <div className="px-3 pb-3">
                           <p className="text-xs text-muted-foreground">
                             Edit via preview panel →
@@ -1368,6 +1389,122 @@ function MarketplaceEditor({
           block={block}
           onUpdateBlock={onUpdateBlock}
           onClose={() => setIsManagerOpen(false)}
+        />
+      )}
+    </>
+  )
+}
+
+// Divider Block Link - Opens Customizer Dialog
+function DividerBlockLink({
+  block,
+  onUpdateBlock
+}: {
+  block: Block
+  onUpdateBlock: (blockId: string, newProps: any) => void
+}) {
+  const [isCustomizerOpen, setIsCustomizerOpen] = useState(false)
+  const style = block.props.style || 'solid'
+  const hasIcon = block.props.icon && block.props.icon !== 'none'
+
+  return (
+    <>
+      <div className="px-3 pb-3">
+        <div className="p-3 rounded-lg border-2 border-border bg-card">
+          <div className="flex items-center gap-3">
+            <div className="p-2 rounded-lg bg-gray-500/10">
+              <Minus className="h-4 w-4 text-gray-600" />
+            </div>
+            <div className="flex-1 min-w-0">
+              <h3 className="font-semibold text-sm">Divider</h3>
+              <p className="text-xs text-muted-foreground">
+                {style} • {hasIcon ? 'with icon' : 'line only'}
+              </p>
+            </div>
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <button
+                    onClick={() => setIsCustomizerOpen(true)}
+                    className="p-2 hover:bg-secondary rounded-lg transition-colors text-muted-foreground hover:text-foreground"
+                  >
+                    <Edit3 className="h-4 w-4" />
+                  </button>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>Customize Divider</p>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+          </div>
+        </div>
+      </div>
+
+      {/* Divider Customizer Dialog */}
+      {isCustomizerOpen && (
+        <DividerCustomizerDialog
+          block={block}
+          onUpdateBlock={onUpdateBlock}
+          onClose={() => setIsCustomizerOpen(false)}
+        />
+      )}
+    </>
+  )
+}
+
+// Gallery Block Link - Opens Manager Dialog
+function GalleryBlockLink({
+  block,
+  onUpdateBlock,
+  canUploadImages = false
+}: {
+  block: Block
+  onUpdateBlock: (blockId: string, newProps: any) => void
+  canUploadImages?: boolean
+}) {
+  const [isManagerOpen, setIsManagerOpen] = useState(false)
+  const itemCount = block.props.items?.length || 0
+
+  return (
+    <>
+      <div className="px-3 pb-3">
+        <div className="p-3 rounded-lg border-2 border-border bg-card">
+          <div className="flex items-center gap-3">
+            <div className="p-2 rounded-lg bg-pink-500/10">
+              <ImageIcon className="h-4 w-4 text-pink-600" />
+            </div>
+            <div className="flex-1 min-w-0">
+              <h3 className="font-semibold text-sm">Gallery</h3>
+              <p className="text-xs text-muted-foreground">
+                {itemCount} {itemCount === 1 ? 'image' : 'images'}
+              </p>
+            </div>
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <button
+                    onClick={() => setIsManagerOpen(true)}
+                    className="p-2 hover:bg-secondary rounded-lg transition-colors text-muted-foreground hover:text-foreground"
+                  >
+                    <Edit3 className="h-4 w-4" />
+                  </button>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>Manage Gallery</p>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+          </div>
+        </div>
+      </div>
+
+      {/* Gallery Manager Dialog */}
+      {isManagerOpen && (
+        <GalleryManagerDialog
+          block={block}
+          onUpdateBlock={onUpdateBlock}
+          onClose={() => setIsManagerOpen(false)}
+          canUploadImages={canUploadImages}
         />
       )}
     </>
