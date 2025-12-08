@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
-import { Plus, Trash2, GripVertical, Link2, Settings, Smartphone, Sparkles, Eye, EyeOff, Copy, ChevronDown, ChevronUp, Hash, ImageIcon, CheckSquare, Undo2, Redo2, Package, ShoppingBag, Edit3, Search, Grid2x2, Grid3x3, Share2, MessageCircle, UtensilsCrossed, Store, Minus } from "lucide-react"
+import { Plus, Trash2, GripVertical, Link2, Settings, Smartphone, Sparkles, Eye, EyeOff, Copy, ChevronDown, ChevronUp, Hash, ImageIcon, CheckSquare, Undo2, Redo2, Package, ShoppingBag, Edit3, Search, Grid2x2, Grid3x3, Share2, MessageCircle, UtensilsCrossed, Store, Minus, MapPin, QrCode } from "lucide-react"
 import { getIconByName } from "./IconPicker"
 import { ImageIconSelector } from "./ImageIconSelector"
 import WhatsAppEditorDialog from "./dialog/WhatsAppEditorDialog"
@@ -20,6 +20,8 @@ import SocialIconsManagerDialog from "./dialog/SocialIconsManagerDialog"
 import ProductLayoutSelectorDialog from "./dialog/ProductLayoutSelectorDialog"
 import DividerCustomizerDialog from "./dialog/DividerCustomizerDialog"
 import GalleryManagerDialog from "./dialog/GalleryManagerDialog"
+import LocationManagerDialog from "./dialog/LocationManagerDialog"
+import QRISPaymentManagerDialog from "./dialog/QRISPaymentManagerDialog"
 import { TextBlockEditor } from "./editors/TextBlockEditor"
 
 interface Block {
@@ -663,6 +665,23 @@ export function EditTab({
                       />
                     )}
 
+                    {/* Location Block - Link to Manager */}
+                    {block.type === 'location' && (
+                      <LocationBlockLink
+                        block={block}
+                        onUpdateBlock={onUpdateBlock}
+                      />
+                    )}
+
+                    {/* QRIS Payment Block - Link to Manager */}
+                    {block.type === 'qris-payment' && (
+                      <QRISPaymentBlockLink
+                        block={block}
+                        onUpdateBlock={onUpdateBlock}
+                        canUploadImages={canUploadImages}
+                      />
+                    )}
+
                     {/* Placeholder for other block types */}
                     {block.type !== 'link-list' &&
                       block.type !== 'product-catalog' &&
@@ -671,7 +690,9 @@ export function EditTab({
                       block.type !== 'marketplace' &&
                       block.type !== 'text' &&
                       block.type !== 'divider' &&
-                      block.type !== 'gallery' && (
+                      block.type !== 'gallery' &&
+                      block.type !== 'location' &&
+                      block.type !== 'qris-payment' && (
                         <div className="px-3 pb-3">
                           <p className="text-xs text-muted-foreground">
                             Edit via preview panel →
@@ -1501,6 +1522,123 @@ function GalleryBlockLink({
       {/* Gallery Manager Dialog */}
       {isManagerOpen && (
         <GalleryManagerDialog
+          block={block}
+          onUpdateBlock={onUpdateBlock}
+          onClose={() => setIsManagerOpen(false)}
+          canUploadImages={canUploadImages}
+        />
+      )}
+    </>
+  )
+}
+
+// Location Block Link - Opens Manager Dialog
+function LocationBlockLink({
+  block,
+  onUpdateBlock
+}: {
+  block: Block
+  onUpdateBlock: (blockId: string, newProps: any) => void
+}) {
+  const [isManagerOpen, setIsManagerOpen] = useState(false)
+  const locationName = block.props.locationName || 'Location'
+  const hasAddress = !!block.props.address
+
+  return (
+    <>
+      <div className="px-3 pb-3">
+        <div className="p-3 rounded-lg border-2 border-border bg-card">
+          <div className="flex items-center gap-3">
+            <div className="p-2 rounded-lg bg-red-500/10">
+              <MapPin className="h-4 w-4 text-red-600" />
+            </div>
+            <div className="flex-1 min-w-0">
+              <h3 className="font-semibold text-sm">Location</h3>
+              <p className="text-xs text-muted-foreground truncate">
+                {hasAddress ? locationName : 'No location set'}
+              </p>
+            </div>
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <button
+                    onClick={() => setIsManagerOpen(true)}
+                    className="p-2 hover:bg-secondary rounded-lg transition-colors text-muted-foreground hover:text-foreground"
+                  >
+                    <Edit3 className="h-4 w-4" />
+                  </button>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>Manage Location</p>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+          </div>
+        </div>
+      </div>
+
+      {/* Location Manager Dialog */}
+      {isManagerOpen && (
+        <LocationManagerDialog
+          block={block}
+          onUpdateBlock={onUpdateBlock}
+          onClose={() => setIsManagerOpen(false)}
+        />
+      )}
+    </>
+  )
+}
+
+// QRIS Payment Block Link - Opens Manager Dialog
+function QRISPaymentBlockLink({
+  block,
+  onUpdateBlock,
+  canUploadImages = false
+}: {
+  block: Block
+  onUpdateBlock: (blockId: string, newProps: any) => void
+  canUploadImages?: boolean
+}) {
+  const [isManagerOpen, setIsManagerOpen] = useState(false)
+  const merchantName = block.props.merchantName || 'QRIS Payment'
+  const hasQRCode = !!block.props.qrisImage
+
+  return (
+    <>
+      <div className="px-3 pb-3">
+        <div className="p-3 rounded-lg border-2 border-border bg-card">
+          <div className="flex items-center gap-3">
+            <div className="p-2 rounded-lg bg-blue-500/10">
+              <QrCode className="h-4 w-4 text-blue-600" />
+            </div>
+            <div className="flex-1 min-w-0">
+              <h3 className="font-semibold text-sm">QRIS Payment</h3>
+              <p className="text-xs text-muted-foreground truncate">
+                {hasQRCode ? merchantName : 'No QR code set'}
+              </p>
+            </div>
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <button
+                    onClick={() => setIsManagerOpen(true)}
+                    className="p-2 hover:bg-secondary rounded-lg transition-colors text-muted-foreground hover:text-foreground"
+                  >
+                    <Edit3 className="h-4 w-4" />
+                  </button>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>Manage QRIS Payment</p>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+          </div>
+        </div>
+      </div>
+
+      {/* QRIS Payment Manager Dialog */}
+      {isManagerOpen && (
+        <QRISPaymentManagerDialog
           block={block}
           onUpdateBlock={onUpdateBlock}
           onClose={() => setIsManagerOpen(false)}

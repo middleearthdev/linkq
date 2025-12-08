@@ -37,15 +37,9 @@ export function QRISPaymentBlock({
     qrisImage,
     merchantName,
     paymentMethods = ['Gopay', 'OVO', 'Dana', 'ShopeePay'],
-    presetAmounts,
-    allowCustomAmount = false,
     instructions,
     showPaymentLogos = true,
   } = props
-
-  const [selectedAmount, setSelectedAmount] = React.useState<number | null>(
-    presetAmounts && presetAmounts.length > 0 ? presetAmounts[0] : null
-  )
 
   return (
     <Card className={cn('w-full max-w-md mx-auto p-6 space-y-6', className)}>
@@ -62,49 +56,8 @@ export function QRISPaymentBlock({
         )}
       </div>
 
-      {/* Preset Amounts */}
-      {presetAmounts && presetAmounts.length > 0 && (
-        <div className="space-y-2">
-          <label className="text-sm font-semibold text-gray-700 dark:text-gray-300">
-            Pilih Nominal
-          </label>
-          <div className="grid grid-cols-2 gap-2">
-            {presetAmounts.map((amount) => (
-              <Button
-                key={amount}
-                variant={selectedAmount === amount ? 'default' : 'outline'}
-                onClick={() => setSelectedAmount(amount)}
-                disabled={isEditing}
-                className="h-12 font-semibold"
-              >
-                Rp {amount.toLocaleString('id-ID')}
-              </Button>
-            ))}
-          </div>
-          {allowCustomAmount && (
-            <Button
-              variant="outline"
-              className="w-full"
-              disabled={isEditing}
-              onClick={() => setSelectedAmount(null)}
-            >
-              Nominal Lainnya
-            </Button>
-          )}
-        </div>
-      )}
-
       {/* QR Code */}
       <div className="space-y-3">
-        {selectedAmount && (
-          <div className="text-center">
-            <p className="text-sm text-gray-600 dark:text-gray-400">Total Pembayaran</p>
-            <p className="text-2xl font-bold text-green-600 dark:text-green-400">
-              Rp {selectedAmount.toLocaleString('id-ID')}
-            </p>
-          </div>
-        )}
-
         <div className="relative bg-white p-4 rounded-xl border-2 border-gray-200 dark:border-gray-700">
           {qrisImage ? (
             <div className="aspect-square w-full max-w-xs mx-auto">
@@ -183,6 +136,3 @@ export function QRISPaymentBlock({
     </Card>
   )
 }
-
-// Add React import for useState
-import React from 'react'
