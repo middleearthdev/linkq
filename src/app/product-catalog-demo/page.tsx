@@ -201,7 +201,7 @@ type DeviceType = 'mobile' | 'tablet'
 
 export default function ProductCatalogDemoPage() {
   const [selectedStyle, setSelectedStyle] = useState<typeof STYLES[number]['value']>('instagram-card')
-  const [columns, setColumns] = useState<'small' | 'medium'>('small')
+  const [columns, setColumns] = useState<'medium' | 'large'>('medium')
   const [deviceType, setDeviceType] = useState<DeviceType>('tablet')
   const [showSearch, setShowSearch] = useState(true)
   const [showCategories, setShowCategories] = useState(true)
@@ -214,7 +214,7 @@ export default function ProductCatalogDemoPage() {
   }
 
   const getColumnInfo = () => {
-    if (columns === 'small') {
+    if (columns === 'medium') {
       return deviceType === 'mobile' ? '2 columns' : '3 columns'
     } else {
       return deviceType === 'mobile' ? '1 column' : '2 columns'
@@ -304,22 +304,22 @@ export default function ProductCatalogDemoPage() {
               </label>
               <div className="flex gap-2">
                 <Button
-                  onClick={() => setColumns('small')}
-                  variant={columns === 'small' ? 'default' : 'outline'}
-                  size="sm"
-                  className="flex-1"
-                  title="Mobile: 2 cols | Tablet: 3 cols"
-                >
-                  Small
-                </Button>
-                <Button
                   onClick={() => setColumns('medium')}
                   variant={columns === 'medium' ? 'default' : 'outline'}
                   size="sm"
                   className="flex-1"
-                  title="Mobile: 1 col | Tablet: 2 cols"
+                  title="Mobile: 2 cols | Tablet: 3 cols"
                 >
                   Medium
+                </Button>
+                <Button
+                  onClick={() => setColumns('large')}
+                  variant={columns === 'large' ? 'default' : 'outline'}
+                  size="sm"
+                  className="flex-1"
+                  title="Mobile: 1 col | Tablet: 2 cols"
+                >
+                  Large
                 </Button>
               </div>
             </div>
@@ -462,7 +462,7 @@ export default function ProductCatalogDemoPage() {
   props={{
     items: products,
     style: '${selectedStyle}',
-    columns: '${columns}',          // 'small' | 'medium'
+    columns: '${columns}',          // 'medium' | 'large'
     showSearch: ${showSearch},
     showCategories: ${showCategories},
     showStockIndicator: ${showStockIndicator},

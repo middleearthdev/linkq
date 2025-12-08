@@ -1239,7 +1239,7 @@ function BlockRenderer({
               },
             ],
             style: productCatalogStyle as any,
-            columns: deviceType === 'mobile' ? 'small' : 'medium',
+            columns: deviceType === 'mobile' ? 'medium' : 'large',
             showSearch: true,
             showCategories: true,
             showStockIndicator: true,

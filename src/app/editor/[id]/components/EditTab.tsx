@@ -7,6 +7,7 @@ import { useState, useEffect, useRef } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Checkbox } from "@/components/ui/checkbox"
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
 import { Plus, Trash2, GripVertical, Link2, Settings, Smartphone, Sparkles, Eye, EyeOff, Copy, ChevronDown, ChevronUp, Hash, ImageIcon, CheckSquare, Undo2, Redo2, Package, ShoppingBag, Edit3, Search, Grid2x2, Grid3x3, Share2, MessageCircle, UtensilsCrossed, Store } from "lucide-react"
 import { getIconByName } from "./IconPicker"
 import { ImageIconSelector } from "./ImageIconSelector"
@@ -16,6 +17,7 @@ import ProductCatalogEditorDialog from "./dialog/ProductCatalogEditorDialog"
 import MarketplaceEditorDialog from "./dialog/MarketplaceEditorDialog"
 import DeliveryPlatformManagerDialog from "./dialog/DeliveryPlatformManagerDialog"
 import SocialIconsManagerDialog from "./dialog/SocialIconsManagerDialog"
+import ProductLayoutSelectorDialog from "./dialog/ProductLayoutSelectorDialog"
 import { TextBlockEditor } from "./editors/TextBlockEditor"
 
 interface Block {
@@ -1127,37 +1129,54 @@ function ProductCatalogBlockLink({
   canUploadImages?: boolean
 }) {
   const [isManagerOpen, setIsManagerOpen] = useState(false)
+  const [isLayoutDialogOpen, setIsLayoutDialogOpen] = useState(false)
   const productCount = block.props.items?.length || 0
+  const currentLayout = block.props.columns || 'medium'
 
   return (
     <>
       <div className="px-3 pb-3">
-        <div className="p-4 rounded-lg bg-gradient-to-br from-purple-500/10 via-pink-500/10 to-orange-500/10 border-2 border-purple-500/20">
-          <div className="flex items-center gap-3 mb-3">
-            <div className="p-2 rounded-lg bg-purple-500/20">
-              <ShoppingBag className="h-5 w-5 text-purple-600" />
+        <div className="p-3 rounded-lg border-2 border-border bg-card">
+          <div className="flex items-center gap-3">
+            <div className="p-2 rounded-lg bg-purple-500/10">
+              <ShoppingBag className="h-4 w-4 text-purple-600" />
             </div>
-            <div className="flex-1">
+            <div className="flex-1 min-w-0">
               <h3 className="font-semibold text-sm">Product Catalog</h3>
               <p className="text-xs text-muted-foreground">
                 {productCount} {productCount === 1 ? 'product' : 'products'}
               </p>
             </div>
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <button
+                    onClick={() => setIsManagerOpen(true)}
+                    className="p-2 hover:bg-secondary rounded-lg transition-colors text-muted-foreground hover:text-foreground"
+                  >
+                    <Edit3 className="h-4 w-4" />
+                  </button>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>Manage Products</p>
+                </TooltipContent>
+              </Tooltip>
+
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <button
+                    onClick={() => setIsLayoutDialogOpen(true)}
+                    className="p-2 hover:bg-secondary rounded-lg transition-colors text-muted-foreground hover:text-foreground"
+                  >
+                    <Grid2x2 className="h-4 w-4" />
+                  </button>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>Select Layout</p>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
           </div>
-
-          <Button
-            onClick={() => setIsManagerOpen(true)}
-            className="w-full bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white"
-          >
-            <Edit3 className="h-4 w-4 mr-2" />
-            Manage Products
-          </Button>
-
-          {productCount === 0 && (
-            <p className="text-xs text-muted-foreground text-center mt-2">
-              Click to add your first product
-            </p>
-          )}
         </div>
       </div>
 
@@ -1168,6 +1187,17 @@ function ProductCatalogBlockLink({
           onUpdateBlock={onUpdateBlock}
           onClose={() => setIsManagerOpen(false)}
           canUploadImages={canUploadImages}
+        />
+      )}
+
+      {/* Layout Selector Dialog */}
+      {isLayoutDialogOpen && (
+        <ProductLayoutSelectorDialog
+          currentLayout={currentLayout}
+          onSelectLayout={(columns) => {
+            onUpdateBlock(block.id, { ...block.props, columns })
+          }}
+          onClose={() => setIsLayoutDialogOpen(false)}
         />
       )}
     </>
@@ -1187,32 +1217,33 @@ function SocialIconsBlockLink({
   return (
     <>
       <div className="px-3 pb-3">
-        <div className="p-4 rounded-lg bg-gradient-to-br from-blue-500/10 via-cyan-500/10 to-teal-500/10 border-2 border-blue-500/20">
-          <div className="flex items-center gap-3 mb-3">
-            <div className="p-2 rounded-lg bg-blue-500/20">
-              <Share2 className="h-5 w-5 text-blue-600" />
+        <div className="p-3 rounded-lg border-2 border-border bg-card">
+          <div className="flex items-center gap-3">
+            <div className="p-2 rounded-lg bg-blue-500/10">
+              <Share2 className="h-4 w-4 text-blue-600" />
             </div>
-            <div className="flex-1">
+            <div className="flex-1 min-w-0">
               <h3 className="font-semibold text-sm">Social Icons</h3>
               <p className="text-xs text-muted-foreground">
                 {platformCount} {platformCount === 1 ? 'platform' : 'platforms'}
               </p>
             </div>
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <button
+                    onClick={() => setIsManagerOpen(true)}
+                    className="p-2 hover:bg-secondary rounded-lg transition-colors text-muted-foreground hover:text-foreground"
+                  >
+                    <Edit3 className="h-4 w-4" />
+                  </button>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>Manage Social Links</p>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
           </div>
-
-          <Button
-            onClick={() => setIsManagerOpen(true)}
-            className="w-full bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-700 hover:to-cyan-700 text-white"
-          >
-            <Edit3 className="h-4 w-4 mr-2" />
-            Manage Social Links
-          </Button>
-
-          {platformCount === 0 && (
-            <p className="text-xs text-muted-foreground text-center mt-2">
-              Click to add your social media links
-            </p>
-          )}
         </div>
       </div>
 
@@ -1243,32 +1274,33 @@ function DeliveryPlatformEditor({
   return (
     <>
       <div className="px-3 pb-3">
-        <div className="p-4 rounded-lg bg-gradient-to-br from-green-500/10 via-emerald-500/10 to-teal-500/10 border-2 border-green-500/20">
-          <div className="flex items-center gap-3 mb-3">
-            <div className="p-2 rounded-lg bg-green-500/20">
-              <UtensilsCrossed className="h-5 w-5 text-green-600" />
+        <div className="p-3 rounded-lg border-2 border-border bg-card">
+          <div className="flex items-center gap-3">
+            <div className="p-2 rounded-lg bg-green-500/10">
+              <UtensilsCrossed className="h-4 w-4 text-green-600" />
             </div>
-            <div className="flex-1">
+            <div className="flex-1 min-w-0">
               <h3 className="font-semibold text-sm">Food Delivery</h3>
               <p className="text-xs text-muted-foreground">
                 {activePlatformCount} {activePlatformCount === 1 ? 'platform' : 'platforms'} configured
               </p>
             </div>
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <button
+                    onClick={() => setIsManagerOpen(true)}
+                    className="p-2 hover:bg-secondary rounded-lg transition-colors text-muted-foreground hover:text-foreground"
+                  >
+                    <Edit3 className="h-4 w-4" />
+                  </button>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>Manage Delivery Platforms</p>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
           </div>
-
-          <Button
-            onClick={() => setIsManagerOpen(true)}
-            className="w-full bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white"
-          >
-            <Edit3 className="h-4 w-4 mr-2" />
-            Manage Delivery Platforms
-          </Button>
-
-          {activePlatformCount === 0 && (
-            <p className="text-xs text-muted-foreground text-center mt-2">
-              Click to add your delivery platform links
-            </p>
-          )}
         </div>
       </div>
 
@@ -1300,32 +1332,33 @@ function MarketplaceEditor({
   return (
     <>
       <div className="px-3 pb-3">
-        <div className="p-4 rounded-lg bg-gradient-to-br from-orange-500/10 via-red-500/10 to-pink-500/10 border-2 border-orange-500/20">
-          <div className="flex items-center gap-3 mb-3">
-            <div className="p-2 rounded-lg bg-orange-500/20">
-              <Store className="h-5 w-5 text-orange-600" />
+        <div className="p-3 rounded-lg border-2 border-border bg-card">
+          <div className="flex items-center gap-3">
+            <div className="p-2 rounded-lg bg-orange-500/10">
+              <Store className="h-4 w-4 text-orange-600" />
             </div>
-            <div className="flex-1">
+            <div className="flex-1 min-w-0">
               <h3 className="font-semibold text-sm">E-commerce Stores</h3>
               <p className="text-xs text-muted-foreground">
                 {activeStoreCount} {activeStoreCount === 1 ? 'store' : 'stores'} configured
               </p>
             </div>
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <button
+                    onClick={() => setIsManagerOpen(true)}
+                    className="p-2 hover:bg-secondary rounded-lg transition-colors text-muted-foreground hover:text-foreground"
+                  >
+                    <Edit3 className="h-4 w-4" />
+                  </button>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>Manage E-commerce Stores</p>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
           </div>
-
-          <Button
-            onClick={() => setIsManagerOpen(true)}
-            className="w-full bg-gradient-to-r from-orange-600 to-red-600 hover:from-orange-700 hover:to-red-700 text-white"
-          >
-            <Edit3 className="h-4 w-4 mr-2" />
-            Manage E-commerce Stores
-          </Button>
-
-          {activeStoreCount === 0 && (
-            <p className="text-xs text-muted-foreground text-center mt-2">
-              Click to add your online store links
-            </p>
-          )}
         </div>
       </div>
 

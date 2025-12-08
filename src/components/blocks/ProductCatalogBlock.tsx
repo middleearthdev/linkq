@@ -55,7 +55,7 @@ export interface ProductItem {
 export interface ProductCatalogBlockProps {
   items: ProductItem[]
   style?: 'instagram-card' | 'modern-minimal' | 'compact-grid' | 'instagram-shop'
-  columns?: 'small' | 'medium'  // small: 3 cols tablet/2 cols mobile | medium: 2 cols tablet/1 col mobile
+  columns?: 'medium' | 'large'  // medium: 3 cols tablet/2 cols mobile | large: 2 cols tablet/1 col mobile
   showSearch?: boolean
   showCategories?: boolean
   categoryFilter?: string[]
@@ -88,7 +88,7 @@ export function ProductCatalogBlock({
   const {
     items = [],
     style = 'instagram-card',
-    columns = 'small',
+    columns = 'medium',
     showSearch = true,
     showCategories = true,
     showStockIndicator = true,
@@ -158,12 +158,12 @@ export function ProductCatalogBlock({
   // If forceViewport is set, use fixed classes; otherwise use responsive classes
   const gridCols = forceViewport ? {
     // Fixed columns based on forced viewport
-    small: isTablet ? 'grid-cols-3' : 'grid-cols-2',
-    medium: isTablet ? 'grid-cols-2' : 'grid-cols-1'
+    medium: isTablet ? 'grid-cols-3' : 'grid-cols-2',  // Medium: 3 cols tablet, 2 cols mobile
+    large: isTablet ? 'grid-cols-2' : 'grid-cols-1'     // Large: 2 cols tablet, 1 col mobile
   } : {
     // Responsive columns using Tailwind breakpoints
-    small: 'grid-cols-2 sm:grid-cols-3',    // 2 cols mobile → 3 cols tablet
-    medium: 'grid-cols-1 sm:grid-cols-2'    // 1 col mobile → 2 cols tablet
+    medium: 'grid-cols-2 sm:grid-cols-3',    // 2 cols mobile → 3 cols tablet
+    large: 'grid-cols-1 sm:grid-cols-2'      // 1 col mobile → 2 cols tablet
   }
 
   if (items.length === 0 && !isEditing) {
